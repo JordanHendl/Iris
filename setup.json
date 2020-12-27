@@ -1,0 +1,5 @@
+{
+  "graph_config_path" : "karma_config.json",
+  "modules_path"      : "nbbuild/modules",
+  "log_output_path"   : "/var/tmp"
+}
