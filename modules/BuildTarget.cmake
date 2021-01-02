@@ -1,0 +1,43 @@
+#FUNCTION( BUILD_TARGET )
+#  CONFIGURE_MAKE_TARGET( ${ARGV} )
+#ENDFUNCTION() 
+#
+#FUNCTION( CONFIGURE_MAKE_TARGET )
+#  CMAKE_POLICY( SET CMP0057 NEW )
+#
+#  IF( UNIX )
+#    STRING( ASCII 27 Esc )
+#  ENDIF()
+#  
+#  SET( CONFIGS
+#        BUILD_DIR
+#        CXX_STANDARD
+#        COMPILE_OPTIONS
+#        BIN_DIR
+#        DOC_DIR
+#        INC_DIR
+#        LIB_DIR
+#        MOD_DIR
+#        TEST_DIR
+#        INSTALL_DIR
+#        VERSION
+#     )
+#
+#SET( VARIABLES
+#      BUILD
+#      COMPONENT
+#      DEBUG
+#      DEPENDENCIES
+#      DERECTORIES
+#      LANGUAGE
+#      LIBRARIES
+#      SOURCES
+#      TARGET
+#      TEST
+#      TYPE
+#    )
+#
+#FOREACH( ARG ${ARGV} )
+#  IF( "${ARG}" IN_LIST CONFIGS OR "${ARG}" IN_LIST VARIABLES )
+#    SET( STATE ${ARG} )
+#

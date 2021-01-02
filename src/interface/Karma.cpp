@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2020 Jordan Hendl
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "Karma.h"
 #include <log/Log.h>
 #include <node/Manager.h>
@@ -18,12 +35,19 @@ struct KarmaData
   std::string                    module_path        ; ///< The path to the modules on the filesystem.
   std::string                    module_config_path ; ///< The path to the modules on the filesystem.
   std::string                    database_path      ; ///< The path to the modules on the filesystem.
-
+  bool                           running            ; ///< Whether or not karma is running.
+  
+  KarmaData() ;
   void fixString( std::string& str ) ;
   void setModuleConfigPath( const char* path ) ;
   void setModulePath( const char* path ) ; 
   void setDebugOutput( const char* output ) ;
 };
+
+KarmaData::KarmaData()
+{
+  this->running = false ;
+}
 
 void KarmaData::setDebugOutput( const char* output )
 {
@@ -66,22 +90,17 @@ void Karma::shutdown()
   data().mod_manager.shutdown() ;
 }
 
-void Karma::initialize()
+void Karma::initialize( const char* setup_json_path )
 {
   using namespace karma::log ;
   
-  std::string path            ;
   std::string karma_config_path ;
   
-  path = "./" ;
-  
-  data().fixString( path ) ;
-
   data().bus.enroll( this->karma_data, &KarmaData::setModulePath      , "modules_path"      ) ;
   data().bus.enroll( this->karma_data, &KarmaData::setModuleConfigPath, "graph_config_path" ) ;
   data().bus.enroll( this->karma_data, &KarmaData::setDebugOutput     , "log_output_path"   ) ;
 
-  karma_config_path = path + "/setup.json" ;
+  karma_config_path = setup_json_path ;
   
   data().config     .initialize( karma_config_path.c_str(), 0                                    ) ;
   data().config     .initialize( data().database_path.c_str()  , 0                             ) ;
@@ -89,11 +108,12 @@ void Karma::initialize()
   data().mod_manager.start() ;
   
   karma::log::Log::write() ;
+  data().running = true ;
 }
 
-void Karma::start()
+bool Karma::running() const
 {
-//  data().context.start( data().window.c_str() ) ;
+  return data().running ;
 }
 
 KarmaData& Karma::data()

@@ -1,100 +1,127 @@
+# 
+# Copyright (C) 2020 Jordan Hendl
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# 
+
+# 
+# File:   CMakeLists.h
+# Author: Jordan Hendl
+# 
+# Created on January 2nd, 2020, 11:30 PM
+# 
+
 CMAKE_MINIMUM_REQUIRED( VERSION 3.8.0 )
-PROJECT( karma LANGUAGES CXX )
 
-#Build Options
-OPTION( BUILD_DOC      "Whether or not documentation should be build"                       OFF ) 
-OPTION( RELEASE        "Whether or not to build with optimizations for release."            OFF ) 
-OPTION( WERROR         "Whether warnings should be treated as errors."                      ON  )
+LIST( APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/modules" )
+LIST( APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/modules" )
 
-SET( MAJOR_VERSION 0 )
-SET( MINOR_VERSION 1 )
-SET( PATCH_VERSION 0 )
+INCLUDE( Message   )
+INCLUDE( BuildTest )
 
-SET( CMAKE_CXX_STANDARD 17 )
-SET(CMAKE_SKIP_BUILD_RPATH FALSE)
+# Build options
+OPTION( WERROR        "Whether or not warnings are treated as errors." ON  )
+OPTION( BUILD_DOCS    "Whether or not to build doxygen documentation"  ON  )
+OPTION( BUILD_RELEASE "Whether or not the to build for release.     "  OFF )
+OPTION( RUN_TESTS     "Whether or not tests should be built and run "  OFF )
 
+PROJECT( Karma CXX )
 
-MESSAGE( "Warnings as Errors  : ${WERROR}"                                          ) 
-MESSAGE( "Build Documentation : ${BUILD_DOC}"                                       ) 
-MESSAGE( "Release             : ${RELEASE}"                                         ) 
-MESSAGE( "Version             : ${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}" ) 
+# Print build options
+MESSAGE( STATUS "" ) 
+MESSAGE( INFO "Build Options:" ) 
+MESSAGE(      "├─WERROR        ${WERROR}       " )
+MESSAGE(      "├─BUILD DOCS    ${BUILD_DOCS}   " )
+MESSAGE(      "├─RUN TESTS     ${RUN_TESTS}    " )
+MESSAGE(      "└─BUILD RELEASE ${BUILD_RELEASE}" )
+MESSAGE( STATUS "" ) 
 
-IF( WERROR STREQUAL "OFF" )
+# Set build config.
+set(CMAKE_CXX_STANDARD          17 )
+set(CMAKE_CXX_STANDARD_REQUIRED ON )
 
-    MESSAGE( "-Compiling without warnings as errors." )
+SET( ARCHITECTURE "64bit" CACHE STRING "The system architecture."              )
+SET( CXX_STANDARD "17"    CACHE STRING "The C++ standard to use for building." )
+SET( MAJOR        "0"     CACHE STRING "The major version of this build."      )
+SET( MINOR        "1"     CACHE STRING "The minor version of this build."      )
+SET( BRANCH       "0"     CACHE STRING "The branch version of this build."     )
+SET( REVISION     "0"     CACHE STRING "The revision of this build."           )
+SET( PROJECT_VERSION "${MAJOR}.${MINOR}.${BRANCH}.${REVISION}" )
 
-    # which compilers to use for C and C++
-    SET(CMAKE_C_FLAGS   "-fPIC" )
-    SET(CMAKE_CXX_FLAGS "-std=c++17 -lstdc++fs -fPIC")
+# Print build configurations.
+MESSAGE( INFO " " ) 
+MESSAGE( INFO "Build Configuration:"                 )
+MESSAGE( INFO "├─ARCHITECTURE:   ${ARCHITECTURE}"    )
+MESSAGE( INFO "├─CXX_STANDARD:   ${CXX_STANDARD}"    )
+MESSAGE( INFO "└─VERSION:        ${PROJECT_VERSION}" )
+MESSAGE( INFO "  ├─MAJOR:        ${MAJOR}"           )
+MESSAGE( INFO "  ├─MINOR:        ${MINOR}"           )
+MESSAGE( INFO "  ├─BRANCH:       ${BRANCH}"          )
+MESSAGE( INFO "  └─REVISION:     ${REVISION}"        )
 
-ELSE()
-    MESSAGE( "-Compiling with warnings as errors." )
+STRING( TIMESTAMP DATE "%Y%m%d" )
+STRING( TIMESTAMP Time "%H%M%S" )
 
-    SET(CMAKE_C_FLAGS   "-fPIC -Werror -Wall"                       )
-    SET(CMAKE_CXX_FLAGS "-std=c++17 -lstdc++fs -fPIC -Werror -Wall ")
+# Handle compiler information
+STRING( TOLOWER ${CMAKE_CXX_COMPILER_ID} CXX_COMPILER_NAME )
+SET( CXX_COMPILER  "${CXX_COMPILER_NAME}${CMAKE_CXX_COMPILER_VERSION}" )
 
-ENDIF( WERROR STREQUAL "OFF" )
+SET( CLANG FALSE )
+SET( INTEL FALSE )
+SET( GNU   FALSE )
+SET( MSVC  FALSE )
+IF( CXX_COMPILER_NAME MATCHES "clang" )
+  SET( CLANG TRUE )
+ELSEIF( CXX_COMPILER_NAME MATCHES "gnu" )
+  SET( GNU TRUE )
+ELSEIF( CXX_COMPILER_NAME MATCHES "intel" )
+  SET( INTEL TRUE )
+ELSEIF( CXX_COMPILER_NAME MATCHES "msvc" )
+  SET( MSVC TRUE )
+ENDIF()
 
-IF( RELEASE STREQUAL "ON" )
-    MESSAGE( "-Building for release" )
-    SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -O3"   )
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3" )
-ELSE()
-    MESSAGE( "-Building for debug" )
-    SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -g"   )
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g" )
-ENDIF( RELEASE STREQUAL "ON" )
+MESSAGE( INFO " " ) 
+MESSAGE( INFO  "System Configuration:"                     )
+MESSAGE( INFO  "├─CXX_COMPILER_NAME: ${CXX_COMPILER_NAME}" )
+MESSAGE( INFO  "├─CXX_COMPILER:      ${CXX_COMPILER}"      )
+MESSAGE( INFO  "├─INTEL:             ${INTEL}"             )
+MESSAGE( INFO  "├─GNU:               ${GNU}"               )
+MESSAGE( INFO  "└─MSVC:              ${MSVC}"              )
+MESSAGE( INFO " " ) 
 
+INCLUDE( KPackage ) 
 
-#Application information.
-SET( ENGINE_NAME              "Karma"                       )
-SET( VENDOR                   "Jorda Hendl"                 ) 
-SET( INSTALL_SUMMARY          "Karma Engine - Installation" )
-SET( INSTALL_DIR              "./karma"                     )
-SET( LIB_INSTALL_DIR          "./karma/lib64"               )
-SET( BIN_INSTALL_DIR          "./karma/bin"                 )
-SET( INC_INSTALL_DIR          "./karma/include"             )
-SET( KARMA_LIB_INSTALL_DIR    "karma/lib"                   )
-SET( KARMA_HEADER_INSTALL_DIR "karma/include"               )
-SET( KARMA_MODULE_INSTALL_DIR "karma/module"                )
-SET( KARMA_INSTALL_DIR        "karma"                       )
+SET( INSTALL_BIN_DIR     "bin"                          )
+SET( INSTALL_INCLUDE_DIR "include/${CMAKE_PROJECT_NAME}")
+SET( INSTALL_LIB_DIR     "lib64"                        )
+SET( INSTALL_DOC_DIR     "doc"                          )
+SET( INSTALL_CONFIG_DIR  "config"                       )
 
-SET( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/" )
+SET( EXPORT_BIN_DIR     "${CPACK_PACKAGING_INSTALL_PREFIX}/bin"     )
+SET( EXPORT_INCLUDE_DIR "${CPACK_PACKAGING_INSTALL_PREFIX}/include" )
+SET( EXPORT_LIB_DIR     "${CPACK_PACKAGING_INSTALL_PREFIX}/lib64"   )
+SET( EXPORT_DOC_DIR     "${CPACK_PACKAGING_INSTALL_PREFIX}/doc"     )
+SET( EXPORT_CONFIG_DIR  "${CPACK_PACKAGING_INSTALL_PREFIX}/config"  )
 
 # Set output directories.
-SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib  )
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib  )
-SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin  )
-SET(DOCUMENTATION_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/docs )
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${LIB_DIR} )
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${LIB_DIR} )
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${BIN_DIR} )
+set(DOCUMENTATION_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${DOC_DIR} )
 
-#Create output directory for documentation.
-FILE( MAKE_DIRECTORY ${DOCUMENTATION_OUTPUT_DIRECTORY} )
-
-#CPack options
-SET( CPACK_PACKAGE_NAME                ${ENGINE_NAME}        )
-SET( CPACK_SOURCE_GENERATOR "TGZ;ZIP"                        )
-SET( CPACK_PACKAGE_VENDOR              ${VENDOR}             )
-SET( CPACK_PACKAGE_DESCRIPTION_SUMMARY ${INSTALL_SUMMARY}    )
-SET( CPACK_PACKAGE_VERSION_MAJOR       ${MAJOR_VERSION}      )
-SET( CPACK_PACKAGE_VERSION_MINOR       ${MINOR_VERSION}      )
-SET( CPACK_PACKAGE_VERSION_PATCH       ${PATCH_VERSION}      )
-SET( CPACK_PACKAGE_INSTALL_DIRECTORY   "./"                  )
-SET( CMAKE_INSTALL_PREFIX              "./"                  ) 
-SET( PROJECT_SRCS       ${CMAKE_WORKING_DIRECTORY}/src       )
-SET( DOXYGEN_CONFIG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/doxygen  )
-SET( CMAKE_INSTALL_RPATH FALSE                               )
-SET( CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/karma/lib" )
-
-SET( CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE )
-LIST( FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/karma/lib" isSystemDir )
-IF( "${isSystemDir}" STREQUAL "-1" )
-    SET( CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib" )
-ENDIF( "${isSystemDir}" STREQUAL "-1" )
-
-INCLUDE     ( CPack   )
-FIND_PACKAGE( Doxygen )
-
-INSTALL( FILES setup.json        DESTINATION ${KARMA_INSTALL_DIR} ) 
-INSTALL( FILES karma_config.json DESTINATION ${KARMA_INSTALL_DIR} ) 
+INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/src ) 
 
 ADD_SUBDIRECTORY( src )
+
+INSTALL( EXPORT karma_lib FILE KarmaConfig.cmake DESTINATION ${INSTALL_CONFIG_DIR} COMPONENT dev )

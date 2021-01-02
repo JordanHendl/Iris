@@ -1,24 +1,44 @@
-find_package( Threads )
+# 
+# Copyright (C) 2020 Jordan Hendl
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# 
 
-set( DATA_BUS_SOURCES 
+FIND_PACKAGE( Threads )
+
+SET( DATA_BUS_SOURCES 
       Bus.cpp 
    )
       
-set( DATA_BUS_HEADERS
+SET( DATA_BUS_HEADERS
       Bus.h
    )
 
-set( DATA_BUS_INCLUDES
+SET( DATA_BUS_INCLUDES
    )
 
-set( DATA_BUS_LIBRARIES
+SET( DATA_BUS_LIBRARIES
     )
 
-add_library( karma_data_bus SHARED ${DATA_BUS_SOURCES} ${DATA_BUS_HEADERS} )
+ADD_LIBRARY( karma_data_bus SHARED ${DATA_BUS_SOURCES} ${DATA_BUS_HEADERS} )
 
-add_executable       ( karma_data_bus_test Test.cpp                                         )
-target_link_libraries( karma_data_bus_test PUBLIC  karma_data_bus ${CMAKE_THREAD_LIBS_INIT} )
+  # If running tests, make and run them.
+  IF( RUN_TESTS )
+    BUILD_TEST( TARGET karma_data_bus )
+  ENDIF()
 
-INSTALL( TARGETS karma_data_bus EXPORT karma_lib DESTINATION ${KARMA_LIB_INSTALL_DIR}    )
-INSTALL( TARGETS karma_data_bus                  DESTINATION ${KARMA_LIB_INSTALL_DIR}    )
-INSTALL( FILES   ${DATA_BUS_HEADERS}             DESTINATION ${KARMA_HEADER_INSTALL_DIR} )
+INSTALL( FILES   ${DATA_BUS_HEADERS} DESTINATION ${INSTALL_INCLUDE_DIR}/data )
+INSTALL( TARGETS karma_data_bus EXPORT karma_lib 
+                 LIBRARY  DESTINATION ${EXPORT_LIB_DIR}/data 
+                 INCLUDES DESTINATION ${EXPORT_INCLUDE_DIR}/data )

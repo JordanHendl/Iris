@@ -1,35 +1,63 @@
-set( KARMA_CONFIG_HEADERS
+# 
+# Copyright (C) 2020 Jordan Hendl
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# 
+
+# 
+# File:   CMakeLists.h
+# Author: Jordan Hendl
+# 
+# Created on January 2nd, 2020, 11:30 PM
+# 
+
+SET( KARMA_CONFIG_HEADERS
       Configuration.h
       Parser.h
    )
 
-set( KARMA_CONFIG_SOURCES
+SET( KARMA_CONFIG_SOURCES
       Configuration.cpp
       Parser.cpp
    )
 
-set( KARMA_CONFIG_INCLUDES 
+SET( KARMA_CONFIG_INCLUDES 
      ${DATA_BUS_DIR}
      ${CONFIGURATION_DIR}
    )
 
-set( KARMA_CONFIG_LIBRARIES 
+SET( KARMA_CONFIG_LIBRARIES 
      karma_data_bus
      karma_log
    )
 
-set( KARMA_CONFIG_DEPS
+SET( KARMA_CONFIG_DEPS
      karma_data_bus
      karma_log
    )
 
-add_library               ( karma_configuration SHARED  ${KARMA_CONFIG_SOURCES} ${KARMA_CONFIG_HEADERS} )
-target_include_directories( karma_configuration PRIVATE ${KARMA_CONFIG_INCLUDES}                        ) 
-target_link_libraries     ( karma_configuration PUBLIC ${KARMA_CONFIG_LIBRARIES}                       ) 
-add_dependencies          ( karma_configuration         ${KARMA_CONFIG_DEPS}                            )
-add_executable       ( karma_config_test test.cpp      )
-target_link_libraries( karma_config_test karma_configuration )
+ADD_LIBRARY               ( karma_configuration SHARED  ${KARMA_CONFIG_SOURCES} ${KARMA_CONFIG_HEADERS} )
+TARGET_INCLUDE_DIRECTORIES( karma_configuration PRIVATE ${KARMA_CONFIG_INCLUDES}                        ) 
+TARGET_LINK_LIBRARIES     ( karma_configuration PUBLIC  ${KARMA_CONFIG_LIBRARIES}                       ) 
+ADD_DEPENDENCIES          ( karma_configuration         ${KARMA_CONFIG_DEPS}                            )
 
-INSTALL( TARGETS karma_configuration EXPORT karma_lib DESTINATION ${KARMA_LIB_INSTALL_DIR}    )
-INSTALL( TARGETS karma_configuration                  DESTINATION ${KARMA_LIB_INSTALL_DIR}    )
-INSTALL( FILES ${KARMA_CONFIG_HEADERS}                DESTINATION ${KARMA_HEADER_INSTALL_DIR} )
+  # If running tests, make and run them.
+  IF( RUN_TESTS )
+    BUILD_TEST( TARGET karma_configuration )
+  ENDIF()
+
+INSTALL( FILES ${KARMA_CONFIG_HEADERS} DESTINATION ${INSTALL_INCLUDE_DIR}/config )
+INSTALL( TARGETS karma_configuration EXPORT karma_lib 
+                 LIBRARY DESTINATION  ${EXPORT_LIB_DIR}/config  
+                 INCLUDES DESTINATION ${EXPORT_INCLUDE_DIR}/config )

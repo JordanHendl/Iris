@@ -1,16 +1,20 @@
-/**********************************************************************
- * Copyright (C) 2020 Jordan Hendl - All Rights Reserved
- * You may use, distribute and modify this code under the
- * terms of the <INSERT_LICENSE>
+/*
+ * Copyright (C) 2020 Jordan Hendl
  *
- * You should have received a copy of the <INSERT_LICENSE> license with
- * this file. If not, please write to: jordiehendl@gmail.com.
- * Author       : Jordan Hendl
- * File         : Parser.cpp
- * Version      : 1.0
- * Date created : 6/21/2020
- * Purpose      : Definitions for JSON Token & Parser classes for retrieving data from a JSON input.
-**********************************************************************/
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "Parser.h"
 #include <string>
 #include <vector>

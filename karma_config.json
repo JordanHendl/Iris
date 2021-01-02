@@ -3,57 +3,18 @@
   {
     "graph1":
     {
-      "gpu"    : 0     ,
-      "window" : "Main",
-      
       "Modules" : 
       {
-        "image" :
+        "API" :
         {
-          "version"      : 0,
-          "type"         : "SpriteSheet",
-          "input"        : "start",
-          "output_image" : "c1i",
-          "output"       : "c1",
-          "debug"        : true,
-          "data_size"    : 5000,
-          "sem_id"       : 0,
-          "sheet"        : "grandma",
-          "resx"         : 256,
-          "resy"         : 256
+          "type"        : "Vulkan"
+          "gpu0_output" : "gpu0"
         },
-        "text" :
+        "window" :
         {
-          "version"      : 0,
-          "type"         : "Text2D",
-          "input"        : "start",
-          "output_image" : "c2i",
-          "output"       : "c2",
-          "debug"        : true,
-          "font"         : "cool_font",
-          "sem_id"       : 1,
-          "resx"         : 256,
-          "resy"         : 256
-        },
-        "present" :
-        {
-          "version"     : 0,
-          "type"        : "Present",
-          "input_image" : "present_image",
-          "input"       : "present",
-          "debug"       : true 
-        },
-        "combine" :
-        {
-          "version"         : 0,
-          "type"            : "Combiner",
-          "input_one"       : "c1",
-          "input_two"       : "c2",
-          "input_image_one" : "c1i",
-          "input_image_two" : "c2i",
-          "output"          : "present",
-          "output_image"    : "present_image",
-          "debug"           : true
+          "gpu_input" : "gpu0"
+          "width"     : 1024
+          "height"    : 720
         }
       }
     }
