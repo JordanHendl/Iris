@@ -60,4 +60,4 @@ ADD_DEPENDENCIES          ( karma_configuration         ${KARMA_CONFIG_DEPS}    
 INSTALL( FILES ${KARMA_CONFIG_HEADERS} DESTINATION ${INSTALL_INCLUDE_DIR}/config )
 INSTALL( TARGETS karma_configuration EXPORT karma_lib 
                  LIBRARY DESTINATION  ${EXPORT_LIB_DIR}/config  
-                 INCLUDES DESTINATION ${EXPORT_INCLUDE_DIR}/config )
+                 INCLUDES DESTINATION ${EXPORT_INCLUDE_DIR} )

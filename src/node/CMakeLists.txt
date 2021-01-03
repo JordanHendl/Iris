@@ -42,12 +42,12 @@ set( KARMA_MODULE_LIBRARIES
      karma_log
    )
 
-add_library               ( karma_module SHARED   ${KARMA_MODULE_SOURCES}      ${KARMA_MODULE_HEADERS} )
-target_include_directories( karma_module PRIVATE  ${KARMA_MODULE_INCLUDE_DIRS}                         )
-target_link_libraries     ( karma_module PUBLIC   ${KARMA_MODULE_LIBRARIES}                            )
+add_library               ( karma_module SHARED   ${KARMA_MODULE_SOURCES} ${KARMA_MODULE_HEADERS} )
+target_include_directories( karma_module PRIVATE  ${KARMA_MODULE_INCLUDE_DIRS}                    )
+target_link_libraries     ( karma_module PUBLIC   ${KARMA_MODULE_LIBRARIES}                       )
 
-INSTALL( FILES ${KARMA_MODULE_HEADERS} DESTINATION ${INSTALL_INCLUDE_DIR} )
+INSTALL( FILES ${KARMA_MODULE_HEADERS} DESTINATION ${INSTALL_INCLUDE_DIR}/module )
 
 INSTALL( TARGETS karma_module EXPORT karma_lib
-                 LIBRARY  DESTINATION ${EXPORT_LIB_DIR}/node 
-                 INCLUDES DESTINATION ${EXPORT_INCLUDE_DIR}/node )
+                 LIBRARY  DESTINATION ${EXPORT_LIB_DIR}/module 
+                 INCLUDES DESTINATION ${EXPORT_INCLUDE_DIR} )

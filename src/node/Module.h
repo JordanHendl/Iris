@@ -28,7 +28,7 @@
 
 namespace karma
 {
-  /** Class for describing a GPU Vulkan Render/Compute Pass.
+  /** Class for describing a Module for use in the Karma Framework.
    */
   class Module
   { 
@@ -45,11 +45,10 @@ namespace karma
        */
       virtual void initialize() = 0 ;
       
-      /**
-       * @param bus_id The channel of bus to subscribe inputs on.
-       * @param gpu The gpu to use for all GPU operations.
+      /** Method to subscribe this module's configuration to the bus.
+       * @param id The id to use for this graph.
        */
-      virtual void subscribe( const char* pipeline, unsigned id ) ;
+      virtual void subscribe( unsigned id ) ;
 
       /** Method to shut down this object's operation.
        */

@@ -86,7 +86,7 @@ namespace karma
     delete this->module_data ;
   }
   
-  void Module::subscribe( const char* pipeline, unsigned id )
+  void Module::subscribe( unsigned id )
   {
     data().bus.setChannel( id ) ;
   }

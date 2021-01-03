@@ -70,7 +70,7 @@ namespace karma
           {
             module->setName    ( this->name.c_str()               ) ;
             module->setVersion ( this->version                    ) ;
-            module->subscribe  ( this->pipeline.c_str(), this->id ) ;
+            module->subscribe  ( this->id                         ) ;
             this->graph->insert( { this->name, module }           ) ;
           }
         }

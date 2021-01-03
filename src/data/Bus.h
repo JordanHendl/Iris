@@ -703,7 +703,7 @@ namespace karma
   {
     typedef Bus::FunctionSubscriber<Value, false, false> Callback ;
     const TypeInfo ctti = typeinfo<Value>() ;
-    Callback* callback ;
+    Callback *callback ;
     Key       key      ;
     
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( setter ) ) ;
@@ -717,7 +717,7 @@ namespace karma
   {
     typedef Bus::FunctionSubscriber<Value, true, false> Callback ;
     const TypeInfo ctti = typeinfo<Value>() ;
-    Callback* callback ;
+    Callback *callback ;
     Key       key      ;
     
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( setter ) ) ;
@@ -731,8 +731,8 @@ namespace karma
   {
     typedef Bus::FunctionSubscriber<Value, false, true> Callback ;
     const TypeInfo ctti = typeinfo<Value>() ;
-    Callback callback ;
-    Key      key      ;
+    Callback *callback ;
+    Key       key      ;
     
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( setter ) ) ;
     key      = ::karma::concatenate( "", args... )          ;
@@ -745,8 +745,8 @@ namespace karma
   {
     typedef Bus::FunctionSubscriber<Value, true, true> Callback ;
     const TypeInfo ctti = typeinfo<Value>() ;
-    Callback callback ;
-    Key      key      ;
+    Callback *callback ;
+    Key       key      ;
     
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( setter ) ) ;
     key      = ::karma::concatenate( "", args... )               ;
@@ -815,7 +815,7 @@ namespace karma
   {
     typedef Bus::FunctionPublisher<Value, false, false> Callback ;
     const TypeInfo ctti = typeinfo<Value>() ;
-    Callback* callback ;
+    Callback *callback ;
     Key       key      ;
     
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( getter ) ) ;
@@ -829,7 +829,7 @@ namespace karma
   {
     typedef Bus::FunctionPublisher<Value, true, false> Callback ;
     const TypeInfo ctti = typeinfo<Value>() ;
-    Callback* callback ;
+    Callback *callback ;
     Key       key      ;
     
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( getter ) ) ;
