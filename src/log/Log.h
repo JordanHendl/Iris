@@ -128,13 +128,13 @@ namespace karma
         const StringData& data() const ;
     };
     
-    /**
+    /** Class to handle logging in the Karma library.
      */
     class Log
     {
       public:
 
-        /**
+        /** Log levels, describing the severity of the log entry.
          */
         enum class Level
         {
@@ -143,53 +143,61 @@ namespace karma
           Fatal,
         };
         
+        enum class Mode
+        {
+          Quiet,
+          Normal,
+          Verbose
+        };
+        
         /** Static method to initialize the logging subsystem.
          * @param logging_directory The folder to store logs in.
          * @param use_stdout Whether or not logging should be dumped to stdout.
          */
         static void initialize( const char* logging_directory, bool use_stdout = true ) ;
         
-        /**
-         * @param first
-         * @param args
+        /** Static method to flush the log to disk.
          */
-        static void write() ;
+        static void flush() ;
+        
+        /** Method to set the log mode.
+         * @param mode The mode to use for log output.
+         */
+        static void setMode( Mode mode ) ;
 
-        /**
-         * @param level
-         * @param first
-         * @param args
+        /** Variadic template function for outputting logs.
+         * @param level The log level.
+         * @param first The first paremeter
+         * @param args Any other logging information.
          */
         template<typename T, typename... ARGS>
         static void output( Level level, T first, ARGS... args ) ;
 
-        /**
-         * @param level
-         * @param first
-         * @param args
+        /** Variadic template method for outputting logs.
+         * @param level The log level.
+         * @param first The first entry.
          */
         template<typename T>
         static void output( Level level, T first ) ;
         
-        /**
-         * @param first
-         * @param args
+        /** Variadic template method for outputting logs.
+         * @param first The first entry
+         * @param args Any additional arguments.
          */
         template<typename T, typename... ARGS>
         static void output( T first, ARGS... args ) ;
 
-        /**
-         * @param first
-         * @param args
+        /** Base-case for variadic template methods.
+         * @param first The log information to output.
          */
         template<typename T>
         static void output( T first ) ;
         
       private:
         
-        /**
-         * @param out
-         * @param level
+        /** Base-case for variadic template.
+         * @param out The completed log string.
+         * @param level The log level.
          */
         static void outputBase( const char* out, Level level ) ;
     };

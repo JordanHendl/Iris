@@ -48,5 +48,5 @@ int main( int argc, const char** argv )
     std::cout << "usage: config_test <file>.json" << std::endl ;
   }
 
-  return 1 ;
+  return 0 ;
 }

@@ -56,7 +56,7 @@ namespace karma
 
         if( this->graph->find( this->name ) == this->graph->end() )
         { 
-          Log::output( " Initializing module. \n\n",
+          Log::output( "Initializing module. \n\n",
 
           "  - Name    : ", this->name.c_str()    , "\n",
           "  - Module  : ", this->type.c_str()    , "\n",
@@ -68,10 +68,10 @@ namespace karma
           
           if( module )
           {
-            module->setName    ( this->name.c_str()               ) ;
-            module->setVersion ( this->version                    ) ;
-            module->subscribe  ( this->id                         ) ;
-            this->graph->insert( { this->name, module }           ) ;
+            module->setName    ( this->name.c_str()     ) ;
+            module->setVersion ( this->version          ) ;
+            module->subscribe  ( this->id               ) ;
+            this->graph->insert( { this->name, module } ) ;
           }
         }
       }

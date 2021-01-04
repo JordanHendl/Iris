@@ -27,6 +27,7 @@ set( KARMA_IO_INCLUDE_DIRS
    )
 
 set( KARMA_IO_LIBRARIES
+    ${CMAKE_DL_LIBS}
    )
 
 

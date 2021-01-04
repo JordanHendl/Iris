@@ -5,6 +5,7 @@ int main()
   using namespace karma::log ;
   
   Log::initialize( "/var/tmp/" ) ;
+  Log::setMode( Log::Mode::Verbose ) ;
   
   for( unsigned i = 0; i < 200; i++ )
   {
@@ -13,7 +14,7 @@ int main()
     
   Log::output( " This is a log message with no log level attached! " ) ;
   
-  Log::write() ;
+  Log::flush() ;
   return 0;
 }
 

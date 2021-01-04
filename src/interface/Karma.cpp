@@ -42,6 +42,7 @@ struct KarmaData
   void setModuleConfigPath( const char* path ) ;
   void setModulePath( const char* path ) ; 
   void setDebugOutput( const char* output ) ;
+  void setDebugMode( const char* output ) ;
 };
 
 KarmaData::KarmaData()
@@ -49,6 +50,24 @@ KarmaData::KarmaData()
   this->running = false ;
 }
 
+void KarmaData::setDebugMode( const char* mode )
+{
+  using Log = karma::log::Log ;
+  std::string tmp = mode ;
+  
+  if( tmp == "VERBOSE" )
+  {
+    Log::setMode( Log::Mode::Verbose ) ;
+  }
+  if( tmp == "NORMAL" )
+  {
+    Log::setMode( Log::Mode::Normal ) ;
+  }
+  if( tmp == "QUIET" )
+  {
+    Log::setMode( Log::Mode::Quiet ) ;
+  }
+}
 void KarmaData::setDebugOutput( const char* output )
 {
   karma::log::Log::initialize( output ) ;
@@ -86,7 +105,7 @@ Karma::~Karma()
 
 void Karma::shutdown()
 {
-  karma::log::Log::write()      ;
+  karma::log::Log::flush()      ;
   data().mod_manager.shutdown() ;
 }
 
@@ -99,15 +118,16 @@ void Karma::initialize( const char* setup_json_path )
   data().bus.enroll( this->karma_data, &KarmaData::setModulePath      , "modules_path"      ) ;
   data().bus.enroll( this->karma_data, &KarmaData::setModuleConfigPath, "graph_config_path" ) ;
   data().bus.enroll( this->karma_data, &KarmaData::setDebugOutput     , "log_output_path"   ) ;
+  data().bus.enroll( this->karma_data, &KarmaData::setDebugMode       , "log_mode"          ) ;
 
   karma_config_path = setup_json_path ;
   
-  data().config     .initialize( karma_config_path.c_str(), 0                                    ) ;
+  data().config     .initialize( karma_config_path.c_str(), 0                                  ) ;
   data().config     .initialize( data().database_path.c_str()  , 0                             ) ;
   data().mod_manager.initialize( data().module_path.c_str(), data().module_config_path.c_str() ) ;
   data().mod_manager.start() ;
   
-  karma::log::Log::write() ;
+  karma::log::Log::flush() ;
   data().running = true ;
 }
 

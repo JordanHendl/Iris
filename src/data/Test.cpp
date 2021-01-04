@@ -77,7 +77,6 @@ float getter()
 
 void threadFunction()
 {
-  f = TEST_VALUE ;
   bus.emit() ;
   std::this_thread::sleep_for( std::chrono::seconds( 5 ) ) ;
   bus.emit( TEST_VALUE_2, "obj_test_2" ) ;
@@ -89,17 +88,15 @@ int main( int argc, char** argv )
   
   bus.enroll ( &setter, "text"                                   ) ;
   bus.enroll ( &obj   , &TestObject::setter, "obj_test"          ) ;
-  bus.enroll ( &obj   , &TestObject::manual_setter, "obj_test_2" ) ;
   bus.publish( &getter, "text"                                   ) ;
   bus.publish( &obj   , &TestObject::getter, "obj_test"          ) ;
 
-  std::thread thread( &threadFunction ) ;
-  
+  f = TEST_VALUE ;
   std::cout << " Waiting on inputs.. " << std::endl ;
+  bus.emit() ;
   bus.wait() ;
   std::cout << " Finished. " << std::endl ;
   
-  thread.join() ;
   return 0;
 }
 

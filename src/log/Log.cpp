@@ -22,8 +22,9 @@
 #include <iostream>
 #include <cstdio>
 #include <fstream>
-#include <chrono>
 #include <ctime>
+#include <chrono>
+#include <iomanip>
 #include <cstring>
 
 namespace karma
@@ -92,13 +93,14 @@ namespace karma
     
     struct LogData
     {
-      const unsigned INITIAL_LOG_SIZE = 4000 ;
+      const unsigned INITIAL_LOG_SIZE = 8000 ;
       
       std::string    output_path ;
       char*          log         ;
       unsigned       log_size    ;
       unsigned       current_pos ;
       bool           use_stdout  ;
+      Log::Mode      mode        ;
       
       /** Default constructor. Initializes member data.
        */
@@ -110,8 +112,12 @@ namespace karma
        */
       const char* stringFromLogLevel( Log::Level level ) ;
       
-      /**
-       * @param append
+      /** Method to create a timestamp from the current time.
+       * @return A string representation of the current time.
+       */
+      std::string timestamp() ;
+      
+      /** Method to write log out to disk.
        */
       void write() ;
     };
@@ -129,8 +135,7 @@ namespace karma
       this->log_size    = this->INITIAL_LOG_SIZE             ;
       this->use_stdout  = true                               ;
       this->current_pos = 0                                  ;
-      
-
+      this->mode        = Log::Mode::Normal                  ;
     }
 
     const char* LogData::stringFromLogLevel( Log::Level level )
@@ -144,19 +149,36 @@ namespace karma
       };
     }
     
+    std::string LogData::timestamp()
+    {
+      // For some reason, this crashes when enabled? TODO: Make this not crash.
+//      auto now = std::chrono::system_clock::now() ;
+//      time_t            time       ;
+//      tm                local_time ;
+      std::stringstream stream     ;
+      std::string       str        ;
+//      
+//      time       = std::chrono::system_clock::to_time_t( now ) ;
+//      local_time = localtime( &time )                          ;
+//      
+//      stream << local_time.tm_hour << "h " << local_time.tm_min << "m " << local_time.tm_sec << "s |" ;
+//      str = std::string( stream.str().c_str() ) ;
+      
+      return str ;
+    }
+
     void LogData::write()
     {
       std::ofstream out ;
       
       out.open( this->output_path, std::ios::app ) ;
 
-      if( out )
+      if( out.is_open() )
       {
         out.write( log_data.log, log_data.current_pos ) ;
         log_data.current_pos = 0 ;
+        out.close() ;
       }
-
-      out.close() ;
     }
 
     String::String()
@@ -238,34 +260,54 @@ namespace karma
       log_data.output_path += file_name.str() ;
     }
     
-    void Log::write()
+    void Log::flush()
     {
       log_data.write() ;
+    }
+    
+    void Log::setMode( Mode mode )
+    {
+      log_data.mode = mode ;
     }
 
     void Log::outputBase( const char* out, Level level )
     {
-      const std::string base_str  = "KARMA_LOGDEBUG::"                   ;
+      const std::string timestamp = log_data.timestamp()                 ;
       const std::string level_str = log_data.stringFromLogLevel( level ) ;
 
-      std::string msg ;
-      int         cx  ;
+      std::stringstream base_str ;
+      std::stringstream msg      ;
+      int               cx       ;
       
-      msg = base_str + level_str + out ;
-      msg.push_back( '\n' ) ;
       
-      if( log_data.use_stdout ) std::cout << level_str << msg.data() ;
       
-      cx = snprintf( log_data.log + log_data.current_pos, log_data.log_size, msg.data() ) ;
-      
-      if( cx < 0 || log_data.current_pos + cx > log_data.log_size )
+      if( log_data.mode == Log::Mode::Verbose )
       {
-        log_data.write() ;
-        std::memset( log_data.log, '0', log_data.log_size ) ;
+        base_str << timestamp ;
       }
-      else
+      
+      base_str << " KLOGDEBUG::" ;
+
+      msg << base_str.str() << level_str << std::string( out ) ;
+      msg << "\n" ;
+      if( log_data.mode != Log::Mode::Quiet )
       {
-        log_data.current_pos += cx ;
+        if( log_data.use_stdout ) 
+        {
+          std::cout << level_str << msg.str().data() ;
+        }
+        
+        cx = snprintf( log_data.log + log_data.current_pos, log_data.log_size, msg.str().data() ) ;
+        
+        if( cx < 0 || log_data.current_pos + cx > log_data.log_size )
+        {
+          log_data.write() ;
+          std::memset( log_data.log, 0x0, 2 ) ;
+        }
+        else
+        {
+          log_data.current_pos += cx ;
+        }
       }
     }
   }
