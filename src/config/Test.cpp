@@ -167,18 +167,15 @@ bool testObject()
 
 int main( int argc, const char** argv )
 {
-  std::cout << "Testing Karma Configuration & JSON Parsing.\n" << std::endl ;
-  
-  std::cout << "Initializing parser...\n"  ;
   parser.initialize( json_data ) ;
   
   base_token = parser.begin() ;
-  std::cout << "Starting test" << std::endl ;
-  manager.add( "Object        Test", &testObject        ) ;
-  manager.add( "Value         Test", &testValue         ) ;
-  manager.add( "Full Module   Test", &testGettingValues ) ;
+  manager.add( "Object Test"       , &testObject        ) ;
+  manager.add( "Value Test"        , &testValue         ) ;
+  manager.add( "Full Module Test"  , &testGettingValues ) ;
   manager.add( "Integer Value Test", &testIntegerValue  ) ;
   
 
+  std::cout << "\nTesting Karma Configuration & JSON Parsing." << std::endl ;
   return manager.test( karma::test::Output::Verbose ) ;
 }

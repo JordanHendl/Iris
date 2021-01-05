@@ -21,82 +21,168 @@
 #include <thread>
 #include <assert.h>
 #include <float.h>
-#include <algorithm>
+#include <KT/Manager.h>
 #include <cmath>
-#include <chrono>
+#include <iostream>
 
-static const float TEST_VALUE   = 0.052005f ;
-static const float TEST_VALUE_2 = 0.254565f ;
-static       ::karma::Bus bus               ;
-static float v                              ;
-static float f                              ;
+static const float          TEST_VALUE   = 0.052005f       ;
+static const float          TEST_VALUE_2 = 0.254565f       ;
+static const float          TEST_VALUE_3 = 0.612335f       ;
+static const unsigned       TEST_ARR[] = { 5, 4, 3, 2, 1 } ;
+static ::karma::Bus         bus                            ;
+static karma::test::Manager manager                        ;
+static float                v                              ;
+static float                f                              ;
+static unsigned             index[] = { 0, 0, 0, 0, 0 }    ;
 
 bool equals( float v1, float v2 )
 {
   return std::fabs( v1 - v2 ) < FLT_EPSILON ;
 }
+
 struct TestObject
 {
-  float output ;
-  float input  ;
+  float output       ;
+  float manual_input ;
+  float input        ;
   
   TestObject()
   {
     output = TEST_VALUE ;
   }
+
   void setter( float val )
   {
-    std::cout << " Method Set " << std::endl ;
     input = val ;
-    assert( equals( input, TEST_VALUE ) ) ;
   }
   
   void manual_setter( float val )
   {
-    std::cout << " Manual Method Set " << std::endl ;
-    assert( equals( val, TEST_VALUE_2 ) ) ;
+    this->manual_input = val ;
   }
   
   float getter()
   {
     return output ;
   }
+  
+  bool checkMethodSetter()
+  {
+    karma::Bus bus ;
+    bus.enroll ( this, &TestObject::setter, "obj_test"   ) ; // Method Setter.
+    bus.publish( this, &TestObject::getter, "obj_test"   ) ; // Method Getter.
+    bus.emit() ;
+    
+    if( equals( this->input, TEST_VALUE ) )  
+    {
+      return true ;
+    }
+    
+    return false ;
+  }
+  
+  bool checkManualSetter()
+  {
+    karma::Bus bus ;
+    bus.enroll ( this, &TestObject::manual_setter, "manual_set" ) ; // Manual Setter.
+    bus.emit( TEST_VALUE_3, "manual_set" ) ; // Manually send data.
+
+    if( equals( this->manual_input, TEST_VALUE_3 ) )
+    {
+      return true ;
+    }
+    
+    return false ;
+  }
 };
 void setter( float val )
 {
-  std::cout << " Function Set " << std::endl ;
   v = val ;
-  assert( equals( v, TEST_VALUE ) ) ;
 }
 
 float getter()
 {
-  assert( equals( f, TEST_VALUE ) ) ;
   return f ;
 }
-
-void threadFunction()
+void indexedSetter( unsigned idx, unsigned val )
 {
+  index[ idx ] = val ;
+}
+
+unsigned indexedGetter( unsigned idx )
+{
+  return TEST_ARR[ idx ] ;
+}
+
+bool testIndexedSetter()
+{
+  karma::Bus bus ;
+  bus.enroll ( &indexedSetter, "indexed" ) ; // Indexed Setter.
+  bus.publish( &indexedGetter, "indexed" ) ; // Indexed Getter.
+  
+  for( unsigned i = 0; i < 5; i++ )
+  {
+    bus.emit( i ) ;
+    if( TEST_ARR[ i ] != index[ i ] )
+    {
+      return false ;
+    }
+  }
+  return true ;
+}
+static karma::Bus speed_bus ;
+
+template<unsigned i>
+void setSpeed( unsigned val )
+{
+  static float v = i + val ;
+}
+
+template<unsigned i>
+unsigned getSpeed()
+{
+  return i ;
+}
+
+bool testEmitSpeed()
+{
+  speed_bus.emit() ;
+  
+  return true ;
+}
+
+bool testFunctionSetter()
+{
+  karma::Bus bus ;
+  bus.enroll ( &setter, "test_1" ) ; // Function Setter.
+  bus.publish( &getter, "test_1" ) ; // Function Getter.
+  
   bus.emit() ;
-  std::this_thread::sleep_for( std::chrono::seconds( 5 ) ) ;
-  bus.emit( TEST_VALUE_2, "obj_test_2" ) ;
+  if( equals( v, TEST_VALUE_2 ) )
+  {
+    return true ;
+  }
+  
+  return false ;
 }
 
 int main( int argc, char** argv ) 
-{
+{ 
   TestObject obj ;
+  f = TEST_VALUE_2 ;
   
-  bus.enroll ( &setter, "text"                                   ) ;
-  bus.enroll ( &obj   , &TestObject::setter, "obj_test"          ) ;
-  bus.publish( &getter, "text"                                   ) ;
-  bus.publish( &obj   , &TestObject::getter, "obj_test"          ) ;
-
-  f = TEST_VALUE ;
-  std::cout << " Waiting on inputs.. " << std::endl ;
-  bus.emit() ;
-  bus.wait() ;
-  std::cout << " Finished. " << std::endl ;
+  for( unsigned i = 0; i < 100; i++ )
+  {
+    speed_bus.enroll ( &setSpeed<0>, "speed" ) ;
+    speed_bus.publish( &getSpeed<0>, "speed" ) ;
+  }
+  manager.add( "Function Test"      , &testFunctionSetter                  ) ;
+  manager.add( "Method Test"        , &obj, &TestObject::checkMethodSetter ) ;
+  manager.add( "Manual Test"        , &obj, &TestObject::checkManualSetter ) ;
+  manager.add( "Indexed Test"       , &testIndexedSetter                   ) ;
+  manager.add( "100 Emit Speed Test", &testEmitSpeed                       ) ;
   
-  return 0;
+  std::cout << "\nTesting Karma Data Bus" << std::endl ;
+  return manager.test( karma::test::Output::Verbose ) ;
 }
 

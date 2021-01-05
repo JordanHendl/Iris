@@ -263,7 +263,7 @@ namespace karma
           case ' ': /* White space. Skip.  */ 
           case ']': /* End of an array.    */ 
           case '}': /* End of an object.   */ 
-          default : /* Error               */ stream.putback( next ) ; Log::output( Log::Level::Warning, "Invalid JSON Found: ", next, ".\n" ) ; break ;
+          default : /* Error               */ stream.putback( next ) ; Log::output( Log::Level::Warning, "Invalid JSON Found: ", next ) ; break ;
         }
       }
 

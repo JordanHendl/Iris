@@ -1,20 +1,39 @@
 #include "Log.h"
+#include <KT/Manager.h>
+#include <iostream>
 
-int main() 
+using namespace karma::log ;
+
+static karma::test::Manager manager ;
+
+bool testLog()
 {
-  using namespace karma::log ;
-  
-  Log::initialize( "/var/tmp/" ) ;
-  Log::setMode( Log::Mode::Verbose ) ;
-  
-  for( unsigned i = 0; i < 200; i++ )
+  for( unsigned i = 0; i < 5; i++ )
   {
     Log::output( Log::Level::Warning, "Whoa cool log message!", i ) ;
   }
-    
-  Log::output( " This is a log message with no log level attached! " ) ;
+  
+  return true ;
+}
+
+bool testNoWarning()
+{
+  Log::output( "Message without a level!\n" ) ;
+  
+  return true ;
+}
+
+int main() 
+{
+  std::cout << "\nTesting log library." << std::endl ;
+  
+  Log::initialize( "./", false ) ;
+  Log::setMode( Log::Mode::Verbose ) ;
+  
+  manager.add( "Log Test"         , &testLog       ) ;
+  manager.add( "Log No Level Test", &testNoWarning ) ;
   
   Log::flush() ;
-  return 0;
+  return manager.test( karma::test::Output::Verbose ) ;
 }
 
