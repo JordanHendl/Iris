@@ -51,6 +51,18 @@ static karma::config::json::Parser parser     ;
 static karma::test::Manager        manager    ;
 static karma::config::json::Token  base_token ;
 
+bool testBadLookup()
+{
+  auto token = base_token[ "BadLookup" ] ;
+  
+  if( token ) return false ; // CASE: Lookup failed and said something invalid was valid.
+  
+  token = base_token[ "Modules" ] ;
+  if( token ) return true ;
+          
+  return false ; // CASE: Lookup failed to recognize a module as valid.
+}
+
 bool testIntegerValue()
 {
   auto token = base_token[ "Modules" ][ "window" ][ "width" ] ;
@@ -174,6 +186,7 @@ int main( int argc, const char** argv )
   manager.add( "Value Test"        , &testValue         ) ;
   manager.add( "Full Module Test"  , &testGettingValues ) ;
   manager.add( "Integer Value Test", &testIntegerValue  ) ;
+  manager.add( "Bad Lookup Test"   , &testBadLookup     ) ;
   
 
   std::cout << "\nTesting Karma Configuration & JSON Parsing." << std::endl ;

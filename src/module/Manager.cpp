@@ -36,29 +36,45 @@ namespace karma
     
     ::karma::config::Configuration config ;
 
-    karma::Bus  bus         ;
     std::string config_path ;
+    std::string mod_path    ;
     Loader      loader      ;
     NodeGraphs  graphs      ;
     
-    /**
-     * @param name
+    /** Method to find all graphs in the configuration.
+     */
+    void findGraphs() ;
+    
+    /** Method to add a graph.
+     * @param name The name of the graph to add.
      */
     void addGraph( const char* name ) ;
   };
   
+  void ManagerData::findGraphs()
+  {
+    this->config.initialize( this->config_path.c_str(), 0 ) ;
+    
+    auto token = this->config.begin() ;
+    
+    // For every graph in the top level, create the object.
+    for( auto graph = token.begin(); graph != token.end(); ++graph )
+    {
+      this->addGraph( graph.key() ) ;
+    }
+  }
   void ManagerData::addGraph( const char* name )
   {
     if( this->graphs.find( name ) == this->graphs.end() )
     {
-      karma::log::Log::output( "Adding render graph ", name ) ;
+      karma::log::Log::output( "Adding module graph ", name ) ;
       Graph* graph ;
       
       graph = new Graph() ;
-      graph->subscribe ( name, this->graphs.size() ) ;
-      graph->setName   ( name                      ) ;
-      graph->initialize( &this->loader             ) ;
-      this->graphs.insert( { name, graph } ) ;
+
+      graph->setName     ( name                                                         ) ;
+      graph->initialize  ( this->loader, this->config_path.c_str(), this->graphs.size() ) ;
+      this->graphs.insert( { name, graph }                                              ) ;
     }
   }
 
@@ -74,15 +90,12 @@ namespace karma
 
   void Manager::initialize( const char* mod_path, const char* configuration_path )
   {
-    data().bus.setChannel( 0 ) ;
-
     data().config_path = configuration_path ;
     
     karma::log::Log::output( "Initializing Module Manager with modules in ", mod_path, " using the following config: ", configuration_path ) ;
 
     data().loader.initialize( mod_path ) ;
-    data().bus.enroll( this->man_data, &ManagerData::addGraph, "Graphs" ) ;
-    data().config.initialize( data().config_path.c_str(), 0 ) ;
+    data().findGraphs() ;
   }
 
   void Manager::start()
@@ -95,18 +108,20 @@ namespace karma
 
     for( auto &graph : data().graphs ) 
     {
-      // Push config once to build nodes.
-      data().config.initialize( data().config_path.c_str(), index ) ;
-      
-      graph.second->load() ;
-
-      // Push a second time to configure nodes.
-      data().config.initialize( data().config_path.c_str(), index ) ;
-
       graph.second->kick() ;
 
       index++ ;
     }
+  }
+  
+  const Graph& Manager::graph( const char* graph_name )
+  {
+    static const Graph dummy ;
+    auto iter = data().graphs.find( graph_name ) ;
+    
+    if( iter != data().graphs.end() ) return *iter->second ;
+    
+    return dummy ;
   }
   
   void Manager::stop()

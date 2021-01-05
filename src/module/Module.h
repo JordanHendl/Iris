@@ -110,7 +110,7 @@ namespace karma
       
     private:
       
-      /**
+      /** Forward declared structure to contain this object's data.
        */
       struct ModuleData* module_data ;
       

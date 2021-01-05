@@ -15,36 +15,44 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-set( KARMA_MODULE_SOURCES 
+FIND_PACKAGE( Threads )
+
+SET( KARMA_MODULE_SOURCES 
      Module.cpp
      Loader.cpp
      Graph.cpp
      Manager.cpp
    )
      
-set( KARMA_MODULE_HEADERS
+SET( KARMA_MODULE_HEADERS
      Module.h
      Loader.h
      Manager.h
      Graph.h
    )
 
-set( KARMA_MODULE_INCLUDE_DIRS
-      ${DATA_BUS_DIR}
-      ${CONFIGURATION_DIR}
+SET( KARMA_MODULE_INCLUDE_DIRS
     )
 
-set( KARMA_MODULE_LIBRARIES
+SET( KARMA_MODULE_LIBRARIES
      karma_io
      stdc++fs
      karma_data_bus
      karma_configuration
      karma_log
+     ${CMAKE_THREAD_LIBS_INIT}
    )
 
-add_library               ( karma_module SHARED   ${KARMA_MODULE_SOURCES} ${KARMA_MODULE_HEADERS} )
-target_include_directories( karma_module PRIVATE  ${KARMA_MODULE_INCLUDE_DIRS}                    )
-target_link_libraries     ( karma_module PUBLIC   ${KARMA_MODULE_LIBRARIES}                       )
+ADD_LIBRARY               ( karma_module SHARED   ${KARMA_MODULE_SOURCES} ${KARMA_MODULE_HEADERS} )
+TARGET_INCLUDE_DIRECTORIES( karma_module PRIVATE  ${KARMA_MODULE_INCLUDE_DIRS}                    )
+TARGET_LINK_LIBRARIES     ( karma_module PUBLIC   ${KARMA_MODULE_LIBRARIES}                       )
+
+ADD_SUBDIRECTORY( test_module )
+
+# If running tests, make and run them.
+IF( RUN_TESTS )
+  BUILD_TEST( TARGET karma_module )
+ENDIF()
 
 INSTALL( FILES ${KARMA_MODULE_HEADERS} DESTINATION ${INSTALL_INCLUDE_DIR}/module )
 

@@ -127,6 +127,12 @@ namespace karma
          */
         JSONNode::NodeMap::const_iterator it  ; 
         
+        TokenData()
+        {
+          this->node     = nullptr ;
+          this->position = 0       ;
+        }
+
         TokenData& operator=( const TokenData& data )
         {
           this->node     = data.node     ;
@@ -522,6 +528,12 @@ namespace karma
         *this->token_data = *token.token_data ;
       }
         
+      Token::operator bool() const
+      {
+        if( data().node == nullptr ) return false ;
+        return true ;
+      }
+
       Token Token::operator[]( const char* key ) const
       {
         Token tmp ;
@@ -570,7 +582,7 @@ namespace karma
         }
         
         // Found nothing, return this.
-        return ret ;
+        return Token() ;
       }
       
       void Token::operator=( const Token& token )

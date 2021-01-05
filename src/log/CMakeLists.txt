@@ -14,10 +14,10 @@ SET( KARMA_LOG_LIBRARIES
 
 ADD_LIBRARY( karma_log SHARED ${KARMA_LOG_SOURCES} ${KARMA_LOG_HEADERS} )
 
-  # If running tests, make and run them.
-  IF( RUN_TESTS )
-    BUILD_TEST( TARGET karma_log )
-  ENDIF()
+# If running tests, make and run them.
+IF( RUN_TESTS )
+  BUILD_TEST( TARGET karma_log )
+ENDIF()
 
 INSTALL( FILES   ${KARMA_LOG_HEADERS}  DESTINATION ${INSTALL_INCLUDE_DIR}/log )
 INSTALL( TARGETS karma_log EXPORT karma_lib

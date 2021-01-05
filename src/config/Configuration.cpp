@@ -98,33 +98,6 @@ namespace karma
         data().end   = data().parser.end  () ;
 
         stream.close() ;
-
-        // Send parsed data over event bus.
-        for( auto token = data().begin; token != data().end; ++token )
-        {
-          if( token.isArray() )
-          {
-            for( unsigned index = 0; index < token.size(); index++ )
-            {
-              // TODO- Look for a better way than just emitting over all types.
-              data().bus.emitIndexed( token.string ( index ), index, token.key() ) ;
-              data().bus.emitIndexed( token.number ( index ), index, token.key() ) ;
-              data().bus.emitIndexed( token.boolean( index ), index, token.key() ) ;
-              data().bus.emitIndexed( token.decimal( index ), index, token.key() ) ;
-              data().bus.emit( token.string ( index ), token.key() ) ;
-              data().bus.emit( token.number ( index ), token.key() ) ;
-              data().bus.emit( token.boolean( index ), token.key() ) ;
-              data().bus.emit( token.decimal( index ), token.key() ) ;
-            }
-          }
-          else
-          {
-            data().bus.emit( token.string (), token.key() ) ;
-            data().bus.emit( token.number (), token.key() ) ;
-            data().bus.emit( token.boolean(), token.key() ) ;
-            data().bus.emit( token.decimal(), token.key() ) ;
-          }
-        }
       }
       else
       {

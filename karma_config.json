@@ -1,21 +1,18 @@
 {
-  "Graphs":
+  "graph1":
   {
-    "graph1":
+    "Modules" : 
     {
-      "Modules" : 
+      "API" :
       {
-        "API" :
-        {
-          "type"        : "Vulkan"
-          "gpu0_output" : "gpu0"
-        },
-        "window" :
-        {
-          "gpu_input" : "gpu0"
-          "width"     : 1024
-          "height"    : 720
-        }
+        "type"        : "Vulkan"
+        "gpu0_output" : "gpu0"
+      },
+      "window" :
+      {
+        "gpu_input" : "gpu0"
+        "width"     : 1024
+        "height"    : 720
       }
     }
   }

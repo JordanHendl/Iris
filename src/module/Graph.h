@@ -34,12 +34,12 @@ namespace karma
     public:
       Graph() ;
       ~Graph() ;
-      void initialize( Loader* loader ) ;
+      void initialize( Loader& mod_loader, const char* graph_config_path, unsigned id = 0 ) ;
       void add( const char* name, Module* module ) ;
-      void subscribe( const char* name, unsigned id ) ;
+      bool has( const char* name ) const ;
+      const Module* module( const char* name ) ;
       void setName( const char* name ) ;
       void kick() ;
-      void load() ;
       void stop() ;
       void reset() ;
     private:

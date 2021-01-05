@@ -43,6 +43,11 @@ namespace karma
            */
           Token( const Token& token ) ;
           
+          /** Conversion operator to provide a check for if this object is valid.
+           * @return Whether or not this object is valid.
+           */
+          operator bool() const ;
+
           /** Method to recursively search this token and all children for the key & return the token of it.
            * @param key The JSON key to search for.
            * @return The token containing that key. If not found, returns this token.

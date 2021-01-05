@@ -14,20 +14,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
+set( KARMA_TEST_MODULE_SOURCES 
+     TestModule.cpp
+   )
+     
+set( KARMA_TEST_MODULE_HEADERS
+     TestModule.h
+   )
 
-# 
-# File:   CMakeLists.h
-# Author: Jordan Hendl
-# 
-# Created on January 2nd, 2020, 11:30 PM
-# 
+set( KARMA_TEST_MODULE_INCLUDE_DIRS
+    )
 
-INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR} )
+set( KARMA_TEST_MODULE_LIBRARIES
+     karma_module
+     karma_data_bus
+     karma_log
+   )
 
-ADD_SUBDIRECTORY( config    )
-ADD_SUBDIRECTORY( data      )
-ADD_SUBDIRECTORY( interface )
-ADD_SUBDIRECTORY( module    )
-ADD_SUBDIRECTORY( io        )
-ADD_SUBDIRECTORY( log       )
-ADD_SUBDIRECTORY( profiling )
+SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test_module )
+ADD_LIBRARY               ( karma_test_module SHARED   ${KARMA_TEST_MODULE_SOURCES} ${KARMA_TEST_MODULE_HEADERS} )
+TARGET_INCLUDE_DIRECTORIES( karma_test_module PRIVATE  ${KARMA_TEST_MODULE_INCLUDE_DIRS}                         )
+TARGET_LINK_LIBRARIES     ( karma_test_module PUBLIC   ${KARMA_TEST_MODULE_LIBRARIES}                            )

@@ -26,12 +26,14 @@
 
 namespace karma
 {
+  class Graph ;
   class Manager
   {
     public:
       Manager() ;
       ~Manager() ;
       void initialize( const char* mod_path, const char* configuration_path ) ;
+      const Graph& graph( const char* graph_name ) ;
       void start() ;
       void stop() ;
       void shutdown() ;

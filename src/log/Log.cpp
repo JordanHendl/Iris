@@ -147,7 +147,7 @@ namespace karma
       this->log_size    = this->INITIAL_LOG_SIZE             ;
       this->use_stdout  = true                               ;
       this->current_pos = 0                                  ;
-      this->mode        = Log::Mode::Normal                  ;
+      this->mode        = Log::Mode::Quiet                   ;
     }
 
     const char* LogData::stringFromLogLevel( Log::Level level )
