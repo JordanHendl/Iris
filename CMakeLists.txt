@@ -34,7 +34,7 @@ INCLUDE( BuildTest )
 OPTION( WERROR        "Whether or not warnings are treated as errors." ON  )
 OPTION( BUILD_DOCS    "Whether or not to build doxygen documentation"  ON  )
 OPTION( BUILD_RELEASE "Whether or not the to build for release.     "  OFF )
-OPTION( RUN_TESTS     "Whether or not tests should be built and run "  OFF )
+OPTION( RUN_TESTS     "Whether or not tests should be built and run "  ON  )
 
 PROJECT( Karma CXX )
 

@@ -16,6 +16,7 @@
  */
 
 #include "Parser.h"
+#include <log/Log.h>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -30,8 +31,72 @@ namespace karma
   {
     namespace json
     {
-      typedef std::vector<std::string>            TokenValues ;
-      typedef  std::map<std::string, TokenValues> JSONMap     ;
+      using Log = ::karma::log::Log ;
+
+      struct JSONNode
+      {
+        typedef std::vector<std::string>        NodeList ;
+        typedef std::map<std::string, JSONNode> NodeMap  ;
+        friend class ParserData ;
+        
+      private:
+        NodeMap  children ;
+        NodeList values   ;
+      public:
+
+        JSONNode()
+        {
+        }
+        
+        const std::string& value( unsigned index ) const 
+        {
+          static std::string dummy = "" ;
+          if( index < this->values.size() ) return this->values[ index ] ;
+          
+          return dummy ;
+        }
+
+        NodeMap::const_iterator find( std::string str ) const 
+        {
+          return this->children.find( str ) ;
+        }
+        
+        NodeMap::const_iterator begin() const 
+        {
+          return this->children.begin() ;
+        }
+        
+        NodeMap::const_iterator end() const 
+        {
+          return this->children.end() ;
+        }
+        
+        
+        JSONNode& operator[]( std::string str )
+        {
+          this->children.insert( { str, JSONNode() } ) ;
+
+          return this->children[ str ] ;
+        }
+        
+        unsigned size() const 
+        {
+          return this->values.size() ;
+        }
+
+        void clear()
+        {
+          this->values  .clear() ;
+          this->children.clear() ;
+        }
+
+        bool leaf() const 
+        {
+          return this->children.empty() ;
+        }
+      };
+      
+      typedef JSONNode JSONMap ;
 
       /** Function to recieve the next valid JSON character from the stream.
        * @param json_stream Reference to the stringstream to search through.
@@ -49,16 +114,34 @@ namespace karma
        */
       struct TokenData
       {
+        
+        /** Node.
+         */
+        const JSONNode* node ;
+        
+        /** Position in this object's node's values this token is at.
+         */
+        unsigned position ;
+
         /** The iterator of this token in the map.
          */
-        JSONMap::const_iterator it  ; 
+        JSONNode::NodeMap::const_iterator it  ; 
+        
+        TokenData& operator=( const TokenData& data )
+        {
+          this->node     = data.node     ;
+          this->position = data.position ;
+          this->it       = data.it       ;
+          
+          return *this ;
+        }
 
         /** Method to return this object's key.
          * @return const char* The C-String representation of this object's key.
          */
-        const char* key() const
+        const std::string& key() const
         {
-          return it->first.c_str() ;
+          return this->it->first ;
         }
 
         /** Method to return the size of this object's value.
@@ -66,7 +149,7 @@ namespace karma
          */
         unsigned size() const
         {
-          return it->second.size() ;
+          return this->node != nullptr ? this->node->size() : 0 ;
         }
       };
       
@@ -86,58 +169,58 @@ namespace karma
         void processFile   ( JSONFile& stream ) ;
 
         /** Handles an expected Key input in the stream.
-         * @param parent_key The concatenated string from this token's parent.
+         * @param parent The concatenated string from this token's parent.
          * @param stream The stream to use for document data.
          */
-        void handleKey( std::string parent_key, JSONFile& stream ) ;
+        void handleKey( JSONMap &parent, JSONFile& stream ) ;
 
         /** Handles an expected number value input in the stream.
-         * @param parent_key The concatenated string from this token's parent.
+         * @param parent The concatenated string from this token's parent.
          * @param stream The stream to use for document data.
          */
-        void handleNumValue( std::string parent_key, JSONFile& stream ) ;
+        void handleNumValue( JSONMap &parent, JSONFile& stream ) ;
 
         /** Handles an expected string value input in the stream.
-         * @param parent_key The concatenated string from this token's parent.
+         * @param parent The concatenated string from this token's parent.
          * @param stream The stream to use for document data.
          */
-        void handleStringValue( std::string parent_key, JSONFile& stream ) ;
+        void handleStringValue( JSONMap &parent, JSONFile& stream ) ;
 
         /** Handles an expected boolean value input in the stream.
-         * @param parent_key The concatenated string from this token's parent.
+         * @param parent The concatenated string from this token's parent.
          * @param stream The stream to use for document data.
          */
-        void handleBoolValue( std::string parent_key, JSONFile& stream ) ;
+        void handleBoolValue( JSONMap &parent, JSONFile& stream ) ;
 
         /** Handles an expected comma input in the stream.
-         * @param parent_key The concatenated string from this token's parent.
+         * @param parent The concatenated string from this token's parent.
          * @param stream The stream to use for document data.
          */
-        void handleComma  ( std::string parent_key, JSONFile& stream ) ;
+        void handleComma  ( JSONMap &parent, JSONFile& stream ) ;
 
         /** Handles an expected colon input in the stream.
-         * @param parent_key The concatenated string from this token's parent.
+         * @param parent The concatenated string from this token's parent.
          * @param stream The stream to use for document data.
          */
-        void handleColon  ( std::string parent_key, JSONFile& stream ) ;
+        void handleColon  ( JSONMap &parent, JSONFile& stream ) ;
 
         /** Handles an expected open-bracket input in the stream.
-         * @param parent_key The concatenated string from this token's parent.
+         * @param parent The concatenated string from this token's parent.
          * @param stream The stream to use for document data.
          */
-        void handleArray  ( std::string parent_key, JSONFile& stream ) ;
+        void handleArray  ( JSONMap &parent, JSONFile& stream ) ;
 
         /** Handles an expected open-brace input in the stream.
-         * @param parent_key The concatenated string from this token's parent.
+         * @param parent The concatenated string from this token's parent.
          * @param stream The stream to use for document data.
          */
-        void handleObject ( std::string parent_key, JSONFile& stream ) ;
+        void handleObject ( JSONMap &parent, JSONFile& stream ) ;
 
         /** Default catch-all handling. Searches file for next character and processes accordingly.
-         * @param parent_key The concatenated string from this token's parent.
+         * @param parent The concatenated string from this token's parent.
          * @param stream The stream to use for document data.
          */
-        void handleNext   ( std::string parent_key, JSONFile& stream ) ;
+        void handleNext   ( JSONMap &parent, JSONFile& stream ) ;
       };
 
       std::string getString( std::stringstream& json_stream )
@@ -163,55 +246,55 @@ namespace karma
         return val ;
       }
 
-      void ParserData::handleComma( std::string parent_key, JSONFile& stream )
+      void ParserData::handleComma( JSONMap &parent, JSONFile& stream )
       {
         const char next = getNextValidCharacter ( stream ) ;  ///< TODO
 
         switch( next )
         {
           // EXPECTED: We found key, want delimiter
-          case ':': /* Key:Value delimiter.*/ handleColon ( parent_key, stream ) ; break ;
-          case '"': /* Start of an string. */ handleKey   ( parent_key, stream ) ; break ;
-          case '{': /* Start of an object. */ handleObject( parent_key, stream ) ; break ;
-          case '[': /* Start of an array.  */ handleArray ( parent_key, stream ) ; break ;
+          case ':': /* Key:Value delimiter.*/ handleColon ( parent, stream ) ; break ;
+          case '"': /* Start of an string. */ handleKey   ( parent, stream ) ; break ;
+          case '{': /* Start of an object. */ handleObject( parent, stream ) ; break ;
+          case '[': /* Start of an array.  */ handleArray ( parent, stream ) ; break ;
 
           // INVALID JSON 
-          case ',': /* Continuing a list.  */ stream.putback( next ) ; break ;
-          case ' ': /* White space. Skip.  */ stream.putback( next ) ; break ;
-          case ']': /* End of an array.    */ stream.putback( next ) ; break ;
-          case '}': /* End of an object.   */ stream.putback( next ) ; break ;
-          default : /* Error               */ stream.putback( next ) ; break ;
+          case ',': /* Continuing a list.  */ 
+          case ' ': /* White space. Skip.  */ 
+          case ']': /* End of an array.    */ 
+          case '}': /* End of an object.   */ 
+          default : /* Error               */ stream.putback( next ) ; Log::output( Log::Level::Warning, "Invalid JSON Found: ", next, ".\n" ) ; break ;
         }
       }
 
-      void ParserData::handleColon( std::string parent_key, JSONFile& stream )
+      void ParserData::handleColon( JSONMap &parent, JSONFile& stream )
       {
         const char next = getNextValidCharacter ( stream ) ; 
         
         
-        if     ( isdigit( next ) || next  == '.' ) { stream.putback( next ) ; handleNumValue ( parent_key, stream ) ; }
-        else if( next == 't' || next == 'f'      ) { stream.putback( next ) ; handleBoolValue( parent_key, stream ) ; }
+        if     ( isdigit( next ) || next  == '.' ) { stream.putback( next ) ; handleNumValue ( parent, stream ) ; }
+        else if( next == 't' || next == 'f'      ) { stream.putback( next ) ; handleBoolValue( parent, stream ) ; }
         else
         {
           switch( next )
           {
             // EXPECTED: We found key, can be string, object, or array.
-            case '"': /* Start of an value . */ handleStringValue( parent_key, stream ) ; break ;
-            case '{': /* Start of an object. */ handleObject     ( parent_key, stream ) ; break ;
-            case '[': /* Start of an array.  */ handleArray      ( parent_key, stream ) ; break ;
+            case '"': /* Start of an value . */ handleStringValue( parent, stream ) ; break ;
+            case '{': /* Start of an object. */ handleObject     ( parent, stream ) ; break ;
+            case '[': /* Start of an array.  */ handleArray      ( parent, stream ) ; break ;
   
             // INVALID JSON 
-            case ':': /* Key:Value delimiter.*/ stream.putback( next ) ; break ;
-            case ',': /* Continuing a list.  */ stream.putback( next ) ; break ;
-            case ' ': /* White space. Skip.  */ stream.putback( next ) ; break ;
-            case '}': /* End of an object.   */ stream.putback( next ) ; break ;
-            case ']': /* End of an array.    */ stream.putback( next ) ; break ;
-            default : /* Could be # or bool  */ stream.putback( next ) ; break ;
+            case ':': /* Key:Value delimiter.*/ 
+            case ',': /* Continuing a list.  */ 
+            case ' ': /* White space. Skip.  */ 
+            case '}': /* End of an object.   */ 
+            case ']': /* End of an array.    */ 
+            default : /* Could be # or bool  */ stream.putback( next ) ; Log::output( Log::Level::Warning, "Invalid JSON Found: ", next, ".\n" ) ; break ;
           }
         }
       }
 
-      void ParserData::handleArray( std::string parent_key, JSONFile& stream )
+      void ParserData::handleArray( JSONMap &parent, JSONFile& stream )
       {
         char     next ; ///< 
         unsigned it   ; ///< 
@@ -219,96 +302,90 @@ namespace karma
         it = 0 ;
         while( ( next = getNextValidCharacter( stream ) ) != ']' && next != stream.eof() )
         {
-          if     ( isdigit( next ) || next  == '.' ) { stream.putback( next ) ; handleNumValue ( parent_key, stream ) ; }
-          else if( next == 't' || next == 'f'      ) { stream.putback( next ) ; handleBoolValue( parent_key, stream ) ; }
+          if     ( isdigit( next ) || next  == '.' ) { stream.putback( next ) ; handleNumValue ( parent, stream ) ; }
+          else if( next == 't' || next == 'f'      ) { stream.putback( next ) ; handleBoolValue( parent, stream ) ; }
           else
           switch( next )
           {
             // EXPECTED: We found key, can be string, object, or array.
-            case '"': /* Start of an string. */ it++ ; handleStringValue( parent_key, stream ) ; break ;
-            case '{': /* Start of an object. */ it++ ; handleObject     ( parent_key, stream ) ; break ;
+            case '"': /* Start of an string. */ it++ ; handleStringValue( parent, stream ) ; break ;
+            case '{': /* Start of an object. */ it++ ; handleObject     ( parent, stream ) ; break ;
             case ',': /* Continuing a list.  */ ; break ;
   
             // INVALID JSON 
-            case ':': /* Key:Value delimiter.*/ break ;
-            case ' ': /* White space. Skip.  */ break ;
-            case '}': /* End of an object.   */ break ;
-            case ']': /* End of an array.    */ break ;
+            case ':': /* Key:Value delimiter.*/
+            case ' ': /* White space. Skip.  */
+            case '}': /* End of an object.   */
+            case ']': /* End of an array.    */ stream.putback( next ) ; Log::output( Log::Level::Warning, "Invalid JSON Found: ", next, ".\n" ) ; break ;
           }
         }
       }
 
-      void ParserData::handleObject( std::string parent_key,  JSONFile& stream )
+      void ParserData::handleObject( JSONMap &parent,  JSONFile& stream )
       {
-        char  next ;
+        char next ;
 
         while( ( next = getNextValidCharacter( stream ) ) != '}' && next != stream.eof() )
         {
           switch( next )
           {
             // EXPECTED: We found key, want delimiter
-            case '"': /* Start of an string. */ handleKey   ( parent_key, stream ) ; break ;
-            case ',': /* Continuing a list.  */ handleComma ( parent_key, stream ) ; break ;
+            case '"': /* Start of an string. */ handleKey   ( parent, stream ) ; break ;
+            case ',': /* Continuing a list.  */ handleComma ( parent, stream ) ; break ;
   
             // INVALID JSON 
-            case ':': /* Key:Value delimiter.*/ break ;
-            case '{': /* Start of an object. */ break ;
-            case '[': /* Start of an array.  */ break ;
-            case ' ': /* White space. Skip.  */ break ;
-            case '}': /* End of an object.   */ break ;
-            case ']': /* End of an array.    */ break ;
-            default : /* Error               */ break ;
+            case ':': /* Key:Value delimiter.*/ 
+            case '{': /* Start of an object. */ 
+            case '[': /* Start of an array.  */ 
+            case ' ': /* White space. Skip.  */ 
+            case '}': /* End of an object.   */ 
+            case ']': /* End of an array.    */ 
+            default : /* Error               */ stream.putback( next ) ; Log::output( Log::Level::Warning, "Invalid JSON Found: ", next, ".\n" ) ; break ;
           }
         }
       }
 
-      void ParserData::handleKey( std::string parent_key, JSONFile& stream )
+      void ParserData::handleKey( JSONMap &parent, JSONFile& stream )
       {
-        const std::string str  = getString( stream )                                    ;
-        const std::string key  = parent_key.size() != 0 ? parent_key + "::" + str : str ;
-        const char        next = getNextValidCharacter( stream )                        ;
+        const std::string str  = getString( stream )             ;
+        const char        next = getNextValidCharacter( stream ) ;
         
-//        if( parent_key != "" && this->map.find( parent_key ) == this->map.end() )
-        {
-          this->map[ parent_key ].push_back( str ) ;
-        }
-
         switch( next )
         {
           // EXPECTED: We found key, want delimiter
-          case ':': /* Key:Value delimiter.*/ handleColon  ( key, stream ) ; break ;
+          case ':': /* Key:Value delimiter.*/ handleColon( parent[ str ], stream ) ; break ;
 
           // INVALID JSON 
-          case ',': /* Continuing a list.  */ stream.putback( next ) ; break ;
-          case '"': /* Start of an string. */ stream.putback( next ) ; break ;
-          case '{': /* Start of an object. */ stream.putback( next ) ; break ;
-          case '[': /* Start of an array.  */ stream.putback( next ) ; break ;
-          case ' ': /* White space. Skip.  */ stream.putback( next ) ; break ;
-          case '}': /* End of an object.   */ stream.putback( next ) ; break ;
-          case ']': /* End of an array.    */ stream.putback( next ) ; break ;
-          default : /* Could be # or bool  */ stream.putback( next ) ; break ;
+          case ',': /* Continuing a list.  */ stream.putback( next ) ; 
+          case '"': /* Start of an string. */ stream.putback( next ) ; 
+          case '{': /* Start of an object. */ stream.putback( next ) ; 
+          case '[': /* Start of an array.  */ stream.putback( next ) ; 
+          case ' ': /* White space. Skip.  */ stream.putback( next ) ; 
+          case '}': /* End of an object.   */ stream.putback( next ) ; 
+          case ']': /* End of an array.    */ stream.putback( next ) ; 
+          default : /* Could be # or bool  */ stream.putback( next ) ; stream.putback( next ) ; Log::output( Log::Level::Warning, "Invalid JSON Found: ", next, ".\n" ) ; break ;
         }
       }
 
-      void ParserData::handleNext( std::string parent_key, JSONFile& stream )
+      void ParserData::handleNext( JSONMap &parent, JSONFile& stream )
       {
         const char value = getNextValidCharacter( stream ) ;
-
+        
         switch( value )
         {
-          case '"': /* Start of an string. */ handleKey   ( parent_key, stream ) ; break ;
-          case '{': /* Start of an object. */ handleObject( parent_key, stream ) ; break ;
-          case '[': /* Start of an array.  */ handleArray ( parent_key, stream ) ; break ;
-          case ',': /* Continuing a list.  */ handleComma ( parent_key, stream ) ; break ;
-          case ':': /* Key:Value delimiter.*/ handleColon ( parent_key, stream ) ; break ;
-          case ' ': /* White space. Skip.  */ break ;
-          case '}': /* End of an object.   */ break ;
-          case ']': /* End of an array.    */ break ;
-          default : /* Error               */ break ;
+          case '"': /* Start of an string. */ handleKey   ( parent, stream ) ; break ;
+          case '{': /* Start of an object. */ handleObject( parent, stream ) ; break ;
+          case '[': /* Start of an array.  */ handleArray ( parent, stream ) ; break ;
+          case ',': /* Continuing a list.  */ handleComma ( parent, stream ) ; break ;
+          case ':': /* Key:Value delimiter.*/ handleColon ( parent, stream ) ; break ;
+          case ' ': /* White space. Skip.  */ 
+          case '}': /* End of an object.   */ 
+          case ']': /* End of an array.    */ 
+          default : /* Error               */ Log::output( Log::Level::Warning, "Invalid JSON Found: ", value, ".\n" ) ; break ;
         }
       }
 
-      void ParserData::handleNumValue( std::string parent_key, JSONFile& stream )
+      void ParserData::handleNumValue( JSONMap &parent, JSONFile& stream )
       {
         std::stringstream str  ;
         char              next ;
@@ -322,11 +399,11 @@ namespace karma
 
         if( str.str() != "" )
         {
-          this->map[ parent_key ].push_back( str.str() ) ;
+          parent.values.push_back( str.str() ) ;
         }
       }
 
-      void ParserData::handleBoolValue( std::string parent_key, JSONFile& stream )
+      void ParserData::handleBoolValue( JSONMap &parent, JSONFile& stream )
       {
         const char next = getNextValidCharacter( stream ) ;
         std::string       buffer ;
@@ -350,22 +427,22 @@ namespace karma
 
         if( buffer.size() != 0 )
         {
-          this->map[ parent_key ].push_back( buffer ) ;
+          parent.values.push_back( buffer ) ;
         }
       }
 
-      void ParserData::handleStringValue( std::string parent_key, JSONFile& stream )
+      void ParserData::handleStringValue( JSONMap &parent, JSONFile& stream )
       {
         const std::string str  = getString( stream ) ;
-
-        this->map[ parent_key ].push_back( str ) ;
+        
+        parent.values.push_back( str ) ;
       }
 
       void ParserData::processFile( JSONFile& stream )
       {
         while( !stream.eof() )
         {
-          handleNext( "", stream ) ;          
+          handleNext( this->map, stream ) ;          
         }
       }
   
@@ -382,6 +459,7 @@ namespace karma
       Token Parser::find( const char* key ) const
       {
         Token token ;
+        token.data().node = &data().map ;
         token.data().it = data().map.find( key ) ;
         return token ;
       }
@@ -389,14 +467,16 @@ namespace karma
       Token Parser::end() const
       {
         Token token ;
-        token.data().it = data().map.end() ;
+        token.data().node = &data().map ;
+        token.data().it   = data().map.end() ;
         return token ;
       }
 
       Token Parser::begin() const
       {
         Token token ;
-        token.data().it = data().map.begin() ;
+        token.data().node = &data().map        ;
+        token.data().it   = data().map.begin() ;
         return token ;
       }
 
@@ -441,7 +521,58 @@ namespace karma
 
         *this->token_data = *token.token_data ;
       }
+        
+      Token Token::operator[]( const char* key ) const
+      {
+        Token tmp ;
+        Token ret ;
+        
+        ret = *this ;
+        
+        // Base case.
+        if( data().node == nullptr || data().it == data().node->end() || data().key() == key )
+        {
+          ret = *this ;
+          
+          return ret ;
+        }
+        
+        // Look through this node's immidiate children.
 
+        // We didnt find it immidiately, so now we have to recursively look.
+        for( auto json = data().node->begin(); json != data().node->end(); ++json )
+        {
+          // If this map location is the correct one, return it.
+          if( json->first == key )
+          {
+            ret             = *this  ;
+            ret.data().it   = json   ;
+            
+            return ret ;
+          }
+          
+          if( !json->second.leaf() )
+          {
+            // Else, set temporary token to the child & look up.
+            tmp.data().node     = &json->second            ;
+            tmp.data().it       = tmp.data().node->begin() ;
+            tmp.data().position = 0                        ;
+  
+            // Recursively search child for key.
+            ret = tmp[ key ] ;
+              
+            // If we found it, return.
+            if( ret.data().node != nullptr && ret.data().it != ret.data().node->end() && std::string( ret.key() ) == key )
+            {
+              return ret ;
+            }
+          }
+        }
+        
+        // Found nothing, return this.
+        return ret ;
+      }
+      
       void Token::operator=( const Token& token )
       {
         *this->token_data = *token.token_data ;
@@ -451,17 +582,45 @@ namespace karma
       {
         return data().it != token.data().it ;
       }
+      
+      Token Token::begin() const
+      {
+        Token tmp ;
+        
+        if( data().node != nullptr )
+        {
+          tmp             = *this                    ;
+          tmp.data().node = &data().it->second       ;
+          tmp.data().it   = tmp.data().node->begin() ;
+        }
+        
+        return tmp ;
+      }
+      
+      Token Token::end() const
+      {
+        Token tmp ;
+        
+        if( data().node != nullptr )
+        {
+          tmp             = *this                  ;
+          tmp.data().node = &data().it->second     ;
+          tmp.data().it   = tmp.data().node->end() ;
+        }
+        
+        return tmp ;
+      }
 
       const char* Token::key() const
       {
-        return data().key() ;
+        return data().key().c_str() ;
       }
 
       const char* Token::string( unsigned index ) const
       {
-        if( index < data().it->second.size() )
+        if( data().node != nullptr )
         {
-          return data().it->second[ index ].c_str() ;
+          return data().it->second.value( index ).c_str() ;
         }
         else
         {
@@ -476,9 +635,9 @@ namespace karma
 
       float Token::decimal( unsigned index ) const
       {
-        if( index < data().it->second.size() )
+        if( data().node != nullptr )
         {
-          return static_cast<float>( std::atof( data().it->second[ index ].c_str() ) ) ;
+          return static_cast<float>( std::atof(data().it->second.value( index ).c_str() ) ) ;
         }
         else
         {
@@ -488,17 +647,20 @@ namespace karma
 
       bool Token::boolean( unsigned index ) const
       {
-        if      ( data().it->second[ index ] == "false" ) return false ;
-        else if ( data().it->second[ index ] == "true"  ) return true  ;
+        if( data().node != nullptr )
+        {
+          if      ( data().it->second.value( index ) == "false" ) return false ;
+          else if ( data().it->second.value( index ) == "true"  ) return true  ;
+        }
         
         return false ;
       }
 
       unsigned Token::number( unsigned index ) const
       {
-        if( index < data().it->second.size() )
+        if( data().node != nullptr && data().it != data().node->end() )
         {
-          return static_cast<unsigned>( std::atoi( data().it->second[ index ].c_str() ) ) ;
+          return static_cast<unsigned>( std::atoi( data().it->second.value( index ).c_str() ) ) ;
         }
         else
         {
@@ -508,12 +670,18 @@ namespace karma
 
       bool Token::isArray() const
       {
-        return data().it->second.size() > 1 ;
+        return data().node != nullptr ? data().node->size() > 1 : false ;
       }
 
       void Token::operator++()
       {
-        ++data().it ;
+        if( data().node != nullptr )
+        {
+          if( data().it != data().node->end() )
+          {
+            ++data().it ;
+          }
+        }
       }
 
       TokenData& Token::data()

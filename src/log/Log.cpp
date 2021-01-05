@@ -31,6 +31,18 @@ namespace karma
 {
   namespace log
   {
+    void operator<<( String& first, char second )
+    {
+      std::stringstream stream ;
+      std::string       string ;
+
+      stream << first.str()  ;
+      stream << second       ;
+      
+      string = stream.str() ;
+      first.setStr( string.c_str() ) ;
+    }
+    
     void operator<<( String& first, const char* second )
     {
       std::stringstream stream ;

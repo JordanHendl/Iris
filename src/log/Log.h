@@ -34,6 +34,12 @@ namespace karma
      * @param first
      * @param second
      */
+    void operator<<( String& first, char second ) ;
+    
+    /**
+     * @param first
+     * @param second
+     */
     void operator<<( String& first, const char* second ) ;
     
     /**

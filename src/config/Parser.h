@@ -42,6 +42,12 @@ namespace karma
            * @param token Const-reference to the object to copy data from.
            */
           Token( const Token& token ) ;
+          
+          /** Method to recursively search this token and all children for the key & return the token of it.
+           * @param key The JSON key to search for.
+           * @return The token containing that key. If not found, returns this token.
+           */
+          Token operator[]( const char* key ) const ;
 
           /** Assignment operator for another copy of this object.
            * @param token Const-reference to the other object to copy data from.
@@ -53,6 +59,21 @@ namespace karma
            * @return Whether or not this object is equivalent to the provided one.
            */
           bool operator!=( const Token& token ) ;
+          
+          /** Method to retrieve a token at the start of this token's children map.
+           * @return A token placed at the beginning of this token's children map.
+           */
+          Token begin() const ;
+          
+          /** Method to retrieve a token at the end of this token's children map.
+           * @return A token placed at the end of this token's children map.
+           */
+          Token end() const ;
+
+          /** Method to retrieve whether or not this token is a leaf & contains a value.
+           * @return Whether or not this token is a leaf and contains a value.
+           */
+          bool leaf() const ;
 
           /** Method to return whether or not this token's value is a part of an array. Used to iterate over array for values.
            * @return Whether or not this object represents a value inside an array.
