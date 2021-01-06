@@ -1,6 +1,16 @@
 {
+  # Path to the config for karma to use.
   "graph_config_path" : "karma_config.json",
+
+  # The path to the modules for karma to load.
   "modules_path"      : "nbbuild/modules",
+
+  # Whether or not logging should be enabled.
+  "log_enable"        : "false",
+
+  # The mode for the logging to use when outputting logs.
   "log_mode"          : "VERBOSE",
+
+  # The path to log output.
   "log_output_path"   : "/var/tmp"
 }

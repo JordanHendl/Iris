@@ -1,18 +1,23 @@
 {
-  "graph1":
+  # The graph for karma to generate.
+  "graph_1" :
   {
+    # The modules as a part of the graph.
     "Modules" : 
     {
+      # Vulkan API Module.
       "API" :
       {
-        "type"        : "Vulkan"
-        "gpu0_output" : "gpu0"
+        "type"  : "Vulkan",
+	"input" : "window_surface"
       },
+      # Vulkan Window Module.
       "window" :
       {
-        "gpu_input" : "gpu0"
-        "width"     : 1024
-        "height"    : 720
+	"type"   : "Vulkan Window",
+        "output" : "window_surface",
+        "width"  : 1024,
+        "height" : 720
       }
     }
   }
