@@ -44,9 +44,7 @@ namespace karma
         NodeList values   ;
       public:
 
-        JSONNode()
-        {
-        }
+        JSONNode() = default ;
         
         const std::string& value( unsigned index ) const 
         {
@@ -70,7 +68,6 @@ namespace karma
         {
           return this->children.end() ;
         }
-        
         
         JSONNode& operator[]( std::string str )
         {
@@ -244,10 +241,24 @@ namespace karma
 
       char getNextValidCharacter( std::stringstream& json_stream )
       {
-        char val ;
+        bool in_comment ;
+        char val        ;
+        
+        in_comment = false ;
 
         // While not eof, not whitespace, and not a line break.
-        while( ( val = json_stream.get() ) != json_stream.eof() && ( val == ' ' || val == '\n' || val == '\r' ) ) { }
+        while( ( val = json_stream.get() ) != json_stream.eof() && ( val == ' ' || val == '\n' || val == '\r' || val == '#' || in_comment ) )
+        { 
+          if( val == '#' )
+          {
+            in_comment = true  ;
+          }
+          
+          if( in_comment && ( val == '\n'|| val == '\r' ) )
+          {
+            in_comment = false ;
+          }
+        }
 
         return val ;
       }

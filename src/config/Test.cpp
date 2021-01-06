@@ -29,6 +29,7 @@ static const char* json_data =
 "  {\n"
 "    \"graph_1\":\n"
 "    {\n"
+"      #This is a comment!\n"
 "      \"Modules\" :\n"
 "      {\n"
 "        \"API\" :\n"

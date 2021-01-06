@@ -52,10 +52,10 @@ TARGET_INCLUDE_DIRECTORIES( karma_configuration PRIVATE ${KARMA_CONFIG_INCLUDES}
 TARGET_LINK_LIBRARIES     ( karma_configuration PUBLIC  ${KARMA_CONFIG_LIBRARIES}                       ) 
 ADD_DEPENDENCIES          ( karma_configuration         ${KARMA_CONFIG_DEPS}                            )
 
-  # If running tests, make and run them.
-  IF( RUN_TESTS )
-    BUILD_TEST( TARGET karma_configuration )
-  ENDIF()
+# If running tests, make and run them.
+IF( RUN_TESTS )
+  BUILD_TEST( TARGET karma_configuration )
+ENDIF()
 
 INSTALL( FILES ${KARMA_CONFIG_HEADERS} DESTINATION ${INSTALL_INCLUDE_DIR}/config )
 INSTALL( TARGETS karma_configuration EXPORT karma_lib 
