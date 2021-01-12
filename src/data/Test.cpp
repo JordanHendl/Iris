@@ -135,7 +135,7 @@ static karma::Bus speed_bus ;
 template<unsigned i>
 void setSpeed( unsigned val )
 {
-  static float v = i + val ;
+  val = val ;
 }
 
 template<unsigned i>
@@ -166,7 +166,7 @@ bool testFunctionSetter()
   return false ;
 }
 
-int main( int argc, char** argv ) 
+int main() 
 { 
   TestObject obj ;
   f = TEST_VALUE_2 ;

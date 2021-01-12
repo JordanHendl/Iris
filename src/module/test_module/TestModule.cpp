@@ -80,8 +80,8 @@ namespace karma
 
   void TestModule::initialize()
   {
-    if( !floatEquals( data().thing1, 0.25 ) ){  std::cout << "!! Float value failed to set.  !!"   << std::endl ; exit( 1 ) ; }
-    if( data().thing2 != "thing2"           ){  std::cout << "!! String value failed to set. !!"  << std::endl ; exit( 1 ) ; }
+    if( !floatEquals( data().thing1, 0.25 ) ){  std::cout << "!! Float value failed to set.  !!" << std::endl ; exit( 1 ) ; }
+    if( data().thing2 != "thing2"           ){  std::cout << "!! String value failed to set. !!" << std::endl ; exit( 1 ) ; }
     if( data().thing3 != 2503               ){  std::cout << "!! Integer value failed to set.!!" << std::endl ; exit( 1 ) ; }
   }
 

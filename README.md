@@ -1,34 +1,32 @@
 # Karma
-  Karma is a C++ framework for quick and easy program development. 
+  Karma is a C++ Node-based framework for quick and easy program development.
   
-## How does it work?
-
-  - Karma works by loading different mini-programs called 'modules' into a graph.
-  - These modules are shared objects built from objects inheriting the "Karma Module" class, with each one acting as it's own program.
-  - The Karma framework is set up by a JSON file that describes all the inputs needed. ( See @setup.json  )
-  - One of the inputs, is another JSON file that describes the graphs and modules in each as well. ( See @karma_config.json )
-  - Ideally, over time, there will be enough modules on my Github so that complex programs can be chained through JSON, and never require any code.
-  - If waiting isn't your thing, then making your own Module is also easy, just link against karma_module of the Karma library, and create your own module inheriting the Karma Module class.
-  - Communication between modules is done so using the Karma Data Bus class, which allows communication without dependencies. ( See https://github.com/JordanHendl/Data-Bus ).
-
 ## How to build
-  To build, as with all Karma libraries, **CMake** is used.
+  Karma is built using **CMake**. If on Linux, to build from source, simply do: 
   
-  On linux:
-
   ```
   mkdir build
-  cd build 
-  cmake .. 
-  make
+  cd build
+  cmake ..
+  make 
   ```
+  
+  For Windows, do 
+  
+  ```
+  mkdir build
+  cd build
+  cmake ..
+  ```
+  
+  And then simply open the generated .sln with whatever editor of your preference and build.
 
-  On windows I suggest using CMake GUI and MinGW-w64.
+  Generated RPM's default install to /usr/local/Karma on UNIX, and C:\Program Files\Karma on Windows.
 
-  On **Linux**, package installation installs to */usr/local/Karma*.
-  On **Windows**, an installer is provided to install wherever you choose.
-
-  In the install directory, lies a KarmaConfig.cmake, all you have to do is add a path to that to your CMAKE_PREFIX_PATH and then link against whatever library you need.
+  Linking with CMake: 
+  1) Add the path to the install to your *CMAKE_PREFIX_PATH*.
+  2) ```FIND_PACKAGE( karma ) ```
+  3) Link against the **karma** library.
 
 ## Usage
 
@@ -55,7 +53,7 @@
 
 ## Planned
 
-  - Design wise, interaction with each module through drivers is planned.
+  - Interaction with each module through drivers is planned.
       E.g. A module calculated something using the GPU, and can be obtained through a callback in your driver program when it is completed.
 
   - A Base Driver program, in the case that you just want to run a bunch of modules and want to write 0 code at all!

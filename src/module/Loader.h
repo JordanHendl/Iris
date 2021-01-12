@@ -33,7 +33,7 @@ namespace karma
       void destroy( Module* module, unsigned version = 0 ) ;
     private:
       
-      friend class LoaderData ;
+      friend struct LoaderData ;
       void initalize( const char* module_path ) ;
 
       struct DescriptorData* desc_data ;

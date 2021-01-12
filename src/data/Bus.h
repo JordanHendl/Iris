@@ -412,7 +412,7 @@ namespace karma
        * @param type_id The hash representing the type of data being transferred.
        * @param type_name The name of the type being transferred.
        */
-      void enrollBase( const Key& key, Publisher* publisher, unsigned type_id, const char* type_name ) ;
+      void enrollBase( const Key& key, Publisher* publisher, unsigned type_id ) ;
       
       /** Method to enroll a subscriber in this bus.
        * @param key The key of signal to use to subscribe to.
@@ -420,7 +420,7 @@ namespace karma
        * @param type_id The hash representing the type of data being transferred.
        * @param type_name The name of the type being transferred.
        */
-      void enrollBase( const Key& key, Subscriber* subscriber, unsigned type_id, const char* type_name ) ;
+      void enrollBase( const Key& key, Subscriber* subscriber, unsigned type_id ) ;
       
       /** Method to manually emit data over the data bus.
        * @param key The key of signal to use to publish over.
@@ -429,7 +429,7 @@ namespace karma
        * @param idx The index of data to send over.
        * @param type_name The name of the type being transferred.
        */
-      void emitBase( const Key& key, const void* value, unsigned type_id, unsigned idx, const char* type_name ) ;
+      void emitBase( const Key& key, const void* value, unsigned type_id, unsigned idx ) ;
   };
   
   template<typename Type>
@@ -555,6 +555,7 @@ namespace karma
     typedef void ( Object::*ReferencedCallback        )( const Type&           ) ;
     typedef void ( Object::*IndexedReferencedCallback )( unsigned, const Type& ) ;
     
+    idx = idx ; // Suppress warning.
     if constexpr( Referenced )
     {
       if constexpr( Indexed )
@@ -685,7 +686,7 @@ namespace karma
     Key key ;
     
     key = ::karma::concatenate( "", args... ) ;
-    this->emitBase( key, static_cast<const void*>( &value ), ctti.ctti_hash, idx, ctti.ctti_name ) ;
+    this->emitBase( key, static_cast<const void*>( &value ), ctti.ctti_hash, idx ) ;
   }
   
   template<class Value, typename ... Keys>
@@ -695,7 +696,7 @@ namespace karma
     Key key ;
     
     key = ::karma::concatenate( "", args... ) ;
-    this->emitBase( key, static_cast<const void*>( &value ), ctti.ctti_hash, 0, ctti.ctti_name ) ;
+    this->emitBase( key, static_cast<const void*>( &value ), ctti.ctti_hash, 0 ) ;
   }
   
   template<typename ... Keys, class Value>
@@ -707,9 +708,9 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( setter ) ) ;
-    key      = ::karma::concatenate( "", args... )               ;
+    key      = ::karma::concatenate( "", args... )                                     ;
     
-    this->enrollBase( key, dynamic_cast<Bus::Subscriber*>( callback ), ctti.ctti_hash, ctti.ctti_name ) ;
+    this->enrollBase( key, dynamic_cast<Bus::Subscriber*>( callback ), ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Value>
@@ -721,9 +722,9 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( setter ) ) ;
-    key      = ::karma::concatenate( "", args... )               ;
+    key      = ::karma::concatenate( "", args... )                                     ;
     
-    this->enrollBase( key, callback, ctti.ctti_hash, ctti.ctti_name ) ;
+    this->enrollBase( key, callback, ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Value>
@@ -735,9 +736,9 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( setter ) ) ;
-    key      = ::karma::concatenate( "", args... )          ;
+    key      = ::karma::concatenate( "", args... )                                     ;
     
-    this->enrollBase( key, callback, ctti.ctti_hash, ctti.ctti_name ) ;
+    this->enrollBase( key, callback, ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Value>
@@ -749,9 +750,9 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( setter ) ) ;
-    key      = ::karma::concatenate( "", args... )               ;
+    key      = ::karma::concatenate( "", args... )                                     ;
     
-    this->enrollBase( key, callback, ctti.ctti_hash, ctti.ctti_name ) ;
+    this->enrollBase( key, callback, ctti.ctti_hash) ;
   }
   
   template<typename ... Keys, class Object, class Value>
@@ -763,9 +764,9 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( obj, reinterpret_cast<typename Callback::Callback>( setter ) ) ;
-    key      = ::karma::concatenate( "", args... )               ;
+    key      = ::karma::concatenate( "", args... )                                          ;
     
-    this->enrollBase( key, callback, ctti.ctti_hash, ctti.ctti_name ) ;
+    this->enrollBase( key, callback, ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Object, class Value>
@@ -777,9 +778,9 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( obj, reinterpret_cast<typename Callback::Callback>( setter ) ) ;
-    key      = ::karma::concatenate( "", args... )               ;
+    key      = ::karma::concatenate( "", args... )                                          ;
     
-    this->enrollBase( key, callback, ctti.ctti_hash, ctti.ctti_name ) ;
+    this->enrollBase( key, callback, ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Object, class Value>
@@ -791,9 +792,9 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( obj, reinterpret_cast<typename Callback::Callback>( setter ) ) ;
-    key      = ::karma::concatenate( "", args... )               ;
+    key      = ::karma::concatenate( "", args... )                                          ;
     
-    this->enrollBase( key, callback, ctti.ctti_hash, ctti.ctti_name ) ;
+    this->enrollBase( key, callback, ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Object, class Value>
@@ -805,9 +806,9 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( obj, reinterpret_cast<typename Callback::Callback>( setter ) ) ;
-    key      = ::karma::concatenate( "", args... )                    ;
+    key      = ::karma::concatenate( "", args... )                                          ;
     
-    this->enrollBase( key, callback, ctti.ctti_hash, ctti.ctti_name ) ;
+    this->enrollBase( key, callback, ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Value>
@@ -819,9 +820,9 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( getter ) ) ;
-    key      = ::karma::concatenate( "", args... )               ;
+    key      = ::karma::concatenate( "", args... )                                     ;
     
-    this->enrollBase( key, callback, ctti.ctti_hash, ctti.ctti_name ) ;
+    this->enrollBase( key, callback, ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Value>
@@ -833,9 +834,9 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( getter ) ) ;
-    key      = ::karma::concatenate( "", args... )               ;
+    key      = ::karma::concatenate( "", args... )                                     ;
     
-    this->enrollBase( key, callback, ctti.ctti_hash, ctti.ctti_name ) ;
+    this->enrollBase( key, callback, ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Value>
@@ -847,9 +848,9 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( getter ) ) ;
-    key      = ::karma::concatenate( "", args... )               ;
+    key      = ::karma::concatenate( "", args... )                                     ;
     
-    this->enrollBase( key, callback, ctti.ctti_hash, ctti.ctti_name ) ;
+    this->enrollBase( key, callback, ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Value>
@@ -861,9 +862,9 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( getter ) ) ;
-    key      = ::karma::concatenate( "", args... )               ;
+    key      = ::karma::concatenate( "", args... )                                     ;
     
-    this->enrollBase( key, callback, ctti.ctti_hash, ctti.ctti_name ) ;
+    this->enrollBase( key, callback, ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Object, class Value>
@@ -875,9 +876,9 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( obj, reinterpret_cast<typename Callback::Callback>( getter ) ) ;
-    key      = ::karma::concatenate( "", args... )                    ;
+    key      = ::karma::concatenate( "", args... )                                          ;
     
-    this->enrollBase( key, callback, ctti.ctti_hash, ctti.ctti_name ) ;
+    this->enrollBase( key, callback, ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Object, class Value>
@@ -889,9 +890,9 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( obj, reinterpret_cast<typename Callback::Callback>( getter ) ) ;
-    key      = ::karma::concatenate( "", args... )                    ;
+    key      = ::karma::concatenate( "", args... )                                          ;
     
-    this->enrollBase( key, callback, ctti.ctti_hash, ctti.ctti_name ) ;
+    this->enrollBase( key, callback, ctti.ctti_hash ) ;
   }
 
   template<typename ... Keys, class Object, class Value>
@@ -903,9 +904,9 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( obj, reinterpret_cast<typename Callback::Callback>( getter ) ) ;
-    key      = ::karma::concatenate( "", args... )                    ;
+    key      = ::karma::concatenate( "", args... )                                          ;
     
-    this->enrollBase( key, callback, ctti.ctti_hash, ctti.ctti_name ) ;
+    this->enrollBase( key, callback, ctti.ctti_hash ) ;
   }
 
   template<typename ... Keys, class Object, class Value>
@@ -917,9 +918,9 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( obj, reinterpret_cast<typename Callback::Callback>( getter ) ) ;
-    key      = ::karma::concatenate( "", args... )                    ;
+    key      = ::karma::concatenate( "", args... )                                          ;
     
-    this->enrollBase( key, callback, ctti.ctti_hash, ctti.ctti_name ) ;
+    this->enrollBase( key, callback, ctti.ctti_hash ) ;
   }
 }
 

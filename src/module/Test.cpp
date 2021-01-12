@@ -57,13 +57,18 @@ bool testModManager()
 }
 int main( int argc, char* argv[] )
 {
-  std::string   path = argv[ 0 ] ;
-  
+  std::string path = argv[ 0 ] ;
+  argc = argc ;
   path = path.substr( 0, path.size() - 21 ) ;
   
-  module_path = path + std::string( "test_module/"     ) ;
+  // This is because visual studio ( and others? ) build to a "Debug' or "Release" folder inside the binary build folder.
+  #if( WIN32 )
+    module_path = path + std::string( "../../test_module/") ; 
+  #else 
+    module_path = path + std::string( "test_module/" ) ;
+  #endif
+
   config_path = path + std::string( "test_config.json" ) ;
-  
   stream.open( config_path ) ;
   if( stream )
   {

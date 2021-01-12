@@ -36,12 +36,15 @@ SET( KARMA_MODULE_INCLUDE_DIRS
 
 SET( KARMA_MODULE_LIBRARIES
      karma_io
-     stdc++fs
      karma_data_bus
      karma_configuration
      karma_log
      ${CMAKE_THREAD_LIBS_INIT}
    )
+
+IF( UNIX AND NOT APPLE )
+  LIST( APPEND KARMA_MODULE_LIBRARIES stdc++fs )
+ENDIF()
 
 ADD_LIBRARY               ( karma_module SHARED   ${KARMA_MODULE_SOURCES} ${KARMA_MODULE_HEADERS} )
 TARGET_INCLUDE_DIRECTORIES( karma_module PRIVATE  ${KARMA_MODULE_INCLUDE_DIRS}                    )
@@ -54,8 +57,10 @@ IF( RUN_TESTS )
   BUILD_TEST( TARGET karma_module )
 ENDIF()
 
-INSTALL( FILES ${KARMA_MODULE_HEADERS} DESTINATION ${INSTALL_INCLUDE_DIR}/module )
+INSTALL( FILES ${KARMA_MODULE_HEADERS} DESTINATION ${INCLUDE_DIR}/module )
 
 INSTALL( TARGETS karma_module EXPORT karma_lib
                  LIBRARY  DESTINATION ${EXPORT_LIB_DIR}/module 
+                 RUNTIME  DESTINATION ${EXPORT_LIB_DIR}/module
+                 ARCHIVE  DESTINATION ${EXPORT_LIB_DIR}/module
                  INCLUDES DESTINATION ${EXPORT_INCLUDE_DIR} )

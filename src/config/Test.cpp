@@ -178,7 +178,7 @@ bool testObject()
   return true ;
 }
 
-int main( int argc, const char** argv )
+int main()
 {
   parser.initialize( json_data ) ;
   

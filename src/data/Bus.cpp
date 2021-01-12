@@ -381,7 +381,7 @@ namespace karma
     }
   }
   
-  void Bus::enrollBase( const Key& key, Publisher* publisher, unsigned type_id, const char* type_name )
+  void Bus::enrollBase( const Key& key, Publisher* publisher, unsigned type_id )
   {
     Signal::PublisherIterator pub_iter ;
     
@@ -405,7 +405,7 @@ namespace karma
     map_lock.unlock() ;
   }
   
-  void Bus::enrollBase( const Key& key, Subscriber* subscriber, unsigned type_id, const char* type_name )
+  void Bus::enrollBase( const Key& key, Subscriber* subscriber, unsigned type_id )
   {
     Signal::SubscriberIterator sub_iter ;
     
@@ -429,7 +429,7 @@ namespace karma
     map_lock.unlock() ;
   }
   
-  void Bus::emitBase( const Key& key, const void* value, unsigned type_id, unsigned idx, const char* type_name )
+  void Bus::emitBase( const Key& key, const void* value, unsigned type_id, unsigned idx )
   {
     auto iter = signal_map.find( key.str() ) ;
     

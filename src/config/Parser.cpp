@@ -373,13 +373,13 @@ namespace karma
           case ':': /* Key:Value delimiter.*/ handleColon( parent[ str ], stream ) ; break ;
 
           // INVALID JSON 
-          case ',': /* Continuing a list.  */ stream.putback( next ) ; 
-          case '"': /* Start of an string. */ stream.putback( next ) ; 
-          case '{': /* Start of an object. */ stream.putback( next ) ; 
-          case '[': /* Start of an array.  */ stream.putback( next ) ; 
-          case ' ': /* White space. Skip.  */ stream.putback( next ) ; 
-          case '}': /* End of an object.   */ stream.putback( next ) ; 
-          case ']': /* End of an array.    */ stream.putback( next ) ; 
+          case ',': /* Continuing a list.  */ 
+          case '"': /* Start of an string. */ 
+          case '{': /* Start of an object. */ 
+          case '[': /* Start of an array.  */ 
+          case ' ': /* White space. Skip.  */ 
+          case '}': /* End of an object.   */ 
+          case ']': /* End of an array.    */ 
           default : /* Could be # or bool  */ stream.putback( next ) ; stream.putback( next ) ; Log::output( Log::Level::Warning, "Invalid JSON Found: ", next, ".\n" ) ; break ;
         }
       }
@@ -466,7 +466,7 @@ namespace karma
       Parser::Parser() 
       {
         this->parser_data = new ParserData() ;
-      };
+      }
   
       Parser::~Parser()
       {

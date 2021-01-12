@@ -26,7 +26,7 @@ namespace karma
       /** Forward Declared object from Parser.h.
        */
       class Token ;
-    };
+    }
 
     /** Class to configure the rest of the program using a JSON file.
      * See @src/data/Bus.h/cpp for how data is sent and recieved.

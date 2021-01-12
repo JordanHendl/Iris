@@ -35,8 +35,10 @@ add_library               ( karma_io SHARED  ${KARMA_IO_SOURCES} ${KARMA_IO_HEAD
 target_link_libraries     ( karma_io PUBLIC  ${KARMA_IO_LIBRARIES}                   )
 target_include_directories( karma_io PRIVATE ${KARMA_IO_INCLUDE_DIRS}                )
 
-INSTALL( FILES ObjectLoader.h DESTINATION ${INSTALL_INCLUDE_DIR}/io )
+INSTALL( FILES ObjectLoader.h DESTINATION ${INCLUDE_DIR}/io )
 
 INSTALL( TARGETS karma_io EXPORT karma_lib 
                  LIBRARY  DESTINATION ${EXPORT_LIB_DIR}/io 
+                 ARCHIVE  DESTINATION ${EXPORT_LIB_DIR}/io 
+                 RUNTIME  DESTINATION ${EXPORT_LIB_DIR}/io 
                  INCLUDES DESTINATION ${EXPORT_INCLUDE_DIR} )

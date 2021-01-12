@@ -15,12 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define NOMINMAX
 #include "Loader.h"
 #include "Module.h"
 #include <io/ObjectLoader.h>
 #include <log/Log.h>
 #include <filesystem>
 #include <string> 
+#include <algorithm>
 #include <map>
 
 namespace karma

@@ -28,6 +28,7 @@
 #include <vector>
 
 #ifdef _WIN32
+  #define NOMINMAX // So we can use std::min/max and not have to do crazy bullshit just for windows.
   #include <windows.h>
 
   static inline void setThreadPriority()
