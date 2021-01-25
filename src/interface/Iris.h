@@ -15,34 +15,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef Karma_INTERFACE_H
-#define Karma_INTERFACE_H
+#ifndef IRIS_INTERFACE_H
+#define IRIS_INTERFACE_H
 
-/** Object to interface and interact with the Karma Library.
+/** Object to interface and interact with the Iris Library.
  */
-class Karma
+class Iris
 {
   public:
     
     /** Default Constructor.
      */
-    Karma() ;
+    Iris() ;
     
     /** Deconstructor.
      */
-    ~Karma() ;
+    ~Iris() ;
     
-    /** Method to initialize the Karma Library.
-     * @param setup_json_path The path on the filesystem to the JSON file describing this karma execution.
+    /** Method to initialize the Iris Library.
+     * @param setup_json_path The path on the filesystem to the JSON file describing this iris execution.
      */
     void initialize( const char* setup_json_path ) ;
     
-    /** Method to retrieve whether or not the karma runtime is currently running.
-     * @return Whether or not karma is currently running.
+    /** Method to retrieve whether or not the iris runtime is currently running.
+     * @return Whether or not Iris is currently running.
      */
     bool running() const ;
 
-    /** Method to shutdown the Karma Library's operations & free all allocated data..
+    /** Method to shutdown the Iris Library's operations & free all allocated data..
      */
     void shutdown() ;
     
@@ -50,17 +50,17 @@ class Karma
     
     /** Forward Declared structure to contain this object's data.
      */
-    struct KarmaData* karma_data ;
+    struct IrisData* iris_data ;
     
     /** Method to retrieve a reference to this object's internal data structure.
      * @return Reference to this object's internal data structure.
      */
-    KarmaData& data() ;
+    IrisData& data() ;
     
       /** Method to retrieve a const reference to this object's underlying data structure.
        * @return A const reference to this object's underlying data structure.
        */
-    const KarmaData& data() const ;
+    const IrisData& data() const ;
 };
 
 #endif

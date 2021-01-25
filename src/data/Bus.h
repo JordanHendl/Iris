@@ -18,8 +18,11 @@
 #ifndef DATA_BUS_H
 #define DATA_BUS_H
 
-namespace karma
+namespace iris
 {
+  static constexpr bool REQUIRED = true  ;
+  static constexpr bool OPTIONAL = false ;
+  
   /** Container for compile-time type info.
    */
   struct TypeInfo
@@ -196,7 +199,7 @@ namespace karma
        * @param args The arguments that make up the name of signal to send the data over.
        */
       template<typename ... Keys, class Value>
-      void enroll( void (*setter)( Value ), Keys... args ) ;
+      void enroll( void (*setter)( Value ), bool required, Keys... args ) ;
 
       /** Method to enroll a subscription in the bus. 
        *  AKA Set a setter function pointer to receive data via const-reference.
@@ -204,7 +207,7 @@ namespace karma
        * @param args The arguments that make up the name of signal to send the data over.
        */
       template<typename ... Keys, class Value>
-      void enroll( void (*setter)( const Value& ), Keys... args ) ;
+      void enroll( void (*setter)( const Value& ), bool required, Keys... args ) ;
 
       /** Method to enroll an indexed subscription in the bus. 
        *  AKA Set a setter function pointer to receive data via value.
@@ -212,7 +215,7 @@ namespace karma
        * @param args The arguments that make up the name of signal to send the data over.
        */      
       template<typename ... Keys, class Value>
-      void enroll( void (*setter)( unsigned, Value ), Keys... args ) ;
+      void enroll( void (*setter)( unsigned, Value ), bool required, Keys... args ) ;
       
       /** Method to enroll an indexed subscription in the bus. 
        *  AKA Set a setter function pointer to receive data via const-reference.
@@ -220,7 +223,7 @@ namespace karma
        * @param args The arguments that make up the name of signal to send the data over.
        */      
       template<typename ... Keys, class Value>
-      void enroll( void (*setter)( unsigned, Value const & ), Keys... args ) ;
+      void enroll( void (*setter)( unsigned, Value const & ), bool required, Keys... args ) ;
       
       /** Method to enroll a method subscription in the bus.
        * @param obj The object to use for calling the subscription.
@@ -228,7 +231,7 @@ namespace karma
        * @param args The arguments that make up the name of the signal to send data over.
        */
       template<typename ... Keys, class Object, class Value>
-      void enroll( Object* obj, void (Object::*setter)( Value ), Keys... args ) ;
+      void enroll( Object* obj, void (Object::*setter)( Value ), bool required, Keys... args ) ;
       
       /** Method to enroll a method subscription in the bus.
        * @param obj The object to use for calling the subscription.
@@ -236,7 +239,7 @@ namespace karma
        * @param args The arguments that make up the name of the signal to send data over.
        */
       template<typename ... Keys, class Object, class Value>
-      void enroll( Object* obj, void (Object::*setter)( Value const & ), Keys... args ) ;
+      void enroll( Object* obj, void (Object::*setter)( Value const & ), bool required, Keys... args ) ;
       
       /** Method to enroll an indexed method subscription in the bus.
        * @param obj The object to use for calling the subscription.
@@ -244,7 +247,7 @@ namespace karma
        * @param args The arguments that make up the name of the signal to send data over.
        */
       template<typename ... Keys, class Object, class Value>
-      void enroll( Object* obj, void (Object::*setter)( unsigned, Value ), Keys... args ) ;
+      void enroll( Object* obj, void (Object::*setter)( unsigned, Value ), bool required, Keys... args ) ;
       
       /** Method to enroll an indexed method subscription in the bus.
        * @param obj The object to use for calling the subscription.
@@ -252,7 +255,7 @@ namespace karma
        * @param args The arguments that make up the name of the signal to send data over.
        */
       template<typename ... Keys, class Object, class Value>
-      void enroll( Object* obj, void (Object::*setter)( unsigned, Value const & ), Keys... args ) ;
+      void enroll( Object* obj, void (Object::*setter)( unsigned, Value const & ), bool required, Keys... args ) ;
       
       /** Method to set a publisher in the bus.
        * @param getter The function pointer to use for publishing data via copy.
@@ -420,7 +423,7 @@ namespace karma
        * @param type_id The hash representing the type of data being transferred.
        * @param type_name The name of the type being transferred.
        */
-      void enrollBase( const Key& key, Subscriber* subscriber, unsigned type_id ) ;
+      void enrollBase( const Key& key, Subscriber* subscriber, bool required, unsigned type_id ) ;
       
       /** Method to manually emit data over the data bus.
        * @param key The key of signal to use to publish over.
@@ -685,7 +688,7 @@ namespace karma
     const TypeInfo ctti = typeinfo<Value>() ;
     Key key ;
     
-    key = ::karma::concatenate( "", args... ) ;
+    key = ::iris::concatenate( "", args... ) ;
     this->emitBase( key, static_cast<const void*>( &value ), ctti.ctti_hash, idx ) ;
   }
   
@@ -695,12 +698,12 @@ namespace karma
     const TypeInfo ctti = typeinfo<Value>() ;
     Key key ;
     
-    key = ::karma::concatenate( "", args... ) ;
+    key = ::iris::concatenate( "", args... ) ;
     this->emitBase( key, static_cast<const void*>( &value ), ctti.ctti_hash, 0 ) ;
   }
   
   template<typename ... Keys, class Value>
-  void Bus::enroll( void (*setter)( Value ), Keys... args )
+  void Bus::enroll( void (*setter)( Value ), bool required, Keys... args )
   {
     typedef Bus::FunctionSubscriber<Value, false, false> Callback ;
     const TypeInfo ctti = typeinfo<Value>() ;
@@ -708,13 +711,13 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( setter ) ) ;
-    key      = ::karma::concatenate( "", args... )                                     ;
+    key      = ::iris::concatenate( "", args... )                                     ;
     
-    this->enrollBase( key, dynamic_cast<Bus::Subscriber*>( callback ), ctti.ctti_hash ) ;
+    this->enrollBase( key, dynamic_cast<Bus::Subscriber*>( callback ), required, ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Value>
-  void Bus::enroll( void (*setter)( const Value& ), Keys... args )
+  void Bus::enroll( void (*setter)( const Value& ), bool required, Keys... args )
   {
     typedef Bus::FunctionSubscriber<Value, true, false> Callback ;
     const TypeInfo ctti = typeinfo<Value>() ;
@@ -722,13 +725,13 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( setter ) ) ;
-    key      = ::karma::concatenate( "", args... )                                     ;
+    key      = ::iris::concatenate( "", args... )                                     ;
     
-    this->enrollBase( key, callback, ctti.ctti_hash ) ;
+    this->enrollBase( key, callback, required, ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Value>
-  void Bus::enroll( void (*setter)( unsigned, Value ), Keys... args )
+  void Bus::enroll( void (*setter)( unsigned, Value ), bool required, Keys... args )
   {
     typedef Bus::FunctionSubscriber<Value, false, true> Callback ;
     const TypeInfo ctti = typeinfo<Value>() ;
@@ -736,13 +739,13 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( setter ) ) ;
-    key      = ::karma::concatenate( "", args... )                                     ;
+    key      = ::iris::concatenate( "", args... )                                     ;
     
-    this->enrollBase( key, callback, ctti.ctti_hash ) ;
+    this->enrollBase( key, callback, required, ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Value>
-  void Bus::enroll( void (*setter)( unsigned, Value const & ), Keys... args )
+  void Bus::enroll( void (*setter)( unsigned, Value const & ), bool required, Keys... args )
   {
     typedef Bus::FunctionSubscriber<Value, true, true> Callback ;
     const TypeInfo ctti = typeinfo<Value>() ;
@@ -750,13 +753,13 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( setter ) ) ;
-    key      = ::karma::concatenate( "", args... )                                     ;
+    key      = ::iris::concatenate( "", args... )                                      ;
     
-    this->enrollBase( key, callback, ctti.ctti_hash) ;
+    this->enrollBase( key, callback, required, ctti.ctti_hash) ;
   }
   
   template<typename ... Keys, class Object, class Value>
-  void Bus::enroll( Object* obj, void (Object::*setter)( Value ), Keys... args )
+  void Bus::enroll( Object* obj, void (Object::*setter)( Value ), bool required, Keys... args )
   {
     typedef Bus::MethodSubscriber<Object, Value, false, false> Callback ;  
     const TypeInfo ctti = typeinfo<Value>() ;
@@ -764,13 +767,13 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( obj, reinterpret_cast<typename Callback::Callback>( setter ) ) ;
-    key      = ::karma::concatenate( "", args... )                                          ;
+    key      = ::iris::concatenate( "", args... )                                          ;
     
-    this->enrollBase( key, callback, ctti.ctti_hash ) ;
+    this->enrollBase( key, callback, required, ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Object, class Value>
-  void Bus::enroll( Object* obj, void (Object::*setter)( Value const & ), Keys... args )
+  void Bus::enroll( Object* obj, void (Object::*setter)( Value const & ), bool required, Keys... args )
   {
     typedef Bus::MethodSubscriber<Object, Value, true, false> Callback ;
     const TypeInfo ctti = typeinfo<Value>() ;
@@ -778,13 +781,13 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( obj, reinterpret_cast<typename Callback::Callback>( setter ) ) ;
-    key      = ::karma::concatenate( "", args... )                                          ;
+    key      = ::iris::concatenate( "", args... )                                          ;
     
-    this->enrollBase( key, callback, ctti.ctti_hash ) ;
+    this->enrollBase( key, callback, required, ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Object, class Value>
-  void Bus::enroll( Object* obj, void (Object::*setter)( unsigned, Value ), Keys... args )
+  void Bus::enroll( Object* obj, void (Object::*setter)( unsigned, Value ), bool required, Keys... args )
   {
     typedef Bus::MethodSubscriber<Object, Value, false, true> Callback ;
     const TypeInfo ctti = typeinfo<Value>() ;
@@ -792,13 +795,13 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( obj, reinterpret_cast<typename Callback::Callback>( setter ) ) ;
-    key      = ::karma::concatenate( "", args... )                                          ;
+    key      = ::iris::concatenate( "", args... )                                          ;
     
-    this->enrollBase( key, callback, ctti.ctti_hash ) ;
+    this->enrollBase( key, callback, required, ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Object, class Value>
-  void Bus::enroll( Object* obj, void (Object::*setter)( unsigned, Value const & ), Keys... args )
+  void Bus::enroll( Object* obj, void (Object::*setter)( unsigned, Value const & ), bool required, Keys... args )
   {
     typedef Bus::MethodSubscriber<Object, Value, true, true> Callback ;
     const TypeInfo ctti = typeinfo<Value>() ;
@@ -806,9 +809,9 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( obj, reinterpret_cast<typename Callback::Callback>( setter ) ) ;
-    key      = ::karma::concatenate( "", args... )                                          ;
+    key      = ::iris::concatenate( "", args... )                                          ;
     
-    this->enrollBase( key, callback, ctti.ctti_hash ) ;
+    this->enrollBase( key, callback, required, ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Value>
@@ -820,7 +823,7 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( getter ) ) ;
-    key      = ::karma::concatenate( "", args... )                                     ;
+    key      = ::iris::concatenate( "", args... )                                     ;
     
     this->enrollBase( key, callback, ctti.ctti_hash ) ;
   }
@@ -834,7 +837,7 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( getter ) ) ;
-    key      = ::karma::concatenate( "", args... )                                     ;
+    key      = ::iris::concatenate( "", args... )                                     ;
     
     this->enrollBase( key, callback, ctti.ctti_hash ) ;
   }
@@ -848,7 +851,7 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( getter ) ) ;
-    key      = ::karma::concatenate( "", args... )                                     ;
+    key      = ::iris::concatenate( "", args... )                                     ;
     
     this->enrollBase( key, callback, ctti.ctti_hash ) ;
   }
@@ -862,7 +865,7 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( getter ) ) ;
-    key      = ::karma::concatenate( "", args... )                                     ;
+    key      = ::iris::concatenate( "", args... )                                     ;
     
     this->enrollBase( key, callback, ctti.ctti_hash ) ;
   }
@@ -876,7 +879,7 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( obj, reinterpret_cast<typename Callback::Callback>( getter ) ) ;
-    key      = ::karma::concatenate( "", args... )                                          ;
+    key      = ::iris::concatenate( "", args... )                                          ;
     
     this->enrollBase( key, callback, ctti.ctti_hash ) ;
   }
@@ -890,7 +893,7 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( obj, reinterpret_cast<typename Callback::Callback>( getter ) ) ;
-    key      = ::karma::concatenate( "", args... )                                          ;
+    key      = ::iris::concatenate( "", args... )                                          ;
     
     this->enrollBase( key, callback, ctti.ctti_hash ) ;
   }
@@ -904,7 +907,7 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( obj, reinterpret_cast<typename Callback::Callback>( getter ) ) ;
-    key      = ::karma::concatenate( "", args... )                                          ;
+    key      = ::iris::concatenate( "", args... )                                          ;
     
     this->enrollBase( key, callback, ctti.ctti_hash ) ;
   }
@@ -918,7 +921,7 @@ namespace karma
     Key       key      ;
     
     callback = new Callback( obj, reinterpret_cast<typename Callback::Callback>( getter ) ) ;
-    key      = ::karma::concatenate( "", args... )                                          ;
+    key      = ::iris::concatenate( "", args... )                                          ;
     
     this->enrollBase( key, callback, ctti.ctti_hash ) ;
   }

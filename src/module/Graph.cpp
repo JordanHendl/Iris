@@ -26,14 +26,14 @@
 #include <map>
 #include <thread>
 #include <iostream>
-namespace karma
+namespace iris
 {
   struct GraphData
   {
     typedef std::map<std::string, Module*> ModuleGraph ;
-    using Config = karma::config::Configuration ;  
+    using Config = iris::config::Configuration ;  
 
-    karma::Bus  bus               ;
+    iris::Bus  bus               ;
     Config      config            ;
     Loader*     loader            ;
     ModuleGraph graph             ;
@@ -46,7 +46,7 @@ namespace karma
     void remove( const char* name ) ;
     void setName( const char* name ) ;
     void loadModules() ;
-    void configureModule( karma::config::json::Token& token, std::string& name ) ;
+    void configureModule( iris::config::json::Token& token, std::string& name ) ;
   };
 
   void GraphData::setName( const char* name )
@@ -54,7 +54,7 @@ namespace karma
     this->graph_name = name ;
   }
 
-  void GraphData::configureModule( karma::config::json::Token& token, std::string& name )
+  void GraphData::configureModule( iris::config::json::Token& token, std::string& name )
   {
     this->bus.setChannel( this->id ) ;
     
@@ -74,7 +74,7 @@ namespace karma
 
   void GraphData::loadModules()
   {
-    using namespace karma::log ;
+    using namespace iris::log ;
 
     auto token = this->config.begin() ;
     std::string name    ;

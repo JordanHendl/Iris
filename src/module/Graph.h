@@ -22,10 +22,10 @@
  * Created on July 10, 2020, 6:04 AM
  */
 
-#ifndef KARMA_GRAPH_H
-#define KARMA_GRAPH_H
+#ifndef IRIS_GRAPH_H
+#define IRIS_GRAPH_H
 
-namespace karma
+namespace iris
 {
   class Module ;
   class Loader ;

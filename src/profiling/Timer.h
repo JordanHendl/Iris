@@ -15,10 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef KARMA_TIMER_H
-#define KARMA_TIMER_H
+#ifndef IRIS_TIMER_H
+#define IRIS_TIMER_H
 
-namespace karma
+namespace iris
 {
   namespace ms
   {

@@ -25,7 +25,7 @@
 #include <mutex>
 #include <atomic>
 
-namespace karma
+namespace iris
 { 
   void operator<<( Key& first, const char* second )
   {
@@ -158,9 +158,10 @@ namespace karma
 
   struct BusData
   {
-    LocalSubscribers sub_map    ;
-    LocalPublishers  pub_map    ;
-    unsigned         identifier ;
+    LocalSubscribers sub_map          ;
+    LocalSubscribers required_sub_map ;
+    LocalPublishers  pub_map          ;
+    unsigned         identifier       ;
     
     BusData() ;
     BusData& operator=( const BusData& bus ) ;
@@ -375,7 +376,7 @@ namespace karma
   
   void Bus::wait()
   {
-    for( auto &signal : data().sub_map )
+    for( auto &signal : data().required_sub_map )
     {
       signal.second.second->second->wait() ;
     }
@@ -405,7 +406,7 @@ namespace karma
     map_lock.unlock() ;
   }
   
-  void Bus::enrollBase( const Key& key, Subscriber* subscriber, unsigned type_id )
+  void Bus::enrollBase( const Key& key, Subscriber* subscriber, bool required, unsigned type_id )
   {
     Signal::SubscriberIterator sub_iter ;
     
@@ -426,6 +427,11 @@ namespace karma
     
     data().sub_map.insert( { std::string( key.str() ), std::make_pair( iter->second, sub_iter ) } ) ;
     
+    if( required )
+    {
+      data().required_sub_map.insert( { std::string( key.str() ), std::make_pair( iter->second, sub_iter ) } ) ;
+    }
+
     map_lock.unlock() ;
   }
   

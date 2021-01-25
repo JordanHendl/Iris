@@ -25,17 +25,17 @@
 #include <algorithm>
 #include <map>
 
-namespace karma
+namespace iris
 {
   static inline bool valid( std::string path ) ;
   
   struct DescriptorData
   { 
     typedef unsigned Version ;
-    typedef ::karma::io::Symbol<unsigned>                 VersionFunc ;
-    typedef ::karma::io::Symbol<karma::Module*, unsigned> MakeFunc    ;
-    typedef ::karma::io::Symbol<const char*>              NameFunc    ;
-    typedef ::karma::io::Symbol<void, karma::Module*>     DestroyFunc ;
+    typedef ::iris::io::Symbol<unsigned>                 VersionFunc ;
+    typedef ::iris::io::Symbol<iris::Module*, unsigned> MakeFunc    ;
+    typedef ::iris::io::Symbol<const char*>              NameFunc    ;
+    typedef ::iris::io::Symbol<void, iris::Module*>     DestroyFunc ;
     
     struct Module
     {
@@ -47,9 +47,9 @@ namespace karma
     
     typedef std::map<Version, Module> ModuleMap ;
     
-    ModuleMap                 modules ;
-    Version                   latest  ;
-    ::karma::io::ObjectLoader loader  ;
+    ModuleMap              modules ;
+    Version                latest  ;
+    iris::io::ObjectLoader loader  ;
     
   };
   
@@ -73,7 +73,7 @@ namespace karma
   {
     for( auto& path : std::filesystem::recursive_directory_iterator( this->module_directory.c_str() ) )
     {
-      if( ::karma::valid( path.path().string() ) )
+      if( iris::valid( path.path().string() ) )
       {
         this->addModule( path.path().string().c_str() ) ;
       }
@@ -82,8 +82,8 @@ namespace karma
   
   void LoaderData::addModule( const char* path )
   {
-    ::karma::io::ObjectLoader        loader   ;
-    ::karma::io::Symbol<const char*> namefunc ;
+    iris::io::ObjectLoader         loader   ;
+    iris::io::Symbol<const char*>  namefunc ;
     std::string                    name     ;
 
     loader.load( path ) ;
@@ -123,7 +123,7 @@ namespace karma
   
   void Descriptor::initalize( const char* module_path )
   {
-    using namespace karma::log ;
+    using namespace iris::log ;
     unsigned version ;
 
     data().loader.load( module_path ) ;

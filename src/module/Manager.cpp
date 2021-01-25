@@ -26,7 +26,7 @@
 #include <vector>
 #include <string>
 
-namespace karma
+namespace iris
 {
   struct ManagerData
   {
@@ -34,7 +34,7 @@ namespace karma
     typedef std::map<Version, Module*>    ModuleMap  ;
     typedef std::map<std::string, Graph*> NodeGraphs ;
     
-    ::karma::config::Configuration config ;
+    iris::config::Configuration config ;
 
     std::string config_path ;
     std::string mod_path    ;
@@ -67,7 +67,7 @@ namespace karma
   {
     if( this->graphs.find( name ) == this->graphs.end() )
     {
-      karma::log::Log::output( "Adding module graph ", name ) ;
+      iris::log::Log::output( "Adding module graph ", name ) ;
       Graph* graph ;
       
       graph = new Graph() ;
@@ -92,7 +92,7 @@ namespace karma
   {
     data().config_path = configuration_path ;
     
-    karma::log::Log::output( "Initializing Module Manager with modules in ", mod_path, " using the following config: ", configuration_path ) ;
+    iris::log::Log::output( "Initializing Module Manager with modules in ", mod_path, " using the following config: ", configuration_path ) ;
 
     data().loader.initialize( mod_path ) ;
     data().findGraphs() ;
@@ -104,7 +104,7 @@ namespace karma
     
     index = 0 ;
     
-    karma::log::Log::output( "Initializing all current active graphs." ) ;
+    iris::log::Log::output( "Initializing all current active graphs." ) ;
 
     for( auto &graph : data().graphs ) 
     {

@@ -46,7 +46,7 @@
   }
 #endif
   
-namespace karma
+namespace iris
 {
   /** Structure to contain the Module object's internal data.
    */
@@ -59,7 +59,7 @@ namespace karma
     unsigned    version    ; ///< The version of module.
     Flag        running    ; ///< Whether or not this module is running.
     Flag        should_run ; ///< Whether or not this module should be running.
-    karma::Bus  bus        ; ///< The bus to communicate data over.
+    iris::Bus  bus        ; ///< The bus to communicate data over.
     unsigned    id         ; ///< The id associated with this module.
 
     /**

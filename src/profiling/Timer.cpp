@@ -21,7 +21,7 @@
 #include <sstream>
 #include <iostream>
 
-namespace karma
+namespace iris
 {
   namespace ms
   {

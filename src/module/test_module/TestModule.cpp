@@ -32,7 +32,7 @@
 
 const unsigned VERSION = 1 ;
 
-namespace karma
+namespace iris
 {
   bool floatEquals( float v1, float v2 )
   {
@@ -41,7 +41,7 @@ namespace karma
 
   struct TestModuleData
   {
-    karma::Bus  bus    ;
+    iris::Bus  bus    ;
     float       thing1 ;
     std::string thing2 ;
     unsigned    thing3 ;
@@ -80,18 +80,18 @@ namespace karma
 
   void TestModule::initialize()
   {
-    if( !floatEquals( data().thing1, 0.25 ) ){  std::cout << "!! Float value failed to set.  !!" << std::endl ; exit( 1 ) ; }
-    if( data().thing2 != "thing2"           ){  std::cout << "!! String value failed to set. !!" << std::endl ; exit( 1 ) ; }
-    if( data().thing3 != 2503               ){  std::cout << "!! Integer value failed to set.!!" << std::endl ; exit( 1 ) ; }
+    if( !floatEquals( data().thing1, 0.25 ) ){  std::cout << "!! Float value failed to set.  !!" << " : " << data().thing1 << std::endl ; exit( 1 ) ; }
+    if( data().thing2 != "thing2"           ){  std::cout << "!! String value failed to set. !!" << " : " << data().thing2 << std::endl ; exit( 1 ) ; }
+    if( data().thing3 != 2503               ){  std::cout << "!! Integer value failed to set.!!" << " : " << data().thing3 << std::endl ; exit( 1 ) ; }
   }
 
   void TestModule::subscribe( unsigned id )
   {
     data().bus.setChannel( id ) ;
     
-    data().bus.enroll( this->module_data, &TestModuleData::setThing1, this->name(), "::thing1" ) ;
-    data().bus.enroll( this->module_data, &TestModuleData::setThing2, this->name(), "::thing2" ) ;
-    data().bus.enroll( this->module_data, &TestModuleData::setThing3, this->name(), "::thing3" ) ;
+    data().bus.enroll( this->module_data, &TestModuleData::setThing1, true, this->name(), "::thing1" ) ;
+    data().bus.enroll( this->module_data, &TestModuleData::setThing2, true, this->name(), "::thing2" ) ;
+    data().bus.enroll( this->module_data, &TestModuleData::setThing3, true, this->name(), "::thing3" ) ;
   }
 
   void TestModule::shutdown()
@@ -134,19 +134,19 @@ exported_function unsigned version()
 /** Exported function to make one instance of this module.
  * @return A single instance of this module.
  */
-exported_function ::karma::Module* make()
+exported_function ::iris::Module* make()
 {
-  return new ::karma::TestModule() ;
+  return new ::iris::TestModule() ;
 }
 
 /** Exported function to destroy an instance of this module.
  * @param module A Pointer to a Module object that is of this type.
  */
-exported_function void destroy( ::karma::Module* module )
+exported_function void destroy( iris::Module* module )
 {
-  ::karma::TestModule* mod ;
+  iris::TestModule* mod ;
   
-  mod = dynamic_cast<::karma::TestModule*>( module ) ;
+  mod = dynamic_cast<::iris::TestModule*>( module ) ;
   delete mod ;
 }
 

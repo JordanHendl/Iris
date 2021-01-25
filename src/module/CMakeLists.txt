@@ -16,50 +16,50 @@
 # 
 
 FIND_PACKAGE( Threads )
+ADD_SUBDIRECTORY( test_module )
 
-SET( KARMA_MODULE_SOURCES 
+SET( IRIS_MODULE_SOURCES 
      Module.cpp
      Loader.cpp
      Graph.cpp
      Manager.cpp
    )
      
-SET( KARMA_MODULE_HEADERS
+SET( IRIS_MODULE_HEADERS
      Module.h
      Loader.h
      Manager.h
      Graph.h
    )
 
-SET( KARMA_MODULE_INCLUDE_DIRS
+SET( IRIS_MODULE_INCLUDE_DIRS
     )
 
-SET( KARMA_MODULE_LIBRARIES
-     karma_io
-     karma_data_bus
-     karma_configuration
-     karma_log
+SET( IRIS_MODULE_LIBRARIES
+     iris_io
+     iris_bus
+     iris_configuration
+     iris_log
      ${CMAKE_THREAD_LIBS_INIT}
    )
 
 IF( UNIX AND NOT APPLE )
-  LIST( APPEND KARMA_MODULE_LIBRARIES stdc++fs )
+  LIST( APPEND IRIS_MODULE_LIBRARIES stdc++fs )
 ENDIF()
 
-ADD_LIBRARY               ( karma_module SHARED   ${KARMA_MODULE_SOURCES} ${KARMA_MODULE_HEADERS} )
-TARGET_INCLUDE_DIRECTORIES( karma_module PRIVATE  ${KARMA_MODULE_INCLUDE_DIRS}                    )
-TARGET_LINK_LIBRARIES     ( karma_module PUBLIC   ${KARMA_MODULE_LIBRARIES}                       )
+ADD_LIBRARY               ( iris_module SHARED   ${IRIS_MODULE_SOURCES} ${IRIS_MODULE_HEADERS} )
+TARGET_INCLUDE_DIRECTORIES( iris_module PRIVATE  ${IRIS_MODULE_INCLUDE_DIRS}                   )
+TARGET_LINK_LIBRARIES     ( iris_module PUBLIC   ${IRIS_MODULE_LIBRARIES}                      )
 
-ADD_SUBDIRECTORY( test_module )
 
 # If running tests, make and run them.
 IF( RUN_TESTS )
-  BUILD_TEST( TARGET karma_module )
+  BUILD_TEST( TARGET iris_module )
 ENDIF()
 
-INSTALL( FILES ${KARMA_MODULE_HEADERS} DESTINATION ${INCLUDE_DIR}/module )
+INSTALL( FILES ${IRIS_MODULE_HEADERS} DESTINATION ${INCLUDE_DIR}/module )
 
-INSTALL( TARGETS karma_module EXPORT karma_lib
+INSTALL( TARGETS iris_module EXPORT Iris
                  LIBRARY  DESTINATION ${EXPORT_LIB_DIR}/module 
                  RUNTIME  DESTINATION ${EXPORT_LIB_DIR}/module
                  ARCHIVE  DESTINATION ${EXPORT_LIB_DIR}/module

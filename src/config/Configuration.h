@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef KARMA_JSON_CONFIGURATION_H
-#define KARMA_JSON_CONFIGURATION_H
+#ifndef IRIS_JSON_CONFIGURATION_H
+#define IRIS_JSON_CONFIGURATION_H
 
-namespace karma
+namespace iris
 {
   namespace config
   {

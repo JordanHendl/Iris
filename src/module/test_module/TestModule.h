@@ -26,9 +26,9 @@
 #define TESTMODULE_H
 #include "../Module.h"
 
-namespace karma
+namespace iris
 {
-  class TestModule : public karma::Module
+  class TestModule : public iris::Module
   {
     public:
 

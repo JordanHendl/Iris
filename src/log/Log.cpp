@@ -27,7 +27,7 @@
 #include <iomanip>
 #include <cstring>
 
-namespace karma
+namespace iris
 {
   namespace log
   {
@@ -257,7 +257,7 @@ namespace karma
       time       = std::chrono::system_clock::to_time_t( now ) ;
       local_time = *localtime( &time )                         ;
       
-      file_name << "/karma_debug_log_"  ;
+      file_name << "/iris_debug_log_"  ;
       file_name << local_time.tm_mon    ;
       file_name << "_"                  ;
       file_name << local_time.tm_mday   ;

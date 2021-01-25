@@ -62,7 +62,7 @@
 #endif
 
 
-namespace karma
+namespace iris
 {
   namespace io
   {

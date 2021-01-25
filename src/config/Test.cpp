@@ -18,7 +18,7 @@
 #include "Configuration.h"
 #include "Parser.h"
 #include <iostream>
-#include <KT/Manager.h>
+#include <Athena/Manager.h>
 
 /** Test JSON file.
  */
@@ -48,9 +48,9 @@ static const char* json_data =
 "  }\n"
 "}\n\0\0" ;
 
-static karma::config::json::Parser parser     ;
-static karma::test::Manager        manager    ;
-static karma::config::json::Token  base_token ;
+static athena::Manager            manager    ;
+static iris::config::json::Parser parser     ;
+static iris::config::json::Token  base_token ;
 
 bool testBadLookup()
 {
@@ -190,6 +190,6 @@ int main()
   manager.add( "Bad Lookup Test"   , &testBadLookup     ) ;
   
 
-  std::cout << "\nTesting Karma Configuration & JSON Parsing." << std::endl ;
-  return manager.test( karma::test::Output::Verbose ) ;
+  std::cout << "\nTesting Iris Configuration & JSON Parsing." << std::endl ;
+  return manager.test( athena::Output::Verbose ) ;
 }

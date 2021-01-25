@@ -21,7 +21,7 @@
 #include <thread>
 #include <assert.h>
 #include <float.h>
-#include <KT/Manager.h>
+#include <Athena/Manager.h>
 #include <cmath>
 #include <iostream>
 
@@ -29,8 +29,8 @@ static const float          TEST_VALUE   = 0.052005f       ;
 static const float          TEST_VALUE_2 = 0.254565f       ;
 static const float          TEST_VALUE_3 = 0.612335f       ;
 static const unsigned       TEST_ARR[] = { 5, 4, 3, 2, 1 } ;
-static ::karma::Bus         bus                            ;
-static karma::test::Manager manager                        ;
+static iris::Bus            bus                            ;
+static athena::Manager      manager                        ;
 static float                v                              ;
 static float                f                              ;
 static unsigned             index[] = { 0, 0, 0, 0, 0 }    ;
@@ -68,8 +68,8 @@ struct TestObject
   
   bool checkMethodSetter()
   {
-    karma::Bus bus ;
-    bus.enroll ( this, &TestObject::setter, "obj_test"   ) ; // Method Setter.
+    iris::Bus bus ;
+    bus.enroll ( this, &TestObject::setter, true, "obj_test"   ) ; // Method Setter.
     bus.publish( this, &TestObject::getter, "obj_test"   ) ; // Method Getter.
     bus.emit() ;
     
@@ -83,8 +83,8 @@ struct TestObject
   
   bool checkManualSetter()
   {
-    karma::Bus bus ;
-    bus.enroll ( this, &TestObject::manual_setter, "manual_set" ) ; // Manual Setter.
+    iris::Bus bus ;
+    bus.enroll ( this, &TestObject::manual_setter, true, "manual_set" ) ; // Manual Setter.
     bus.emit( TEST_VALUE_3, "manual_set" ) ; // Manually send data.
 
     if( equals( this->manual_input, TEST_VALUE_3 ) )
@@ -116,8 +116,8 @@ unsigned indexedGetter( unsigned idx )
 
 bool testIndexedSetter()
 {
-  karma::Bus bus ;
-  bus.enroll ( &indexedSetter, "indexed" ) ; // Indexed Setter.
+  iris::Bus bus ;
+  bus.enroll ( &indexedSetter, true, "indexed" ) ; // Indexed Setter.
   bus.publish( &indexedGetter, "indexed" ) ; // Indexed Getter.
   
   for( unsigned i = 0; i < 5; i++ )
@@ -130,7 +130,7 @@ bool testIndexedSetter()
   }
   return true ;
 }
-static karma::Bus speed_bus ;
+static iris::Bus speed_bus ;
 
 template<unsigned i>
 void setSpeed( unsigned val )
@@ -153,8 +153,8 @@ bool testEmitSpeed()
 
 bool testFunctionSetter()
 {
-  karma::Bus bus ;
-  bus.enroll ( &setter, "test_1" ) ; // Function Setter.
+  iris::Bus bus ;
+  bus.enroll ( &setter, true, "test_1" ) ; // Function Setter.
   bus.publish( &getter, "test_1" ) ; // Function Getter.
   
   bus.emit() ;
@@ -173,8 +173,8 @@ int main()
   
   for( unsigned i = 0; i < 100; i++ )
   {
-    speed_bus.enroll ( &setSpeed<0>, "speed" ) ;
-    speed_bus.publish( &getSpeed<0>, "speed" ) ;
+    speed_bus.enroll ( &setSpeed<0>, true,"speed" ) ;
+    speed_bus.publish( &getSpeed<0>,"speed" ) ;
   }
   manager.add( "Function Test"      , &testFunctionSetter                  ) ;
   manager.add( "Method Test"        , &obj, &TestObject::checkMethodSetter ) ;
@@ -182,7 +182,7 @@ int main()
   manager.add( "Indexed Test"       , &testIndexedSetter                   ) ;
   manager.add( "100 Emit Speed Test", &testEmitSpeed                       ) ;
   
-  std::cout << "\nTesting Karma Data Bus" << std::endl ;
-  return manager.test( karma::test::Output::Verbose ) ;
+  std::cout << "\nTesting Iris Data Bus" << std::endl ;
+  return manager.test( athena::Output::Verbose ) ;
 }
 

@@ -22,43 +22,43 @@
 # Created on January 2nd, 2020, 11:30 PM
 # 
 
-SET( KARMA_CONFIG_HEADERS
+SET( IRIS_CONFIG_HEADERS
       Configuration.h
       Parser.h
    )
 
-SET( KARMA_CONFIG_SOURCES
+SET( IRIS_CONFIG_SOURCES
       Configuration.cpp
       Parser.cpp
    )
 
-SET( KARMA_CONFIG_INCLUDES 
+SET( IRIS_CONFIG_INCLUDES 
      ${DATA_BUS_DIR}
      ${CONFIGURATION_DIR}
    )
 
-SET( KARMA_CONFIG_LIBRARIES 
-     karma_data_bus
-     karma_log
+SET( IRIS_CONFIG_LIBRARIES 
+     iris_bus
+     iris_log
    )
 
-SET( KARMA_CONFIG_DEPS
-     karma_data_bus
-     karma_log
+SET( IRIS_CONFIG_DEPS
+     iris_bus
+     iris_log
    )
 
-ADD_LIBRARY               ( karma_configuration SHARED  ${KARMA_CONFIG_SOURCES} ${KARMA_CONFIG_HEADERS} )
-TARGET_INCLUDE_DIRECTORIES( karma_configuration PRIVATE ${KARMA_CONFIG_INCLUDES}                        ) 
-TARGET_LINK_LIBRARIES     ( karma_configuration PUBLIC  ${KARMA_CONFIG_LIBRARIES}                       ) 
-ADD_DEPENDENCIES          ( karma_configuration         ${KARMA_CONFIG_DEPS}                            )
+ADD_LIBRARY               ( iris_configuration SHARED  ${IRIS_CONFIG_SOURCES} ${IRIS_CONFIG_HEADERS} )
+TARGET_INCLUDE_DIRECTORIES( iris_configuration PRIVATE ${IRIS_CONFIG_INCLUDES}                        ) 
+TARGET_LINK_LIBRARIES     ( iris_configuration PUBLIC  ${IRIS_CONFIG_LIBRARIES}                       ) 
+ADD_DEPENDENCIES          ( iris_configuration         ${IRIS_CONFIG_DEPS}                            )
 
 # If running tests, make and run them.
 IF( RUN_TESTS )
-  BUILD_TEST( TARGET karma_configuration )
+  BUILD_TEST( TARGET iris_configuration )
 ENDIF()
 
-INSTALL( FILES ${KARMA_CONFIG_HEADERS} DESTINATION ${INCLUDE_DIR}/config )
-INSTALL( TARGETS karma_configuration EXPORT karma_lib 
+INSTALL( FILES ${IRIS_CONFIG_HEADERS} DESTINATION ${INCLUDE_DIR}/config )
+INSTALL( TARGETS iris_configuration EXPORT Iris 
                  LIBRARY  DESTINATION ${EXPORT_LIB_DIR}/config
                  ARCHIVE  DESTINATION ${EXPORT_LIB_DIR}/config
                  RUNTIME  DESTINATION ${EXPORT_LIB_DIR}/config

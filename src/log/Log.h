@@ -21,10 +21,10 @@
  * Created on August 9, 2020, 5:06 AM
  */
 
-#ifndef LOG_H
-#define LOG_H
+#ifndef IRIS_LOG_H
+#define IRIS_LOG_H
 
-namespace karma
+namespace iris
 {
   namespace log
   {
@@ -233,8 +233,8 @@ namespace karma
       Log::Level level ;
       String     str   ;
       
-      str   = ::karma::log::concatenate( first, args... ) ;
-      level = Log::Level::None                            ;
+      str   = iris::log::concatenate( first, args... ) ;
+      level = Log::Level::None                         ;
 
       outputBase( str.str(), level ) ;
     }
@@ -256,7 +256,7 @@ namespace karma
     {
       String str ;
       
-      str = ::karma::log::concatenate( first, args... ) ;
+      str = ::iris::log::concatenate( first, args... ) ;
 
       outputBase( str.str(), level ) ;
     }

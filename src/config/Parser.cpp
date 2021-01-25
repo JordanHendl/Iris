@@ -25,13 +25,13 @@
 #include <variant>
 #include <map>
 
-namespace karma
+namespace iris
 {
   namespace config
   {
     namespace json
     {
-      using Log = ::karma::log::Log ;
+      using Log = iris::log::Log ;
 
       struct JSONNode
       {

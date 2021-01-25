@@ -1,10 +1,10 @@
 #include "Log.h"
-#include <KT/Manager.h>
+#include <Athena/Manager.h>
 #include <iostream>
 
-using namespace karma::log ;
+using namespace iris::log ;
 
-static karma::test::Manager manager ;
+static athena::Manager manager ;
 
 bool testLog()
 {
@@ -34,6 +34,6 @@ int main()
   manager.add( "Log No Level Test", &testNoWarning ) ;
   
   Log::flush() ;
-  return manager.test( karma::test::Output::Verbose ) ;
+  return manager.test( athena::Output::Verbose ) ;
 }
 

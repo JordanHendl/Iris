@@ -17,16 +17,16 @@
 
 #include "Manager.h"
 #include "Graph.h"
-#include <KT/Manager.h>
+#include <Athena/Manager.h>
 #include <iostream>
 #include <ostream>
 #include <fstream>
 
-static karma::test::Manager manager      ;
-static karma::Manager       mod_manager  ;
-static std::string          module_path  ;
-static std::string          config_path  ;
-static std::ofstream        stream       ;
+static athena::Manager manager      ;
+static iris::Manager   mod_manager  ;
+static std::string     module_path  ;
+static std::string     config_path  ;
+static std::ofstream   stream       ;
 
 /** Test JSON file.
  */
@@ -54,7 +54,8 @@ bool testModManager()
   mod_manager.initialize( module_path.c_str(), config_path.c_str() ) ;
   mod_manager.start() ;
   return true ;
-}
+} 
+
 int main( int argc, char* argv[] )
 {
   std::string path = argv[ 0 ] ;
@@ -65,7 +66,7 @@ int main( int argc, char* argv[] )
   #if( WIN32 )
     module_path = path + std::string( "../../test_module/") ; 
   #else 
-    module_path = path + std::string( "test_module/" ) ;
+    module_path = path + std::string( "/test_module/" ) ;
   #endif
 
   config_path = path + std::string( "test_config.json" ) ;
@@ -76,9 +77,9 @@ int main( int argc, char* argv[] )
     stream.close() ;
   }
   
-  std::cout << "\n Performing Karma Module Library Test. " << std::endl ;
+  std::cout << "\n Performing Iris Module Library Test. " << std::endl ;
   
   manager.add( "Module Manager & Graph Test", &testModManager ) ;
 
-  return manager.test( karma::test::Output::Verbose ) ; 
+  return manager.test( athena::Output::Verbose ) ; 
 }

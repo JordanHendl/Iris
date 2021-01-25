@@ -15,10 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef KARMA_CONFIG_PARSER_H
-#define KARMA_CONFIG_PARSER_H
+#ifndef IRIS_CONFIG_PARSER_H
+#define IRIS_CONFIG_PARSER_H
 
-namespace karma
+namespace iris
 {
   namespace config
   {

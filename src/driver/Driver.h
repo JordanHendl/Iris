@@ -14,35 +14,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 /* 
- * File:   Manager.h
+ * File:   IrisDriver.h
  * Author: Jordan Hendl
  *
- * Created on July 10, 2020, 6:04 AM
+ * Created on January 3, 2021, 5:37 PM
  */
 
-#ifndef IRIS_MANAGER_H
-#define IRIS_MANAGER_H
+#ifndef IRIS_DRIVER_H
+#define IRIS_DRIVER_H
 
-namespace iris
+/** Object for running chauffeur application.
+ */
+class IrisDriver
 {
-  class Graph ;
-  class Manager
-  {
-    public:
-      Manager() ;
-      ~Manager() ;
-      void initialize( const char* mod_path, const char* configuration_path ) ;
-      const Graph& graph( const char* graph_name ) ;
-      void start() ;
-      void stop() ;
-      void shutdown() ;
-    private:
-      struct ManagerData* man_data ;
-      ManagerData& data() ;
-      const ManagerData& data() const ;
-  };
-}
+  public:
+    
+    /** Default constructor.
+     */
+    IrisDriver() ;
+    
+    /** Deconstructor.
+     */
+    ~IrisDriver() ;
+    
+    /** Method to initialize the Chauffuer program with arguments.
+     * @param arguments The string arguments to parse and use for runtime.
+     */
+    void initialize( unsigned argc, const char* arguments[] ) ;
+    
+    /** Method to run the program.
+     * @return The error code to return.
+     */
+    int run() ;
+};
 
-#endif /* MANAGER_H */
+#endif /* CHAUFFEUR_H */
 

@@ -15,42 +15,42 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-SET( KARMA_SOURCES 
-    Karma.cpp
+SET( IRIS_SOURCES 
+    Iris.cpp
    )
       
-SET( KARMA_HEADERS
-     Karma.h
+SET( IRIS_HEADERS
+     Iris.h
    )
 
-SET( KARMA_INCLUDE_DIRS
+SET( IRIS_INCLUDE_DIRS
    )
 
-SET( KARMA_LIBRARIES
-     karma_module
-     karma_io
-     karma_configuration
-     karma_data_bus
-     karma_log
+SET( IRIS_LIBRARIES
+     iris_module
+     iris_io
+     iris_configuration
+     iris_bus
+     iris_log
     )
 
-SET( KARMA_DEPS
-     karma_module
-     karma_io
-     karma_configuration
-     karma_data_bus
-     karma_log
+SET( IRIS_DEPS
+     iris_module
+     iris_io
+     iris_configuration
+     iris_bus
+     iris_log
     )
 
-ADD_LIBRARY               ( karma SHARED  ${KARMA_SOURCES}     ${KARMA_HEADERS} )
-TARGET_LINK_LIBRARIES     ( karma PUBLIC  ${KARMA_LIBRARIES}                    )
-TARGET_INCLUDE_DIRECTORIES( karma PRIVATE ${KARMA_INCLUDE_DIRS}                 )
-ADD_DEPENDENCIES          ( karma ${KARMA_DEPS}                                 ) 
+ADD_LIBRARY               ( iris SHARED  ${IRIS_SOURCES}     ${IRIS_HEADERS} )
+TARGET_LINK_LIBRARIES     ( iris PUBLIC  ${IRIS_LIBRARIES}                   )
+TARGET_INCLUDE_DIRECTORIES( iris PRIVATE ${IRIS_INCLUDE_DIRS}                )
+ADD_DEPENDENCIES          ( iris ${IRIS_DEPS}                                ) 
 
 set( CMAKE_EXPORT_PACKAGE_REGISTRY ON )
 
-INSTALL( FILES   Karma.h DESTINATION ${INCLUDE_DIR} )
-INSTALL( TARGETS karma EXPORT karma_lib 
+INSTALL( FILES   Iris.h DESTINATION ${INCLUDE_DIR} )
+INSTALL( TARGETS iris EXPORT Iris 
                  LIBRARY  DESTINATION ${EXPORT_LIB_DIR}
                  ARCHIVE  DESTINATION ${EXPORT_LIB_DIR}
                  RUNTIME  DESTINATION ${EXPORT_LIB_DIR}

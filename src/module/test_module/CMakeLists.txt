@@ -14,27 +14,27 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
-set( KARMA_TEST_MODULE_SOURCES 
+set( IRIS_TEST_MODULE_SOURCES 
      TestModule.cpp
    )
      
-set( KARMA_TEST_MODULE_HEADERS
+set( IRIS_TEST_MODULE_HEADERS
      TestModule.h
    )
 
-set( KARMA_TEST_MODULE_INCLUDE_DIRS
+set( IRIS_TEST_MODULE_INCLUDE_DIRS
     )
 
-set( KARMA_TEST_MODULE_LIBRARIES
-     karma_module
-     karma_data_bus
-     karma_log
+set( IRIS_TEST_MODULE_LIBRARIES
+     iris_module
+     iris_bus
+     iris_log
    )
 
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test_module )
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test_module )
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test_module )
 
-ADD_LIBRARY               ( karma_test_module SHARED   ${KARMA_TEST_MODULE_SOURCES} ${KARMA_TEST_MODULE_HEADERS} )
-TARGET_INCLUDE_DIRECTORIES( karma_test_module PRIVATE  ${KARMA_TEST_MODULE_INCLUDE_DIRS}                         )
-TARGET_LINK_LIBRARIES     ( karma_test_module PUBLIC   ${KARMA_TEST_MODULE_LIBRARIES}                            )
+ADD_LIBRARY               ( iris_test_module SHARED   ${IRIS_TEST_MODULE_SOURCES} ${IRIS_TEST_MODULE_HEADERS} )
+TARGET_INCLUDE_DIRECTORIES( iris_test_module PRIVATE  ${IRIS_TEST_MODULE_INCLUDE_DIRS}                        )
+TARGET_LINK_LIBRARIES     ( iris_test_module PUBLIC   ${IRIS_TEST_MODULE_LIBRARIES}                           )

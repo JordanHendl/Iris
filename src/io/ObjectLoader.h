@@ -15,10 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef KARMA_IO_OBJECT_LOADER_H
-#define KARMA_IO_OBJECT_LOADER_H
+#ifndef IRIS_IO_OBJECT_LOADER_H
+#define IRIS_IO_OBJECT_LOADER_H
 
-namespace karma
+namespace iris
 {
   namespace io
   {

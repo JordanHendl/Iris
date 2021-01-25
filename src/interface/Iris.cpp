@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Karma.h"
+#include "Iris.h"
 #include <log/Log.h>
 #include <module/Manager.h>
 #include <config/Configuration.h>
@@ -26,21 +26,21 @@
 #include <filesystem>
 #include <stdlib.h>
 
-struct KarmaData
+struct IrisData
 {
-  ::karma::Bus                   bus                ; ///< The bus to use for data transfer.
-  ::karma::Manager               mod_manager        ; ///< The Graph module manager.
-  ::karma::config::Configuration config             ; ///< The Configuration to initialize the library with.
-  std::string                    module_path        ; ///< The path to the modules on the filesystem.
-  std::string                    module_config_path ; ///< The path to the graph config on the filesystem.
-  bool                           running            ; ///< Whether or not karma is running.
+  iris::Bus                   bus                ; ///< The bus to use for data transfer.
+  iris::Manager               mod_manager        ; ///< The Graph module manager.
+  iris::config::Configuration config             ; ///< The Configuration to initialize the library with.
+  std::string                 module_path        ; ///< The path to the modules on the filesystem.
+  std::string                 module_config_path ; ///< The path to the graph config on the filesystem.
+  bool                        running            ; ///< Whether or not iris is running.
   
   /** Default constructor.
    */
-  KarmaData() ;
+  IrisData() ;
   
-  /** Method to act as a pathway for the graph to signal karma to shutdown.
-   * @param exit Whether or not karma should exit.
+  /** Method to act as a pathway for the graph to signal iris to shutdown.
+   * @param exit Whether or not iris should exit.
    */
   void setExit( bool exit ) ;
 
@@ -54,13 +54,13 @@ struct KarmaData
    */
   void setModulePath( const char* path ) ; 
   
-  /** Method to set the output directory of karma logs.
-   * @param output The output directory of karma logs.
+  /** Method to set the output directory of iris logs.
+   * @param output The output directory of iris logs.
    */
   void setDebugOutput( const char* output ) ;
   
-  /** Method to set the debug output mode of the karma logger.
-   * @param output The debug output mode of the karma logger.
+  /** Method to set the debug output mode of the iris logger.
+   * @param output The debug output mode of the iris logger.
    */
   void setDebugMode( const char* output ) ;
   
@@ -69,12 +69,12 @@ struct KarmaData
   void parseSetup() ;
 };
 
-KarmaData::KarmaData()
+IrisData::IrisData()
 {
   this->running = false ;
 }
 
-void KarmaData::setExit( bool exit )
+void IrisData::setExit( bool exit )
 {
   if( !exit )
   {
@@ -83,9 +83,9 @@ void KarmaData::setExit( bool exit )
   }
 }
 
-void KarmaData::setDebugMode( const char* mode )
+void IrisData::setDebugMode( const char* mode )
 {
-  using Log = karma::log::Log ;
+  using Log = iris::log::Log ;
   std::string tmp = mode ;
   
   if( tmp == "VERBOSE" )
@@ -101,22 +101,22 @@ void KarmaData::setDebugMode( const char* mode )
     Log::setMode( Log::Mode::Quiet ) ;
   }
 }
-void KarmaData::setDebugOutput( const char* output )
+void IrisData::setDebugOutput( const char* output )
 {
-  karma::log::Log::initialize( output ) ;
+  iris::log::Log::initialize( output ) ;
 }
 
-void KarmaData::setModulePath( const char* path )
+void IrisData::setModulePath( const char* path )
 {
   this->module_path = path ;
 }
 
-void KarmaData::setModuleConfigPath( const char* path )
+void IrisData::setModuleConfigPath( const char* path )
 {
   this->module_config_path = path ;
 }
 
-void KarmaData::parseSetup()
+void IrisData::parseSetup()
 {
   auto token = this->config.begin() ;
   
@@ -130,50 +130,50 @@ void KarmaData::parseSetup()
   if( log_output   ) this->setDebugOutput     ( log_output.string()   ) ;
   if( log_mode     ) this->setDebugMode       ( log_mode.string()     ) ;
 }
-Karma::Karma()
+Iris::Iris()
 {
-  this->karma_data = new KarmaData() ;
+  this->iris_data = new IrisData() ;
 }
 
-Karma::~Karma()
+Iris::~Iris()
 {
-  delete this->karma_data ;
+  delete this->iris_data ;
 }
 
-void Karma::shutdown()
+void Iris::shutdown()
 {
-  karma::log::Log::flush()      ;
+  iris::log::Log::flush()      ;
   data().mod_manager.shutdown() ;
 }
 
-void Karma::initialize( const char* setup_json_path )
+void Iris::initialize( const char* setup_json_path )
 {
-  const std::string karma_config_path = setup_json_path ;
+  const std::string iris_config_path = setup_json_path ;
   
   // Set the exit condition in the event bus.
-  data().bus.enroll( this->karma_data, &KarmaData::setExit, "KARMA_EXIT_FLAG" ) ;
+  data().bus.enroll( this->iris_data, &IrisData::setExit, "IRIS_EXIT_FLAG" ) ;
   
-  data().config.initialize( karma_config_path.c_str(), 0 ) ;
+  data().config.initialize( iris_config_path.c_str(), 0 ) ;
   data().parseSetup() ;
 
   data().mod_manager.initialize( data().module_path.c_str(), data().module_config_path.c_str() ) ;
   data().mod_manager.start() ;
   
-  karma::log::Log::flush() ;
+  iris::log::Log::flush() ;
   data().running = true ;
 }
 
-bool Karma::running() const
+bool Iris::running() const
 {
   return data().running ;
 }
 
-KarmaData& Karma::data()
+IrisData& Iris::data()
 {
-  return *this->karma_data ;
+  return *this->iris_data ;
 }
 
-const KarmaData& Karma::data() const
+const IrisData& Iris::data() const
 {
-  return *this->karma_data ;
+  return *this->iris_data ;
 }

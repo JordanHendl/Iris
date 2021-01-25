@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef KARMA_MODULE
-#define KARMA_MODULE
+#ifndef IRIS_MODULE
+#define IRIS_MODULE
 
 // Defines for different OS Shared Library Exports.
 #ifdef _WIN32
@@ -26,9 +26,9 @@
   #define exported_function extern "C"
 #endif
 
-namespace karma
+namespace iris
 {
-  /** Class for describing a Module for use in the Karma Framework.
+  /** Class for describing a Module for use in the Iris Framework.
    */
   class Module
   { 

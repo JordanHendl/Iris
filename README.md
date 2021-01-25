@@ -1,8 +1,8 @@
-# Karma
-  Karma is a C++ Node-based framework for quick and easy program development.
+# Iris
+  Iris is a C++ Node-based framework for quick and easy program development.
   
 ## How to build
-  Karma is built using **CMake**. If on Linux, to build from source, simply do: 
+  Iris is built using **CMake**. If on Linux, to build from source, simply do: 
   
   ```
   mkdir build
@@ -21,31 +21,31 @@
   
   And then simply open the generated .sln with whatever editor of your preference and build.
 
-  Generated RPM's default install to /usr/local/Karma on UNIX, and C:\Program Files\Karma on Windows.
+  Generated RPM's default install to /usr/local/Iris on UNIX, and C:\Program Files\Iris on Windows.
 
   Linking with CMake: 
   1) Add the path to the install to your *CMAKE_PREFIX_PATH*.
-  2) ```FIND_PACKAGE( karma ) ```
-  3) Link against the **karma** library.
+  2) ```FIND_PACKAGE( Iris ) ```
+  3) Link against the **iris** library.
 
 ## Usage
 
-  Usage is very simple. All you have to do to make an object of the Karma class, and call initialize with the correct JSON file path.
+  Usage is very simple. All you have to do to make an object of the Iris class, and call initialize with the correct JSON file path.
   
   ### Example
   ```
-  #include <karma/Karma.h>
+  #include <iris/Iris.h>
 
   int main()
   {
-    Karma karma ;
-    karma.initialize( "setup.json" ) ;
+    Iris iris ;
+    iris.initialize( "setup.json" ) ;
 
-    // Let the karma modules do their work.
-    while( karma.running() ) {} ;
+    // Let the iris modules do their work.
+    while( iris.running() ) {} ;
     
     // Shutdown when done.
-    karma.shutdown() ;
+    iris.shutdown() ;
 
     return 0 ;
   }

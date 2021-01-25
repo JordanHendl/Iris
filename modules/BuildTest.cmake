@@ -11,6 +11,7 @@ FUNCTION( BUILD_TEST )
   # Test configurations.
   SET( VARIABLES 
         TARGET
+        DEPENDS
      )
   
   # For each argument provided.
@@ -32,14 +33,16 @@ FUNCTION( BUILD_TEST )
         SET( ${STATE} ${${STATE}} PARENT_SCOPE )
       ENDIF()
     ENDIF()
-    
-    IF( TARGET )
-        FIND_PACKAGE( KT REQUIRED )
-        
-        # Add Test executable.
-        ADD_EXECUTABLE       ( ${TARGET}_test Test.cpp             )
-        TARGET_LINK_LIBRARIES( ${TARGET}_test ${TARGET} karma_test )
+  ENDFOREACH()
 
+    IF( TARGET )
+      IF( BUILD_TESTS )
+        FIND_PACKAGE( Athena REQUIRED )
+        # Add Test executable.
+        ADD_EXECUTABLE       ( "${TARGET}_test" Test.cpp                         )
+        TARGET_LINK_LIBRARIES( "${TARGET}_test" ${TARGET} athena ${DEPENDANCIES} )
+
+        IF( RUN_TESTS )
           # If we should run tests, add custom command to run them after the fact.
           ADD_CUSTOM_COMMAND(
             POST_BUILD
@@ -52,6 +55,7 @@ FUNCTION( BUILD_TEST )
             ${TARGET}_test_flag ALL
             DEPENDS ${TARGET}_test_execution
           )
+        ENDIF()
+      ENDIF()
     ENDIF()
-  ENDFOREACH()
 ENDFUNCTION()

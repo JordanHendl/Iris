@@ -23,7 +23,7 @@
 #include <istream>
 #include <iostream>
 
-namespace karma
+namespace iris
 {
   namespace config
   {
@@ -31,8 +31,8 @@ namespace karma
      */
     struct ConfigurationData
     {
-      karma::Bus                  bus    ; ///< The bus to sent data over.
-      karma::config::json::Parser parser ; ///< The parser to use to parse the configuration.
+      iris::Bus                  bus    ; ///< The bus to sent data over.
+      iris::config::json::Parser parser ; ///< The parser to use to parse the configuration.
       json::Token                 begin  ; ///< The beginning of this object's internal parsed data.
       json::Token                 end    ; ///< The end of this object's internal parsed data.
       bool                        init   ; ///< Whether or not this object is initialized.
@@ -101,7 +101,7 @@ namespace karma
       }
       else
       {
-        karma::log::Log::output( karma::log::Log::Level::Warning, "Unable to load configuration file: ", path ) ;
+        iris::log::Log::output( iris::log::Log::Level::Warning, "Unable to load configuration file: ", path ) ;
         data().init = false ;
       }
     }

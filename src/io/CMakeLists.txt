@@ -15,29 +15,34 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-set( KARMA_IO_SOURCES 
+set( IRIS_IO_SOURCES 
      ObjectLoader.cpp
    )
 
-set( KARMA_IO_HEADERS
+set( IRIS_IO_HEADERS
      ObjectLoader.h
    )
 
-set( KARMA_IO_INCLUDE_DIRS
+set( IRIS_IO_INCLUDE_DIRS
    )
 
-set( KARMA_IO_LIBRARIES
+set( IRIS_IO_LIBRARIES
     ${CMAKE_DL_LIBS}
    )
 
 
-add_library               ( karma_io SHARED  ${KARMA_IO_SOURCES} ${KARMA_IO_HEADERS} )
-target_link_libraries     ( karma_io PUBLIC  ${KARMA_IO_LIBRARIES}                   )
-target_include_directories( karma_io PRIVATE ${KARMA_IO_INCLUDE_DIRS}                )
+add_library               ( iris_io SHARED  ${IRIS_IO_SOURCES} ${IRIS_IO_HEADERS} )
+target_link_libraries     ( iris_io PUBLIC  ${IRIS_IO_LIBRARIES}                  )
+target_include_directories( iris_io PRIVATE ${IRIS_IO_INCLUDE_DIRS}               )
+
+# If running tests, make and run them.
+IF( RUN_TESTS )
+  BUILD_TEST( TARGET iris_io )
+ENDIF()
 
 INSTALL( FILES ObjectLoader.h DESTINATION ${INCLUDE_DIR}/io )
 
-INSTALL( TARGETS karma_io EXPORT karma_lib 
+INSTALL( TARGETS iris_io EXPORT Iris 
                  LIBRARY  DESTINATION ${EXPORT_LIB_DIR}/io 
                  ARCHIVE  DESTINATION ${EXPORT_LIB_DIR}/io 
                  RUNTIME  DESTINATION ${EXPORT_LIB_DIR}/io 
