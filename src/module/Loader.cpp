@@ -32,10 +32,10 @@ namespace iris
   struct DescriptorData
   { 
     typedef unsigned Version ;
-    typedef ::iris::io::Symbol<unsigned>                 VersionFunc ;
-    typedef ::iris::io::Symbol<iris::Module*, unsigned> MakeFunc    ;
-    typedef ::iris::io::Symbol<const char*>              NameFunc    ;
-    typedef ::iris::io::Symbol<void, iris::Module*>     DestroyFunc ;
+    using VersionFunc = iris::io::Symbol<unsigned>                 ;
+    using MakeFunc    = iris::io::Symbol<iris::Module*, unsigned>  ;
+    using NameFunc    = iris::io::Symbol<const char*>              ;
+    using DestroyFunc = iris::io::Symbol<void, iris::Module*>      ;
     
     struct Module
     {
@@ -116,21 +116,22 @@ namespace iris
     *this->desc_data = *desc.desc_data ;
   }
 
-  void Descriptor::operator=( const Descriptor& desc )
+  Descriptor& Descriptor::operator=( const Descriptor& desc )
   {
     *this->desc_data = *desc.desc_data ;
+    
+    return *this ;
   }
   
   void Descriptor::initalize( const char* module_path )
   {
     using namespace iris::log ;
+    DescriptorData::Module mod ;
     unsigned version ;
 
     data().loader.load( module_path ) ;
     
-    DescriptorData::Module mod ;
-    
-    Log::output( "loading shared library at: ", module_path ) ;
+    Log::output( "Loading shared library at: ", module_path ) ;
 
     mod.name    = data().loader.symbol( "name"    ) ;
     mod.make    = data().loader.symbol( "make"    ) ;
@@ -140,8 +141,8 @@ namespace iris
     version = mod.version() ;
     
     data().latest = std::max( data().latest, version ) ;
-
-    if( data().modules.find( version ) == data().modules.end() )
+    
+    if( mod.name && mod.make && mod.destroy && mod.version && data().modules.find( version ) == data().modules.end() )
     { 
       data().modules.insert( { version, mod } ) ;
     }
@@ -202,9 +203,11 @@ namespace iris
     *this = loader ;
   }
   
-  void Loader::operator=( const Loader& loader )
+  Loader& Loader::operator=( const Loader& loader )
   {
     *this->loader_data = *loader.loader_data ;
+    
+    return *this ;
   }
 
   void Loader::initialize( const char* module_path )

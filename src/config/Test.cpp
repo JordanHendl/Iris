@@ -190,6 +190,6 @@ int main()
   manager.add( "Bad Lookup Test"   , &testBadLookup     ) ;
   
 
-  std::cout << "\nTesting Iris Configuration & JSON Parsing." << std::endl ;
+  std::cout << "\n-- Testing Iris Configuration & JSON Parsing." << std::endl ;
   return manager.test( athena::Output::Verbose ) ;
 }

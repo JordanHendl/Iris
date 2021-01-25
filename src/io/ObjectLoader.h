@@ -31,12 +31,17 @@ namespace iris
         
         /** Default Constructor.
          */
-        Symbol() = default ;
+        Symbol() ;
         
         /** Default Deconstructor.
          */
         ~Symbol() = default ;
         
+        /** Conversion operator to check for validity of this object.
+         * @return Whether this object is valid or not.
+         */
+        operator bool() const ;
+
         /** Paren operator to call this symbol as a function.
          * @param args The arguments specified in the template parameters.
          * @return The return type that this object's template parameters specify.
@@ -98,6 +103,19 @@ namespace iris
          */
         const ObjectLoaderData& data() const ;
     };
+    
+    template<class RETURN, class ... ARGS>
+    Symbol<RETURN, ARGS... >::Symbol()
+    {
+      this->func = nullptr ;
+    }
+    
+    template<class RETURN, class ... ARGS>
+    Symbol<RETURN, ARGS... >::operator bool() const
+    {
+      if( this->func == nullptr ) return false ;
+      return true ;
+    }
     
     template<class RETURN, class ... ARGS>
     RETURN Symbol<RETURN, ARGS... >::operator()( ARGS ... args )

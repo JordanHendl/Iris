@@ -95,8 +95,6 @@ bool testNoImpl()
   {
     test.assign( i ) ;
     num = test.get() ;
-    
-    std::cout << num ;
   }
   
   return num ;
@@ -110,8 +108,6 @@ bool testImpl()
   {
     test.assign( i ) ;
     num = test.get() ;
-    
-    std::cout << num ;
   }
   
   return num ;
@@ -119,10 +115,11 @@ bool testImpl()
 
 int main()
 {
+  std::cout << "\n-- Performing Iris IO Test" << std::endl ;
+
   manager.add( "1) No PIMPL speed test", &testNoImpl ) ;
   manager.add( "2) PIMPL speed test"   , &testImpl   ) ;
 
   return manager.test( athena::Output::Verbose ) ; 
-//  return 0 ;
 }
 

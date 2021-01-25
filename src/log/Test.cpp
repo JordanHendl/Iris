@@ -25,7 +25,7 @@ bool testNoWarning()
 
 int main() 
 {
-  std::cout << "\nTesting log library." << std::endl ;
+  std::cout << "\n-- Testing log library." << std::endl ;
   
   Log::initialize( "./", false ) ;
   Log::setMode( Log::Mode::Verbose ) ;

@@ -18,6 +18,7 @@
 #include "ObjectLoader.h"
 #include <map>
 #include <iostream>
+#include <log/Log.h>
 
 #ifdef _WIN32
   #include <windows.h>
@@ -61,17 +62,20 @@
 
 #endif
 
-
 namespace iris
 {
   namespace io
   {
+    using Log = iris::log::Log ;
+
     struct ObjectLoaderData
     {
-      typedef std::map<std::string, ObjectLoader::DL_FUNC> FunctionMap ;
+      using FunctionMap      = std::map<std::string, ObjectLoader::DL_FUNC> ;
+      using SharedLibraryMap = std::map<std::string, bool                 > ;
 
-      LibHandle   handle ;
-      FunctionMap map    ;
+      LibHandle        handle     ;
+      SharedLibraryMap loaded_map ;
+      FunctionMap      map        ;
 
       ObjectLoaderData()
       {
@@ -96,8 +100,16 @@ namespace iris
       if( data().map.find( symbol_name ) == data().map.end() )
       {
         func = reinterpret_cast<ObjectLoader::DL_FUNC>( dlsym( data().handle, symbol_name ) ) ;
-        if( func ) data().map.insert( { symbol_name, func } ) ;
-        else       std::cout << "Symbol not found: " << symbol_name << std::endl ;
+
+        if( func )
+        {
+          data().map.insert( { symbol_name, func } ) ;
+        }
+        else
+        {
+          Log::output( "Symbol not found: ", symbol_name ) ;
+          return nullptr ;
+        }
       }
 
       return data().map.at( symbol_name ) ;

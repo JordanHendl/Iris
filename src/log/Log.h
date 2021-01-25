@@ -134,7 +134,7 @@ namespace iris
         const StringData& data() const ;
     };
     
-    /** Class to handle logging in the Karma library.
+    /** Class to handle logging in the Iris library.
      */
     class Log
     {

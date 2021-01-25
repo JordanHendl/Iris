@@ -182,7 +182,7 @@ int main()
   manager.add( "Indexed Test"       , &testIndexedSetter                   ) ;
   manager.add( "100 Emit Speed Test", &testEmitSpeed                       ) ;
   
-  std::cout << "\nTesting Iris Data Bus" << std::endl ;
+  std::cout << "\n-- Testing Iris Data Bus" << std::endl ;
   return manager.test( athena::Output::Verbose ) ;
 }
 

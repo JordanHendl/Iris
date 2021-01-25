@@ -1,0 +1,16 @@
+{
+  "graph_1"   :
+  {
+    "Modules" :
+    {
+      Test"   :
+      {
+        "type"    : "TestModule",
+        "version" :  1,
+        "thing1"  :  0.25,
+        "thing2"  :  "thing2",
+        "thing3"  :  2503
+      }
+    }
+  }
+}

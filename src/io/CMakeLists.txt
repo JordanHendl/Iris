@@ -28,6 +28,7 @@ set( IRIS_IO_INCLUDE_DIRS
 
 set( IRIS_IO_LIBRARIES
     ${CMAKE_DL_LIBS}
+    iris_log
    )
 
 
