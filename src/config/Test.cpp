@@ -183,6 +183,8 @@ int main()
   parser.initialize( json_data ) ;
   
   base_token = parser.begin() ;
+
+  manager.initialize( "Iris Configuration Tests" ) ;
   manager.add( "Object Test"       , &testObject        ) ;
   manager.add( "Value Test"        , &testValue         ) ;
   manager.add( "Full Module Test"  , &testGettingValues ) ;
@@ -190,6 +192,5 @@ int main()
   manager.add( "Bad Lookup Test"   , &testBadLookup     ) ;
   
 
-  std::cout << "\n-- Testing Iris Configuration & JSON Parsing." << std::endl ;
   return manager.test( athena::Output::Verbose ) ;
 }

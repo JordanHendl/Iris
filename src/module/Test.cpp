@@ -39,6 +39,7 @@ int main( int argc, char* argv[] )
   std::string path = argv[ 0 ] ;
   argc = argc ;
   
+  manager.initialize( "Iris Module Library" ) ;
   const size_t last_slash_idx = path.find_last_of( "\\/" ) ;
   if ( std::string::npos != last_slash_idx )
   {

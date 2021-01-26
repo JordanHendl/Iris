@@ -176,13 +176,14 @@ int main()
     speed_bus.enroll ( &setSpeed<0>, true,"speed" ) ;
     speed_bus.publish( &getSpeed<0>,"speed" ) ;
   }
+  
+  manager.initialize( "Iris Data Bus Tests" ) ;
   manager.add( "Function Test"      , &testFunctionSetter                  ) ;
   manager.add( "Method Test"        , &obj, &TestObject::checkMethodSetter ) ;
   manager.add( "Manual Test"        , &obj, &TestObject::checkManualSetter ) ;
   manager.add( "Indexed Test"       , &testIndexedSetter                   ) ;
   manager.add( "100 Emit Speed Test", &testEmitSpeed                       ) ;
   
-  std::cout << "\n-- Testing Iris Data Bus" << std::endl ;
   return manager.test( athena::Output::Verbose ) ;
 }
 

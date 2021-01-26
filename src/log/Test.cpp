@@ -29,7 +29,8 @@ int main()
   
   Log::initialize( "./", false ) ;
   Log::setMode( Log::Mode::Verbose ) ;
-  
+
+  manager.initialize( "Iris Logging Library" ) ;
   manager.add( "Log Test"         , &testLog       ) ;
   manager.add( "Log No Level Test", &testNoWarning ) ;
   

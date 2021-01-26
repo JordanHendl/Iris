@@ -115,8 +115,7 @@ bool testImpl()
 
 int main()
 {
-  std::cout << "\n-- Performing Iris IO Test" << std::endl ;
-
+  manager.initialize( "Iris PIMPL Tests" ) ;
   manager.add( "1) No PIMPL speed test", &testNoImpl ) ;
   manager.add( "2) PIMPL speed test"   , &testImpl   ) ;
 
