@@ -56,11 +56,10 @@ FILE( COPY test_json.json DESTINATION ${BUILD_DIR}/bin )
 # If running tests, make and run them.
 BUILD_TEST( TARGET iris_module )
 
-
 INSTALL( FILES ${IRIS_MODULE_HEADERS} DESTINATION ${INCLUDE_DIR}/module )
 
 INSTALL( TARGETS iris_module EXPORT Iris
-                 LIBRARY  DESTINATION ${EXPORT_LIB_DIR}/module 
-                 RUNTIME  DESTINATION ${EXPORT_LIB_DIR}/module
-                 ARCHIVE  DESTINATION ${EXPORT_LIB_DIR}/module
+                 LIBRARY  DESTINATION ${EXPORT_LIB_DIR} 
+                 RUNTIME  DESTINATION ${EXPORT_LIB_DIR}
+                 ARCHIVE  DESTINATION ${EXPORT_LIB_DIR}
                  INCLUDES DESTINATION ${EXPORT_INCLUDE_DIR} )

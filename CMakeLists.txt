@@ -26,8 +26,6 @@ CMAKE_MINIMUM_REQUIRED( VERSION 3.8.0 )
 
 LIST( APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" )
 
-INCLUDE( Message   )
-INCLUDE( BuildTest )
 
 # Build options
 OPTION( WERROR        "Whether or not warnings are treated as errors." ON  )
@@ -37,6 +35,8 @@ OPTION( RUN_TESTS     "Whether or not tests should be run."            ON  )
 OPTION( BUILD_RELEASE "Whether or not the to build for release.     "  OFF )
 
 PROJECT( Iris CXX )
+INCLUDE( Message   )
+INCLUDE( BuildTest )
 
 # Print build options
 MESSAGE( STATUS "" ) 
@@ -128,8 +128,6 @@ MESSAGE( INFO  "├─GNU:               ${GNU}"               )
 MESSAGE( INFO  "└─MSVC:              ${MSVC}"              )
 MESSAGE( INFO " " ) 
 
-INCLUDE( KPackage ) 
-
 SET( BIN_DIR     "bin"                           )
 SET( INCLUDE_DIR "include/${CMAKE_PROJECT_NAME}" )
 SET( LIB_DIR     "lib64"                         )
@@ -153,6 +151,8 @@ IF( MSVC )
     SET( CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE )
     SET( BUILD_SHARED_LIBS TRUE                )
 ENDIF()
+
+INCLUDE( KPackage ) 
 
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/src ) 
 
