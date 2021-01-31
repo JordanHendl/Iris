@@ -298,7 +298,7 @@ namespace iris
         base_str << timestamp ;
       }
       
-      base_str << " KLOGDEBUG::" ;
+      base_str << "--Iris Debug :" ;
 
       msg << base_str.str() << level_str << std::string( out ) ;
       msg << "\n" ;

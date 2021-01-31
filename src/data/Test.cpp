@@ -21,7 +21,7 @@
 #include <thread>
 #include <assert.h>
 #include <float.h>
-#include <Athena/Manager.h>
+#include <athena/Manager.h>
 #include <cmath>
 #include <iostream>
 

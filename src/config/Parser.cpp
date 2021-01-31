@@ -247,7 +247,7 @@ namespace iris
         in_comment = false ;
 
         // While not eof, not whitespace, and not a line break.
-        while( ( val = json_stream.get() ) != json_stream.eof() && ( val == ' ' || val == '\n' || val == '\r' || val == '#' || in_comment ) )
+        while( ( val = json_stream.get() ) != json_stream.eof() && ( val == ' ' || val == '\n' || val == '\r' || val == '\t' || val == '#' || in_comment ) )
         { 
           if( val == '#' )
           {
@@ -325,7 +325,7 @@ namespace iris
           switch( next )
           {
             // EXPECTED: We found key, can be string, object, or array.
-            case '"': /* Start of an string. */ it++ ; handleStringValue( parent, stream ) ; break ;
+             case '"': /* Start of an string. */ it++ ; handleStringValue( parent, stream ) ; break ;
             case '{': /* Start of an object. */ it++ ; handleObject     ( parent, stream ) ; break ;
             case ',': /* Continuing a list.  */ ; break ;
   
@@ -388,6 +388,7 @@ namespace iris
       {
         const char value = getNextValidCharacter( stream ) ;
         
+        if( stream.eof() ) return ;
         switch( value )
         {
           case '"': /* Start of an string. */ handleKey   ( parent, stream ) ; break ;
@@ -653,7 +654,7 @@ namespace iris
 
       unsigned Token::size() const
       {
-        return data().size() ;
+        return data().it->second.size() ;
       }
 
       float Token::decimal( unsigned index ) const
@@ -693,7 +694,7 @@ namespace iris
 
       bool Token::isArray() const
       {
-        return data().node != nullptr ? data().node->size() > 1 : false ;
+        return data().node != nullptr ? this->data().it->second.size() > 1 : false ;
       }
 
       void Token::operator++()

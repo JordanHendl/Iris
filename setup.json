@@ -1,16 +1,17 @@
 {
-  # Path to the config for karma to use.
-  "graph_config_path" : "karma_config.json",
+  #Path to the config for karma to use.
+  "graph_config_path" : "/wksp/testing/iris_config.json",
 
-  # The path to the modules for karma to load.
-  "modules_path"      : "nbbuild/modules",
+  #The path to the modules for karma to load.
+  "module_path"      : "/wksp/testing/modules",
 
-  # Whether or not logging should be enabled.
-  "log_enable"        : "false",
+  #Whether or not logging should be enabled.
+  "log_enable"        : false,
 
-  # The mode for the logging to use when outputting logs.
+  #The mode for the logging to use when outputting logs.
   "log_mode"          : "VERBOSE",
 
-  # The path to log output.
+  #The path to log output.
   "log_output_path"   : "/var/tmp"
 }
+

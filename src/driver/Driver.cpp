@@ -149,6 +149,6 @@ void IrisDriver::initialize( unsigned argc, const char* arguments[] )
 int IrisDriver::run()
 {
   iris.initialize( setup_path.c_str() ) ;
-  return 0 ;
+  return iris.run() ;
 }
 

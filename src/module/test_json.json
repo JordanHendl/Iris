@@ -3,7 +3,7 @@
   {
     "Modules" :
     {
-      Test"   :
+      "Test"   :
       {
         "type"    : "TestModule",
         "version" :  1,

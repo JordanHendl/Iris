@@ -22,7 +22,7 @@
  * Created on January 15, 2021, 2:23 AM
  */
 
-#include <Athena/Manager.h>
+#include <athena/Manager.h>
 #include <iostream>
 
 static athena::Manager manager ;

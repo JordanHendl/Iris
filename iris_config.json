@@ -1,24 +1,38 @@
-{
-  # The graph for karma to generate.
+  {
+  # The graph for iris to generate.
   "graph_1" :
   {
     # The modules as a part of the graph.
     "Modules" : 
     {
-      # Vulkan API Module.
-      "API" :
+      # Image Downloading Module.
+      "ImageDownloader" :
       {
-        "type"  : "Vulkan",
-	"input" : "window_surface"
+        "type"            : "HttpImageDownloader",
+        "output_bytes"    : "http_image",
+        "output_width"    : "http_width",
+        "output_height"   : "http_height",
+        "output_channels" : "http_channels",
+        "image_url"       : "https://pbs.twimg.com/media/Es92wJWUcAE0dL9?format=jpg&name=large"
       },
-      # Vulkan Window Module.
-      "window" :
+      # Vulkan module
+      "Vulkan" :
       {
-	"type"   : "Vulkan Window",
-        "output" : "window_surface",
-        "width"  : 1024,
-        "height" : 720
+        "type"              : "Vulkan",
+        "validation_layers" : [ "VK_KHR_surface", "VK_LAYER_KHRONOS_validation", "VK_LAYER_LUNARG_standard_validation" ]
+      },
+      # Vulkan image converter.
+      "VulkanImageConverter" :
+      {
+        "type"                : "Vulkan Image Converter",
+        "input_width_name"    : "http_width",
+        "input_height_name"   : "http_height",
+        "input_channels_name" : "http_channels",
+        "input_bytes_name"    : "http_image",
+        "output"              : "converted_image",
+        "sync_output"         : "converter_sync"
       }
     }
   }
 }
+

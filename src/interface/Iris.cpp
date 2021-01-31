@@ -25,6 +25,8 @@
 #include <vector>
 #include <filesystem>
 #include <stdlib.h>
+#include <condition_variable>
+#include <mutex>
 
 struct IrisData
 {
@@ -34,7 +36,9 @@ struct IrisData
   std::string                 module_path        ; ///< The path to the modules on the filesystem.
   std::string                 module_config_path ; ///< The path to the graph config on the filesystem.
   bool                        running            ; ///< Whether or not iris is running.
-  
+  std::condition_variable     cv                 ; ///< The condition variable to use for waiting to end.
+  std::mutex                  mutex              ; ///< The mutex to wait on for an exit condition.
+
   /** Default constructor.
    */
   IrisData() ;
@@ -80,6 +84,7 @@ void IrisData::setExit( bool exit )
   {
     this->mod_manager.shutdown() ;
     this->running = false ;
+    this->cv.notify_all() ;
   }
 }
 
@@ -130,6 +135,7 @@ void IrisData::parseSetup()
   if( log_output   ) this->setDebugOutput     ( log_output.string()   ) ;
   if( log_mode     ) this->setDebugMode       ( log_mode.string()     ) ;
 }
+
 Iris::Iris()
 {
   this->iris_data = new IrisData() ;
@@ -146,6 +152,14 @@ void Iris::shutdown()
   data().mod_manager.shutdown() ;
 }
 
+bool Iris::run()
+{
+  std::unique_lock<std::mutex> lock = std::unique_lock<std::mutex>( data().mutex ) ;
+  data().cv.wait( lock, [=] { return !data().running ; } ) ;
+  
+  return data().running ;
+}
+
 void Iris::initialize( const char* setup_json_path )
 {
   const std::string iris_config_path = setup_json_path ;
@@ -155,7 +169,21 @@ void Iris::initialize( const char* setup_json_path )
   
   data().config.initialize( iris_config_path.c_str(), 0 ) ;
   data().parseSetup() ;
-
+  
+  if( data().module_config_path.empty() )
+  {
+    iris::log::Log::output( "No module config path!" ) ;
+    iris::log::Log::flush() ;
+    exit( -1 ) ;
+  }
+  
+  if( data().module_path.empty() )
+  {
+    iris::log::Log::output( "No module path!" ) ;
+    iris::log::Log::flush() ;
+    exit( -1 ) ;
+  }
+  
   data().mod_manager.initialize( data().module_path.c_str(), data().module_config_path.c_str() ) ;
   data().mod_manager.start() ;
   

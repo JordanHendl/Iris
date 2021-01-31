@@ -71,7 +71,9 @@ namespace iris
 
   void LoaderData::loadAllModules()
   {
-    for( auto& path : std::filesystem::recursive_directory_iterator( this->module_directory.c_str() ) )
+    iris::log::Log::output( "Loading modules at location: ", this->module_directory.c_str() ) ;
+
+    for( auto& path : std::filesystem::recursive_directory_iterator( this->module_directory.c_str() , std::filesystem::directory_options::follow_directory_symlink ) )
     {
       if( iris::valid( path.path().string() ) )
       {

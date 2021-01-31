@@ -17,7 +17,7 @@
 
 #include "Manager.h"
 #include "Graph.h"
-#include <Athena/Manager.h>
+#include <athena/Manager.h>
 #include <iostream>
 #include <ostream>
 #include <fstream>

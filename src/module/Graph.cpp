@@ -65,9 +65,21 @@ namespace iris
       key = param.key() ;
       if( key != "type" && key != "version" )
       {
-        this->bus.emit( param.number (), name.c_str(), "::", key.c_str() ) ;
-        this->bus.emit( param.decimal(), name.c_str(), "::", key.c_str() ) ;
-        this->bus.emit( param.string (), name.c_str(), "::", key.c_str() ) ;
+        if( param.isArray() )
+        {
+          for( unsigned index = 0; index < param.size(); index++ )
+          {
+            this->bus.emitIndexed( param.number ( index ), index, name.c_str(), "::", key.c_str() ) ;
+            this->bus.emitIndexed( param.decimal( index ), index, name.c_str(), "::", key.c_str() ) ;
+            this->bus.emitIndexed( param.string ( index ), index, name.c_str(), "::", key.c_str() ) ;
+          }
+        }
+        else
+        {
+          this->bus.emit( param.number (), name.c_str(), "::", key.c_str() ) ;
+          this->bus.emit( param.decimal(), name.c_str(), "::", key.c_str() ) ;
+          this->bus.emit( param.string (), name.c_str(), "::", key.c_str() ) ;
+        }
       }
     }
   }
@@ -201,6 +213,8 @@ namespace iris
 
   void Graph::kick()
   {
+    iris::log::Log::output( "Kicking off graph ", data().graph_name.c_str() ) ;
+
     for( auto module : data().graph )
     {
       module.second->initialize() ;

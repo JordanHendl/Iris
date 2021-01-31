@@ -37,6 +37,11 @@ class Iris
      */
     void initialize( const char* setup_json_path ) ;
     
+    /** Method to run the iris engine.
+     * @return Whether or not there was an error in the engine runtime.
+     */
+    bool run() ;
+
     /** Method to retrieve whether or not the iris runtime is currently running.
      * @return Whether or not Iris is currently running.
      */
