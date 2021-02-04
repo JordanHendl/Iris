@@ -40,6 +40,7 @@ SET( IRIS_MODULE_LIBRARIES
      iris_bus
      iris_configuration
      iris_log
+     iris_profiling
      ${CMAKE_THREAD_LIBS_INIT}
    )
 

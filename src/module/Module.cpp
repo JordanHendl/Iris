@@ -108,14 +108,14 @@ namespace iris
     while( data().should_run )
     {
       data().cv.wait( lock, [=] { return data().is_signaled.load() ; } ) ;
-      data().is_signaled = false ;
       this->execute() ;
+      data().is_signaled = false ;
     }
   }
   
   void Module::kick()
   {
-    data().is_signaled = true ;
+    data().is_signaled = true  ;
     data().cv.notify_all() ;
   }
   
@@ -149,6 +149,11 @@ namespace iris
   void Module::setId( unsigned id )
   {
     data().id = id ;
+  }
+  
+  bool Module::ready() const
+  {
+    return !data().is_signaled ;
   }
 
   const char* Module::type() const

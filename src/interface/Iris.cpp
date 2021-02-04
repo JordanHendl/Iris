@@ -58,6 +58,11 @@ struct IrisData
    */
   void setModulePath( const char* path ) ; 
   
+  /** Method to set whether or not the logs should be enabled or not.
+   * @param output Whether or not logs should be enabled.
+   */
+  void setLogEnable( const char* boolean ) ;
+
   /** Method to set the output directory of iris logs.
    * @param output The output directory of iris logs.
    */
@@ -93,15 +98,15 @@ void IrisData::setDebugMode( const char* mode )
   using Log = iris::log::Log ;
   std::string tmp = mode ;
   
-  if( tmp == "VERBOSE" )
+  if( tmp == "Verbose" )
   {
     Log::setMode( Log::Mode::Verbose ) ;
   }
-  if( tmp == "NORMAL" )
+  if( tmp == "Normal" )
   {
     Log::setMode( Log::Mode::Normal ) ;
   }
-  if( tmp == "QUIET" )
+  if( tmp == "Quiet" )
   {
     Log::setMode( Log::Mode::Quiet ) ;
   }
@@ -129,6 +134,7 @@ void IrisData::parseSetup()
   auto module_path  = token[ "module_path"       ] ;
   auto log_output   = token[ "log_output_path"   ] ;
   auto log_mode     = token[ "log_mode"          ] ;
+  auto log_enable   = token[ "log_mode"          ] ;
   
   if( graph_config ) this->setModuleConfigPath( graph_config.string() ) ;
   if( module_path  ) this->setModulePath      ( module_path.string()  ) ;
@@ -148,8 +154,8 @@ Iris::~Iris()
 
 void Iris::shutdown()
 {
-  iris::log::Log::flush()      ;
   data().mod_manager.shutdown() ;
+  iris::log::Log::flush()       ;
 }
 
 bool Iris::run()
@@ -172,23 +178,23 @@ void Iris::initialize( const char* setup_json_path )
   
   if( data().module_config_path.empty() )
   {
-    iris::log::Log::output( "No module config path!" ) ;
+    iris::log::Log::output( "No module config path given in file ", setup_json_path, ". Unable to startup any graph. Exitting" ) ;
     iris::log::Log::flush() ;
     exit( -1 ) ;
   }
   
   if( data().module_path.empty() )
   {
-    iris::log::Log::output( "No module path!" ) ;
+    iris::log::Log::output( "No module path given in file ", setup_json_path, ". Cannot load any modules for the graph to use. Exitting." ) ;
     iris::log::Log::flush() ;
     exit( -1 ) ;
   }
   
+  data().running = true ;
   data().mod_manager.initialize( data().module_path.c_str(), data().module_config_path.c_str() ) ;
   data().mod_manager.start() ;
   
   iris::log::Log::flush() ;
-  data().running = true ;
 }
 
 bool Iris::running() const

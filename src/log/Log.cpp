@@ -31,6 +31,8 @@ namespace iris
 {
   namespace log
   {
+    bool Log::enabled ;
+
     void operator<<( String& first, char second )
     {
       std::stringstream stream ;
@@ -257,16 +259,19 @@ namespace iris
       time       = std::chrono::system_clock::to_time_t( now ) ;
       local_time = *localtime( &time )                         ;
       
-      file_name << "/iris_debug_log_"  ;
+      file_name << "/iris_debug_log_"   ;
       file_name << local_time.tm_mon    ;
-      file_name << "_"                  ;
+      file_name << "D_"                 ;
       file_name << local_time.tm_mday   ;
-      file_name << "_"                  ;
+      file_name << "M_"                 ;
       file_name << local_time.tm_year   ;
-      file_name << "_"                  ;
+      file_name << "Y_"                 ;
       file_name << local_time.tm_hour   ;
+      file_name << "H"                  ;
       file_name << local_time.tm_min    ;
+      file_name << "M"                  ;
       file_name << local_time.tm_sec    ;
+      file_name << "S"                  ;
       file_name << ".txt"               ;
       
       log_data.output_path += file_name.str() ;
@@ -280,6 +285,11 @@ namespace iris
     void Log::setMode( Mode mode )
     {
       log_data.mode = mode ;
+    }
+    
+    void Log::setEnabled( bool value )
+    {
+      Log::enabled = value ;
     }
 
     void Log::outputBase( const char* out, Level level )

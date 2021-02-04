@@ -170,6 +170,11 @@ namespace iris
          * @param mode The mode to use for log output.
          */
         static void setMode( Mode mode ) ;
+        
+        /** Method to set whether or not logging is enabled.
+         * @param value Whether or not logging is enabled.
+         */
+        static void setEnabled( bool value ) ;
 
         /** Variadic template function for outputting logs.
          * @param level The log level.
@@ -201,6 +206,8 @@ namespace iris
         
       private:
         
+        static bool enabled ;
+
         /** Base-case for variadic template.
          * @param out The completed log string.
          * @param level The log level.
@@ -255,10 +262,12 @@ namespace iris
     void Log::output( Log::Level level, T first, ARGS... args )
     {
       String str ;
-      
-      str = ::iris::log::concatenate( first, args... ) ;
-
-      outputBase( str.str(), level ) ;
+      if( Log::enabled )
+      {
+        str = ::iris::log::concatenate( first, args... ) ;
+  
+        outputBase( str.str(), level ) ;
+      }
     }
 
     template<typename T>
@@ -266,9 +275,12 @@ namespace iris
     {
       String str ;
       
-      str << first ;
-
-      outputBase( str.str(), level ) ;
+      if( Log::enabled )
+      {
+        str << first ;
+  
+        outputBase( str.str(), level ) ;
+      }
     }
   }
 }

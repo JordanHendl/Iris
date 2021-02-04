@@ -67,6 +67,11 @@ namespace iris
        * @param id The id to associate with this module.
        */
       void setId( unsigned id ) ;
+      
+      /** Method to check whether this module is done and ready to operate again.
+       * @return Whether or not this module is done.
+       */
+      bool ready() const ;
 
       /** Method to start operations of this module.
        */

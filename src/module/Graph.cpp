@@ -20,6 +20,7 @@
 #include "Loader.h"
 #include <config/Configuration.h>
 #include <config/Parser.h>
+#include <profiling/Timer.h>
 #include <log/Log.h>
 #include <data/Bus.h>
 #include <string>
@@ -27,27 +28,30 @@
 #include <thread>
 #include <iostream>
 #include <queue>
+#include <thread>
+#include <chrono>
 
 namespace iris
 {
   struct GraphData
   {
-    typedef std::map<std::string, Module*> ModuleGraph ;
-    using Config = iris::config::Configuration ;  
-    using PriorityQueue   = std::vector<Module*> ;
-    using StringVec       = std::vector<std::string>                          ;
-    using InputOutputPair = std::pair<StringVec, StringVec>                   ;
+    using ModuleGraph     = std::map<std::string, Module*>  ;
+    using Config          = iris::config::Configuration     ;
+    using PriorityQueue   = std::vector<Module*>            ;
+    using StringVec       = std::vector<std::string>        ;
+    using InputOutputPair = std::pair<StringVec, StringVec> ;
 
-    PriorityQueue queue ;
-    iris::Bus   bus               ;
-    Config      config            ;
-    Loader*     loader            ;
-    ModuleGraph graph             ;
-    unsigned    bus_id            ;
-    std::string graph_name        ;
-    std::string graph_config_path ;
-    unsigned    id                ;
-    bool        running           ;
+    PriorityQueue   queue             ;
+    iris::Timer     timer             ;
+    iris::Bus       bus               ;
+    Config          config            ;
+    Loader*         loader            ;
+    ModuleGraph     graph             ;
+    unsigned        bus_id            ;
+    std::string     graph_name        ;
+    std::string     graph_config_path ;
+    unsigned        id                ;
+    bool            running           ;
 
     void stop  ( const char* name ) ;
     void remove( const char* name ) ;
@@ -329,8 +333,13 @@ namespace iris
     {
       for( auto module : data().queue )
       {
+        data().timer.start() ;
         module->kick() ;
+        data().timer.stop() ;
       }
+      while( !data().queue.back()->ready() ) std::this_thread::sleep_for( std::chrono::microseconds( 200 ) ) ;
+
+      iris::log::Log::output( "Graph '", data().graph_name.c_str(), "' execution time: ", data().timer.output() ) ;
     }
   }
 

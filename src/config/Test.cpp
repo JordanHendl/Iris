@@ -19,6 +19,7 @@
 #include "Parser.h"
 #include <iostream>
 #include <athena/Manager.h>
+#include <string>
 
 /** Test JSON file.
  */
@@ -51,6 +52,21 @@ static const char* json_data =
 static athena::Manager            manager    ;
 static iris::config::json::Parser parser     ;
 static iris::config::json::Token  base_token ;
+
+bool testGraphLookup()
+{
+  bool found_it = true ;
+  auto token = base_token ;
+  
+//  for( auto& tok : token )
+  {
+//    if( std::string( tok.key() ) == "Graphs" ) found_it = true ;
+  }
+  
+  if( !token[ "Graphs" ]                                 ) return false ;
+  if( std::string( token[ "Graphs" ].key() ) != "Graphs" ) return false ;
+  return found_it ;
+}
 
 bool testBadLookup()
 {
@@ -190,6 +206,7 @@ int main()
   manager.add( "Full Module Test"  , &testGettingValues ) ;
   manager.add( "Integer Value Test", &testIntegerValue  ) ;
   manager.add( "Bad Lookup Test"   , &testBadLookup     ) ;
+  manager.add( "Graph Lookup Test" , &testGraphLookup   ) ;
   
 
   return manager.test( athena::Output::Verbose ) ;
