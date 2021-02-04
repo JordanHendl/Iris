@@ -42,7 +42,7 @@ namespace iris
       VersionFunc version ;
       MakeFunc    make    ;
       NameFunc    name    ;
-      DestroyFunc destroy ;
+      mutable DestroyFunc destroy ;
     };
     
     typedef std::map<Version, Module> ModuleMap ;
@@ -160,7 +160,7 @@ namespace iris
     return iter != data().modules.end() ? iter->second.make( version ) : mod ;
   }
 
-  void Descriptor::destroy( Module* module, unsigned version )
+  void Descriptor::destroy( Module* module, unsigned version ) const
   {
     if( module )
     {
@@ -220,7 +220,12 @@ namespace iris
 
   const Descriptor& Loader::descriptor( const char* module_type ) const
   {
-    static const Descriptor dummy ;
+    return this->descriptor( module_type );
+  }
+
+  Descriptor& Loader::descriptor( const char* module_type )
+  {
+    static Descriptor dummy ;
     auto iter = data().descriptor_map.find( module_type ) ;
     
     if( iter != data().descriptor_map.end() ) 

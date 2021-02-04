@@ -357,7 +357,7 @@ namespace iris
             case ' ': /* White space. Skip.  */ 
             case '}': /* End of an object.   */ 
             case ']': /* End of an array.    */ 
-            default : /* Error               */ stream.putback( next ) ; Log::output( Log::Level::Warning, "Invalid JSON Found: ", next, ".\n" ) ; break ;
+            default : /* Error               */ Log::output( Log::Level::Warning, "Invalid JSON Found: ", next, ".\n" ) ; break ;
           }
         }
       }

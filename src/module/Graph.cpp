@@ -46,27 +46,144 @@ namespace iris
     iris::Bus       bus               ;
     Config          config            ;
     Loader*         loader            ;
+    ModuleGraph     pre_graph         ;
     ModuleGraph     graph             ;
     unsigned        bus_id            ;
     std::string     graph_name        ;
     std::string     graph_config_path ;
     unsigned        id                ;
     bool            running           ;
+    
+    /** Method to shutdown all modules & clear the priority queue & graph.
+     */
+    void clear() ;
+    
+    /** Helper method to move prexisting modules to the newly generated graph in the event of a reload.
+     */
+    void movePrexisting() ;
 
-    void stop  ( const char* name ) ;
-    void remove( const char* name ) ;
-    void load() ;
+    /** Method to configure a module.
+     * @param token The JSON token at the specified module's location in the file.
+     * @param name The name of the module.
+     */
     void configureModule( iris::config::json::Token& token, std::string& name ) ;
+
+    /** Helper method when solving the graph. Used for finding the inputs and outputs of a module.
+     * @param token The JSON token to process.
+     * @return A Pair of vectors of strings, in the format of < INPUTS, OUTPUTS >.
+     */
     InputOutputPair findInputsAndOutputs( const iris::config::json::Token& token ) ;
-    void solve() ;
+
+    /** Method to kick off the module threads.
+     */
+    void kick() ;
+
+    /** Method to load all modules in this graph.
+     */
+    void load() ;
+    
+    /** Helper method when solving the graph. Used for recursively traversing the graph and building a priority of each module.
+     * @param module The module to retrieve a priority for.
+     * @param count How deep this recursion is, used for breaking out of potential infinite loops in graphs.
+     * @return The priority of the module, calculated as the amount of modules it has to traverse to get to the beginning.
+     */
     unsigned recursiveSolve( Module* module, unsigned count = 0 ) ;
+
+    /** Helper method to reload the config and repopulate the graph.
+     */
+    void reload() ;
+
+    /** Method to stop the graph.
+     */
+    void stop() ;
+    
+    /** Helper method to solve the graph, and calculate a priority queue of the modules.
+     */
+    void solve() ;
+    
+    /** The main compute loop of this graph.
+     */
+    void traverse() ;
   };
   
+  void GraphData::movePrexisting()
+  {
+    const auto token = this->config.begin()[ this->graph_name.c_str() ] ;
+    iris::Module *module ;
+
+    if( token )
+    {
+      // Search for modules.
+      for( auto mod = token.begin(); mod != token.end(); ++mod )
+      {
+        for( unsigned index = 0; index < this->queue.size(); index++ )
+        {
+          module = this->queue[ index ] ;
+          if( std::string( mod.key() ) == module->name() )
+          {
+            this->pre_graph.insert( { module->name(), module } ) ;
+            this->queue.erase( this->queue.begin() + index ) ;
+          }
+        }
+      }
+    }
+  }
+
+  void GraphData::traverse()
+  {
+    while( this->running )
+    {
+      this->timer.start() ;
+      if( this->config.modified() ) this->reload() ;
+      for( auto module : this->queue )
+      {
+        module->kick() ;
+      }
+      
+      while( !this->queue.back()->ready() ) std::this_thread::sleep_for( std::chrono::microseconds( 0 ) ) ;
+      this->timer.stop() ;
+
+      iris::log::Log::output( "Graph '", this->graph_name.c_str(), "' execution time: ", this->timer.output() ) ;
+    }
+  }
+
+  void GraphData::clear()
+  {
+    std::string type ;
+    for( auto node : this->queue )
+    {
+      type = node->type() ;
+
+      node->shutdown() ;
+      this->loader->descriptor( type.c_str() ).destroy( node ) ;
+    }
+
+    this->queue.clear() ;
+    this->graph.clear() ;
+  }
+
+  void GraphData::kick()
+  {
+    for( auto module : this->queue )
+    {
+      module->initialize() ;
+      std::thread( &Module::start, module ).detach() ;
+    }
+  }
+
+  void GraphData::stop()
+  {
+    for( auto module : this->queue )
+    {
+      while( !module->stop() ) { module->kick() ; } ;
+    }
+  }
+
   GraphData::InputOutputPair GraphData::findInputsAndOutputs( const iris::config::json::Token& token )
   {
-    GraphData::InputOutputPair pair  ;
-    std::string                key   ;
-    std::string                value ;
+    GraphData::InputOutputPair pair ;
+    std::string                key  ;
+
     for( auto& param : token )
     {
       key = param.key() ;
@@ -104,8 +221,7 @@ namespace iris
   unsigned GraphData::recursiveSolve( Module* module, unsigned count )
   {
     const iris::config::json::Token start = this->config.begin() ;
-    std::string                     other        ;
-    unsigned                        priority     ;
+    unsigned priority ;
 
     if( count >= 300 )
     {
@@ -126,6 +242,7 @@ namespace iris
       {
         for( auto output : second.second )
         {
+          // If this module depends on the selected one's output, then add their priority to ours.
           if( input == output ) priority += this->recursiveSolve( dep.second, count++ ) ;
         }
       }
@@ -147,7 +264,7 @@ namespace iris
       this->queue.push_back( module.second ) ;
     }
     
-//    this->config.reset() ;
+    this->config.reset() ;
     this->graph.clear() ;
   }
 
@@ -182,6 +299,22 @@ namespace iris
       }
     }
   }
+  
+  void GraphData::reload()
+  {
+    iris::log::Log::output( "Graph ", this->graph_name.c_str(), " reloading..." ) ;
+    this->stop ()          ;
+    this->config.reset() ;
+    this->config.initialize( this->graph_config_path.c_str() ) ;
+
+    this->movePrexisting() ;
+    this->clear()          ;
+
+    this->load () ;
+    this->solve() ;
+    this->kick () ;
+    iris::log::Log::output( "Graph ", this->graph_name.c_str(), " reloaded!" ) ;
+  }
 
   void GraphData::load()
   {
@@ -204,7 +337,7 @@ namespace iris
         name = mod.key() ;
         version = 0  ;
         type    = "" ;
-
+        
         for( auto params = mod.begin(); params != mod.end(); ++params )
         {
           param = params.key() ;
@@ -213,7 +346,7 @@ namespace iris
           if( param == "version" ) version = params.number() ; 
        }
         
-        if( this->graph.find( name ) == this->graph.end() )
+        if( this->graph.find( name ) == this->graph.end() && this->pre_graph.find( name ) == this->pre_graph.end() )
         {
           Log::output( "Initializing module. \n\n",
           "  - Name    : ", name.c_str()            , "\n",
@@ -221,15 +354,14 @@ namespace iris
           "  - Version : ", version                 , "\n",
           "  - Graph   : ", this->graph_name.c_str(), "\n" ) ;
           
-          auto descriptor = loader->descriptor( type.c_str() ) ;  
-          auto module     = descriptor.create ( version      ) ;
+          auto module = loader->descriptor( type.c_str() ).create ( version ) ;
           
           if( module )
           {
             module->setName    ( name.c_str()     ) ;
             module->setVersion ( version          ) ;
             module->subscribe  ( this->id         ) ;
-            this->graph.insert( { name, module } ) ;
+            this->graph.insert( { name, module }  ) ;
             this->configureModule( mod, name ) ;
           }
           else
@@ -239,29 +371,15 @@ namespace iris
         }
       }
     }
+    
+    for( auto& iter : this->pre_graph )
+    {
+      this->graph.insert( iter ) ;
+    }
+    
+    this->pre_graph.clear() ;
   }
   
-  void GraphData::stop  ( const char* name )
-  {
-    auto iter = this->graph.find( name ) ;
-    
-    if( iter != this->graph.end() )
-    {
-      while( !iter->second->stop() ) {} ;
-    }
-  }
-
-  void GraphData::remove( const char* name )
-  {
-    auto iter = this->graph.find( name ) ;
-
-    if( iter != this->graph.end() )
-    {
-      this->stop( name ) ;
-      this->graph.erase( iter ) ;
-    }
-  }
-
   Graph::Graph()
   {
     this->graph_data = new GraphData() ;
@@ -277,8 +395,9 @@ namespace iris
     data().loader            = &mod_loader       ;
     data().graph_config_path = graph_config_path ;
     data().id                = id                ;
-    data().config.initialize( graph_config_path, id ) ;
-    data().load() ;
+
+    data().config.initialize( graph_config_path ) ;
+    data().load()  ;
     data().solve() ;
   }
   
@@ -324,47 +443,21 @@ namespace iris
 
     iris::log::Log::output( "Kicking off graph ", data().graph_name.c_str() ) ;
     data().running = true ;
-    for( auto module : data().queue )
-    {
-      module->initialize() ;
-      std::thread( &Module::start, module ).detach() ;
-    }
     
+    data().kick    () ;
+    data().traverse() ;
     
-    while( data().running )
-    {
-      for( auto module : data().queue )
-      {
-        data().timer.start() ;
-        module->kick() ;
-        data().timer.stop() ;
-      }
-      while( !data().queue.back()->ready() ) std::this_thread::sleep_for( std::chrono::microseconds( 200 ) ) ;
-
-      iris::log::Log::output( "Graph '", data().graph_name.c_str(), "' execution time: ", data().timer.output() ) ;
-    }
+    this->stop() ;
   }
 
   void Graph::stop()
   {
-    for( auto module : data().graph )
-    {
-      while( !module.second->stop() ) {} ;
-    }
+    data().stop() ;
   }
 
   void Graph::reset()
   {
-    std::string type ;
-    for( auto node : data().graph )
-    {
-      type = node.second->type() ;
-
-      auto descriptor = data().loader->descriptor( type.c_str() ) ;
-      descriptor.destroy( node.second ) ;
-    }
-
-    data().graph.clear() ;
+    data().clear() ;
   }
 
   GraphData& Graph::data()

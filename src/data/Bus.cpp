@@ -223,7 +223,11 @@ namespace iris
   
   void Signal::Subscriber::signal()
   {
-    this->is_signaled = true ;
+    {
+      std::lock_guard<std::mutex> lock( this->mutex ) ;
+      this->is_signaled = true ;
+    }
+
     this->cv.notify_one() ;
   }
   

@@ -57,7 +57,7 @@ namespace iris
        * @param module The pointer to the module to destroy.
        * @param version The version of module.
        */
-      void destroy( Module* module, unsigned version = 0 ) ;
+      void destroy( Module* module, unsigned version = 0 ) const ;
 
     private:
       
@@ -120,6 +120,12 @@ namespace iris
        * @return A const reference to a descriptor to assist in module creation.
        */
       const Descriptor& descriptor( const char* module_type ) const ;
+      
+      /** Method to recieve a descriptor of the input module type.
+       * @param module_type The type of module to recieve a descriptor for.
+       * @return A const reference to a descriptor to assist in module creation.
+       */
+      Descriptor& descriptor( const char* module_type ) ;
       
       /** Method to check if a descriptor exists for the given module type.
        * @param module_type The type of module to check.

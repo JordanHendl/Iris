@@ -22,6 +22,8 @@
 #include <fstream>
 #include <istream>
 #include <iostream>
+#include <chrono>
+#include <filesystem>
 
 namespace iris
 {
@@ -31,11 +33,15 @@ namespace iris
      */
     struct ConfigurationData
     {
-      iris::Bus                  bus    ; ///< The bus to sent data over.
-      iris::config::json::Parser parser ; ///< The parser to use to parse the configuration.
-      json::Token                 begin  ; ///< The beginning of this object's internal parsed data.
-      json::Token                 end    ; ///< The end of this object's internal parsed data.
-      bool                        init   ; ///< Whether or not this object is initialized.
+      using Time = std::chrono::system_clock::time_point ;
+      
+      iris::Bus                  bus      ; ///< The bus to sent data over.
+      iris::config::json::Parser parser   ; ///< The parser to use to parse the configuration.
+      std::string                filename ; ///< The filename being parsed.
+      json::Token                begin    ; ///< The beginning of this object's internal parsed data.
+      json::Token                end      ; ///< The end of this object's internal parsed data.
+      bool                       init     ; ///< Whether or not this object is initialized.
+      Time                       modified ; ///< The last time this object was modified.
       
       /** Default Constructor.
       */
@@ -72,12 +78,12 @@ namespace iris
       return data().init ;
     }
 
-    void Configuration::initialize( const char* path, unsigned channel )
+    void Configuration::initialize( const char* path )
     {
       std::string   file   ;
       std::ifstream stream ;
       
-      data().bus.setChannel( channel ) ;
+      data().filename = path ;
 
       stream.open( path ) ;
       data().parser.clear() ;
@@ -96,14 +102,33 @@ namespace iris
         data().parser.initialize( file.c_str() ) ;
         data().begin = data().parser.begin() ;
         data().end   = data().parser.end  () ;
-
-        stream.close() ;
+        
+        data().modified = std::filesystem::last_write_time( path ) ;
       }
       else
       {
         iris::log::Log::output( iris::log::Log::Level::Warning, "Unable to load configuration file: ", path ) ;
         data().init = false ;
       }
+      stream.close() ;
+    }
+    
+    bool Configuration::modified()
+    {
+      auto time = std::filesystem::last_write_time( data().filename ) ;
+
+      if( data().modified != time )
+      {
+        data().modified = time ;
+        return true ;
+      }
+
+      return false ;
+    }
+
+    void Configuration::reset()
+    {
+      data().parser.clear() ;
     }
 
     ConfigurationData& Configuration::data()

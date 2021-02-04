@@ -53,7 +53,7 @@ namespace iris
   
   void ManagerData::findGraphs()
   {
-    this->config.initialize( this->config_path.c_str(), 0 ) ;
+    this->config.initialize( this->config_path.c_str() ) ;
     
     auto token = this->config.begin() ;
     

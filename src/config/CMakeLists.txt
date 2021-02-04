@@ -47,10 +47,14 @@ SET( IRIS_CONFIG_DEPS
      iris_log
    )
 
+IF( UNIX AND NOT APPLE )
+  LIST( APPEND IRIS_CONFIG_LIBRARIES stdc++fs )
+ENDIF()
+
 ADD_LIBRARY               ( iris_configuration SHARED  ${IRIS_CONFIG_SOURCES} ${IRIS_CONFIG_HEADERS} )
-TARGET_INCLUDE_DIRECTORIES( iris_configuration PRIVATE ${IRIS_CONFIG_INCLUDES}                        ) 
-TARGET_LINK_LIBRARIES     ( iris_configuration PUBLIC  ${IRIS_CONFIG_LIBRARIES}                       ) 
-ADD_DEPENDENCIES          ( iris_configuration         ${IRIS_CONFIG_DEPS}                            )
+TARGET_INCLUDE_DIRECTORIES( iris_configuration PRIVATE ${IRIS_CONFIG_INCLUDES}                       ) 
+TARGET_LINK_LIBRARIES     ( iris_configuration PUBLIC  ${IRIS_CONFIG_LIBRARIES}                      ) 
+ADD_DEPENDENCIES          ( iris_configuration         ${IRIS_CONFIG_DEPS}                           )
 
 # If running tests, make and run them.
 IF( RUN_TESTS )

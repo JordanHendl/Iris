@@ -64,8 +64,16 @@ namespace iris
          * @param path The path to the JSON file to process on the file system.
          * @param channel The channel of data bus to pulse information to.
          */
-        void initialize( const char* path, unsigned channel = 0 ) ;
+        void initialize( const char* path ) ;
+        
+        /** Method to check whether or not this configuration file was modified.
+         * @return Whether or not this file was modified.
+         */
+        bool modified() ;
 
+        /** Method to clear this object of all it's contents.
+         */
+        void reset() ;
       private:
 
         /** Forward declared structure to contain this object's interal data.

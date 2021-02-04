@@ -174,7 +174,7 @@ void Iris::initialize( const char* setup_json_path )
   // Set the exit condition in the event bus.
   data().bus.enroll( this->iris_data, &IrisData::setExit, "Iris::Exit::Flag" ) ;
   
-  data().config.initialize( iris_config_path.c_str(), 0 ) ;
+  data().config.initialize( iris_config_path.c_str() ) ;
   data().parseSetup() ;
   
   if( data().module_config_path.empty() )
