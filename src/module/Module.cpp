@@ -101,22 +101,24 @@ namespace iris
   {
     setThreadPriority() ;
     
-    std::unique_lock<std::mutex> lock = std::unique_lock<std::mutex>( data().mutex ) ;
-    
     data().should_run = true ;
 
     while( data().should_run )
     {
+      std::unique_lock<std::mutex> lock = std::unique_lock<std::mutex>( data().mutex ) ;
+      data().is_signaled = false ;
       data().cv.wait( lock, [=] { return data().is_signaled.load() ; } ) ;
       this->execute() ;
-      data().is_signaled = false ;
     }
   }
   
   void Module::kick()
   {
-    data().is_signaled = true  ;
-    data().cv.notify_all() ;
+    if( !data().is_signaled )
+    {
+      data().is_signaled = true ;
+      data().cv.notify_one() ;
+    }
   }
   
   bool Module::stop()

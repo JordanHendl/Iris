@@ -234,6 +234,7 @@ namespace iris
     this->reset() ;
     lock.unlock() ;
   }
+  
   void Signal::Subscriber::initialize( Bus::Subscriber* sub )
   {
     this->subscriber_ptr = sub ;
@@ -317,12 +318,15 @@ namespace iris
   BusData::~BusData()
   {
     map_lock.lock() ;
-    for( auto iter : this->sub_map )
+    if( this->sub_map.size() != 0 )
     {
-      auto signal = signal_map.find( iter.first ) ;
-      
-      delete( iter.second.second->second ) ;
-      signal->second->subscribers.erase( iter.second.second ) ;
+      for( auto& iter : this->sub_map )
+      {
+        auto signal = signal_map.find( iter.first ) ;
+        
+        delete( iter.second.second->second ) ;
+        signal->second->subscribers.erase( iter.second.second ) ;
+      }
     }
     map_lock.unlock() ;
   }

@@ -46,7 +46,7 @@ struct IrisData
   /** Method to act as a pathway for the graph to signal iris to shutdown.
    * @param exit Whether or not iris should exit.
    */
-  void setExit( bool exit ) ;
+  void setExit( unsigned exit ) ;
 
   /** Method to set the graph configuration path.
    * @param path The path to the graph configuration on the filesystem.
@@ -83,13 +83,14 @@ IrisData::IrisData()
   this->running = false ;
 }
 
-void IrisData::setExit( bool exit )
+void IrisData::setExit( unsigned exit )
 {
-  if( !exit )
+  if( exit )
   {
     this->mod_manager.shutdown() ;
-    this->running = false ;
-    this->cv.notify_all() ;
+    this->running = false        ;
+    iris::log::Log::flush()      ;
+    this->cv.notify_all()        ;
   }
 }
 
@@ -171,7 +172,7 @@ void Iris::initialize( const char* setup_json_path )
   const std::string iris_config_path = setup_json_path ;
   
   // Set the exit condition in the event bus.
-  data().bus.enroll( this->iris_data, &IrisData::setExit, "IRIS_EXIT_FLAG" ) ;
+  data().bus.enroll( this->iris_data, &IrisData::setExit, "Iris::Exit::Flag" ) ;
   
   data().config.initialize( iris_config_path.c_str(), 0 ) ;
   data().parseSetup() ;

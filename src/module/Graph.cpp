@@ -169,6 +169,7 @@ namespace iris
             this->bus.emitIndexed( param.number ( index ), index, name.c_str(), "::", key.c_str() ) ;
             this->bus.emitIndexed( param.decimal( index ), index, name.c_str(), "::", key.c_str() ) ;
             this->bus.emitIndexed( param.string ( index ), index, name.c_str(), "::", key.c_str() ) ;
+            this->bus.emitIndexed( param.boolean( index ), index, name.c_str(), "::", key.c_str() ) ;
           }
         }
         else
@@ -176,6 +177,7 @@ namespace iris
           this->bus.emit( param.number (), name.c_str(), "::", key.c_str() ) ;
           this->bus.emit( param.decimal(), name.c_str(), "::", key.c_str() ) ;
           this->bus.emit( param.string (), name.c_str(), "::", key.c_str() ) ;
+          this->bus.emit( param.boolean(), name.c_str(), "::", key.c_str() ) ;
         }
       }
     }
