@@ -15,40 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
- * File:   Graph.h
- * Author: Jordan Hendl
- *
- * Created on July 10, 2020, 6:04 AM
- */
-
-#ifndef IRIS_GRAPH_H
-#define IRIS_GRAPH_H
+#pragma once
 
 namespace iris
 {
   class Module ;
-  class Loader ;
-  class Graph
+  class Scheduler
   {
     public:
-      Graph() ;
-      ~Graph() ;
-      void initialize( Loader& mod_loader, const char* graph_config_path, unsigned id = 0 ) ;
-      void add( const char* name, Module* module ) ;
-      bool has( const char* name ) const ;
+      Scheduler() ;
+      ~Scheduler() ;
+      void schedule( Module* module, float priority ) ;
       void pulse() ;
-      const Module* module( const char* name ) ;
-      void setName( const char* name ) ;
-      void kick() ;
       void stop() ;
-      void reset() ;
     private:
-      struct GraphData* graph_data ;
-      GraphData& data() ;
-      const GraphData& data() const ;
+      struct SchedulerData *scheduler_data ;
+      SchedulerData& data() ;
+      const SchedulerData& data() const ;
   };
 }
-
-#endif
 

@@ -69,10 +69,13 @@ namespace iris
       void setId( unsigned id ) ;
 
       /** Method to start operations of this module.
-       * @return 
        */
       void start() ;
       
+      /** Method to kick this module to start a single execution.
+       */
+      void kick() ;
+
       /** Method to stop operation of this module.
        * @return Whether the module is stopped or not.
        */

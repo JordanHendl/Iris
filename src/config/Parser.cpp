@@ -545,6 +545,11 @@ namespace iris
         if( data().node == nullptr ) return false ;
         return true ;
       }
+      
+      Token& Token::operator*()
+      {
+        return *this ;
+      }
 
       Token Token::operator[]( const char* key ) const
       {

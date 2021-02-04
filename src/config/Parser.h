@@ -53,6 +53,11 @@ namespace iris
            * @return The token containing that key. If not found, returns this token.
            */
           Token operator[]( const char* key ) const ;
+          
+          /** Star operator for range based for loop.
+           * @return Reference to this object.
+           */
+          Token& operator*() ;
 
           /** Assignment operator for another copy of this object.
            * @param token Const-reference to the other object to copy data from.

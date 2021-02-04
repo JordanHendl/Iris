@@ -212,6 +212,7 @@ namespace iris
   Signal::Subscriber::Subscriber()
   {
     this->subscriber_ptr = nullptr ;
+    this->is_signaled = false ;
   }
   
   Signal::Subscriber::Subscriber( const Signal::Subscriber& cont )

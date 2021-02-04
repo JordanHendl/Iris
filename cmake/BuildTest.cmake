@@ -37,7 +37,7 @@ FUNCTION( BUILD_TEST )
 
     IF( TARGET )
       IF( BUILD_TESTS )
-        FIND_PACKAGE( Athena REQUIRED )
+        FIND_PACKAGE( athena REQUIRED )
         # Add Test executable.
         ADD_EXECUTABLE       ( "${TARGET}_test" Test.cpp                         )
         TARGET_LINK_LIBRARIES( "${TARGET}_test" ${TARGET} athena ${DEPENDANCIES} )

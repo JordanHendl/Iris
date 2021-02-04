@@ -26,14 +26,20 @@
 #include <map>
 #include <thread>
 #include <iostream>
+#include <queue>
+
 namespace iris
 {
   struct GraphData
   {
     typedef std::map<std::string, Module*> ModuleGraph ;
     using Config = iris::config::Configuration ;  
+    using PriorityQueue   = std::vector<Module*> ;
+    using StringVec       = std::vector<std::string>                          ;
+    using InputOutputPair = std::pair<StringVec, StringVec>                   ;
 
-    iris::Bus  bus               ;
+    PriorityQueue queue ;
+    iris::Bus   bus               ;
     Config      config            ;
     Loader*     loader            ;
     ModuleGraph graph             ;
@@ -41,17 +47,104 @@ namespace iris
     std::string graph_name        ;
     std::string graph_config_path ;
     unsigned    id                ;
+    bool        running           ;
 
     void stop  ( const char* name ) ;
     void remove( const char* name ) ;
-    void setName( const char* name ) ;
-    void loadModules() ;
+    void load() ;
     void configureModule( iris::config::json::Token& token, std::string& name ) ;
+    InputOutputPair findInputsAndOutputs( const iris::config::json::Token& token ) ;
+    void solve() ;
+    unsigned recursiveSolve( Module* module, unsigned count = 0 ) ;
   };
-
-  void GraphData::setName( const char* name )
+  
+  GraphData::InputOutputPair GraphData::findInputsAndOutputs( const iris::config::json::Token& token )
   {
-    this->graph_name = name ;
+    GraphData::InputOutputPair pair  ;
+    std::string                key   ;
+    std::string                value ;
+    for( auto& param : token )
+    {
+      key = param.key() ;
+      
+      if( key == "inputs" || key.find( "inputs" ) != std::string::npos )
+      {
+        if( param.isArray() )
+        {
+          for( unsigned i = 0; i < param.size(); i++ )
+            pair.first.push_back( param.string( i ) ) ;
+        }
+        else
+        {
+          pair.first.push_back( param.string() ) ;
+        }
+      }
+      
+      else if( key == "outputs" || key.find( "outputs" ) != std::string::npos )
+      {
+        if( param.isArray() )
+        {
+          for( unsigned i = 0; i < param.size(); i++ )
+            pair.second.push_back( param.string( i ) ) ;
+        }
+        else
+        {
+          pair.second.push_back( param.string() ) ;
+        }
+      }
+    }
+    
+    return pair ;
+  }
+
+  unsigned GraphData::recursiveSolve( Module* module, unsigned count )
+  {
+    const iris::config::json::Token start = this->config.begin() ;
+    std::string                     other        ;
+    unsigned                        priority     ;
+
+    if( count >= 300 )
+    {
+      std::cout << "Possible loop found in graph. Exitting." << std::endl ;
+      exit( -1 ) ;
+    }
+
+    priority = 1 ;
+    
+    auto first = this->findInputsAndOutputs( start[ module->name() ] ) ;
+
+    // For every other module, check and see if their output match the selected input.
+    for( const auto& dep : this->graph )
+    {
+      
+      auto second = this->findInputsAndOutputs( start[ dep.second->name() ] ) ;
+      for( auto input : first.first )
+      {
+        for( auto output : second.second )
+        {
+          if( input == output ) priority += this->recursiveSolve( dep.second, count++ ) ;
+        }
+      }
+    }
+    
+    return priority ;
+  }
+
+  void GraphData::solve()
+  {
+    std::multimap<unsigned, Module*> map ;
+    for( const auto& module : this->graph )
+    {
+      map.insert( { this->recursiveSolve( module.second ), module.second } ) ;
+    }
+    
+    for( auto module : map )
+    {
+      this->queue.push_back( module.second ) ;
+    }
+    
+//    this->config.reset() ;
+    this->graph.clear() ;
   }
 
   void GraphData::configureModule( iris::config::json::Token& token, std::string& name )
@@ -84,7 +177,7 @@ namespace iris
     }
   }
 
-  void GraphData::loadModules()
+  void GraphData::load()
   {
     using namespace iris::log ;
 
@@ -179,7 +272,8 @@ namespace iris
     data().graph_config_path = graph_config_path ;
     data().id                = id                ;
     data().config.initialize( graph_config_path, id ) ;
-    data().loadModules() ;
+    data().load() ;
+    data().solve() ;
   }
   
   bool Graph::has( const char* name ) const
@@ -198,6 +292,13 @@ namespace iris
     return nullptr ;
   }
   
+  void Graph::pulse()
+  {
+    for( auto& module : data().graph )
+    {
+      module.second->kick() ;
+    }
+  }
   void Graph::add( const char* name, Module* module )
   {
     if( data().graph.find( name ) == data().graph.end() )
@@ -208,17 +309,28 @@ namespace iris
   
   void Graph::setName( const char* name )
   {
-    data().setName( name ) ;
+    data().graph_name = name ;
   }
 
   void Graph::kick()
   {
-    iris::log::Log::output( "Kicking off graph ", data().graph_name.c_str() ) ;
+    GraphData::PriorityQueue queue ;
 
-    for( auto module : data().graph )
+    iris::log::Log::output( "Kicking off graph ", data().graph_name.c_str() ) ;
+    data().running = true ;
+    for( auto module : data().queue )
     {
-      module.second->initialize() ;
-      std::thread( &Module::start, module.second ).detach() ;
+      module->initialize() ;
+      std::thread( &Module::start, module ).detach() ;
+    }
+    
+    
+    while( data().running )
+    {
+      for( auto module : data().queue )
+      {
+        module->kick() ;
+      }
     }
   }
 
