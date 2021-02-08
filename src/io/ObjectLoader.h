@@ -55,7 +55,7 @@ namespace iris
         Symbol& operator=( void (*func)() ) ;
 
       private:
-        RETURN (*func)(ARGS ... args ) ;
+        RETURN (*func)( ARGS ... args ) ;
     };
 
     /** A Class to manage loading of shared objects from a .DLL / .SO.
