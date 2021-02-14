@@ -153,7 +153,7 @@ namespace iris
     for( auto node : this->queue )
     {
       type = node->type() ;
-
+      
       node->shutdown() ;
       this->loader->descriptor( type.c_str() ).destroy( node ) ;
     }
@@ -166,7 +166,11 @@ namespace iris
   {
     for( auto module : this->queue )
     {
-      module->initialize() ;
+      if( this->pre_graph.find( module->name() ) == this->pre_graph.end() )
+      {
+        module->initialize() ;
+      }
+
       std::thread( &Module::start, module ).detach() ;
     }
   }
@@ -225,8 +229,7 @@ namespace iris
 
     if( count >= 300 )
     {
-      std::cout << "Possible loop found in graph. Exitting." << std::endl ;
-      exit( -1 ) ;
+      iris::log::Log::output( iris::log::Log::Level::Fatal, "Possible loop found in graph. Exitting." ) ;
     }
 
     priority = 1 ;
@@ -304,7 +307,7 @@ namespace iris
   {
     iris::log::Log::output( "Graph ", this->graph_name.c_str(), " reloading..." ) ;
     this->stop ()          ;
-    this->config.reset() ;
+    this->config.reset()   ;
     this->config.initialize( this->graph_config_path.c_str() ) ;
 
     this->movePrexisting() ;
@@ -314,6 +317,7 @@ namespace iris
     this->solve() ;
     this->kick () ;
     iris::log::Log::output( "Graph ", this->graph_name.c_str(), " reloaded!" ) ;
+    this->pre_graph.clear() ;
   }
 
   void GraphData::load()
@@ -344,7 +348,7 @@ namespace iris
           
           if( param == "type"    ) type    = params.string() ;
           if( param == "version" ) version = params.number() ; 
-       }
+        }
         
         if( this->graph.find( name ) == this->graph.end() && this->pre_graph.find( name ) == this->pre_graph.end() )
         {
@@ -362,13 +366,15 @@ namespace iris
             module->setVersion ( version          ) ;
             module->subscribe  ( this->id         ) ;
             this->graph.insert( { name, module }  ) ;
-            this->configureModule( mod, name ) ;
+            
           }
           else
           {
             Log::output( Log::Level::Warning, "Failed to load module: ", name.c_str() ) ;
           }
         }
+        
+        this->configureModule( mod, name ) ;
       }
     }
     
@@ -376,8 +382,6 @@ namespace iris
     {
       this->graph.insert( iter ) ;
     }
-    
-    this->pre_graph.clear() ;
   }
   
   Graph::Graph()

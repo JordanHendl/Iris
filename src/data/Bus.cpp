@@ -149,9 +149,9 @@ namespace iris
     std::mutex                                   signal_mutex ;
   };
   
-  typedef std::multimap<std::string, Signal*                                       > SignalMap        ;
-  typedef std::multimap<std::string, std::pair<Signal*, Signal::SubscriberIterator>> LocalSubscribers ;
-  typedef std::multimap<unsigned   , std::pair<Signal*, Signal::PublisherIterator >> LocalPublishers  ;
+  typedef std::multimap<std::string, Signal*                                  > SignalMap        ;
+  typedef std::map<std::string, std::pair<Signal*, Signal::SubscriberIterator>> LocalSubscribers ;
+  typedef std::map<std::string, std::pair<Signal*, Signal::PublisherIterator >> LocalPublishers  ;
   
   static SignalMap  signal_map ;
   static std::mutex map_lock   ;
@@ -375,7 +375,7 @@ namespace iris
       auto map = pub.second ;
       auto val = map.second->second->execute( idx ) ;
       
-      for( auto iter = pub.second.first->subscribers.lower_bound( pub.first ); iter != pub.second.first->subscribers.upper_bound( pub.first ); ++iter )
+      for( auto iter = pub.second.first->subscribers.lower_bound( pub.second.second->first ); iter != pub.second.first->subscribers.upper_bound( pub.second.second->first ); ++iter )
       {
         iter->second->subscriber().execute( val, idx ) ;
         iter->second->signal() ;
@@ -397,7 +397,9 @@ namespace iris
     
     map_lock.lock() ;
     
-    auto iter = signal_map.find( key.str() ) ;
+    auto iter = signal_map.find( key.str() )      ;
+    auto iter2 = data().pub_map.find( key.str() ) ;
+
     
     if( iter == signal_map.end() )
     {
@@ -410,8 +412,14 @@ namespace iris
       pub_iter = iter->second->insert( type_id, publisher ) ;
     }
     
-    data().pub_map.insert( { type_id , std::make_pair( iter->second, pub_iter ) } ) ;
+    if( iter2 != data().pub_map.end() )
+    {
+      iter->second->remove( iter2->second.second ) ;
+      data().pub_map.erase( iter2 ) ;
+    }
     
+    data().pub_map.insert( { key.str() , std::make_pair( iter->second, pub_iter ) } ) ;
+
     map_lock.unlock() ;
   }
   
@@ -421,8 +429,10 @@ namespace iris
     
     map_lock.lock() ;
     
-    auto iter = signal_map.find( key.str() ) ;
+    auto iter  = signal_map.find( key.str() )     ;
+    auto iter2 = data().sub_map.find( key.str() ) ;
     
+
     if( iter == signal_map.end() )
     {
       iter = signal_map.insert( { std::string( key.str() ), new Signal() } ) ;
@@ -433,9 +443,18 @@ namespace iris
     {
       sub_iter = iter->second->insert( type_id, subscriber ) ;
     }
-    
+  
+    if( iter2 != data().sub_map.end() )
+    {
+      iter->second->remove( iter2->second.second ) ;
+      data().sub_map.erase( iter2                ) ;
+      
+      auto required_iter = data().required_sub_map.find( key.str() ) ;
+      if( required_iter != data().required_sub_map.end() ) data().required_sub_map.erase( required_iter ) ;
+    }
+
     data().sub_map.insert( { std::string( key.str() ), std::make_pair( iter->second, sub_iter ) } ) ;
-    
+  
     if( required )
     {
       data().required_sub_map.insert( { std::string( key.str() ), std::make_pair( iter->second, sub_iter ) } ) ;

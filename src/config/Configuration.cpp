@@ -24,6 +24,7 @@
 #include <iostream>
 #include <chrono>
 #include <filesystem>
+#include <thread>
 
 namespace iris
 {
@@ -115,11 +116,13 @@ namespace iris
     
     bool Configuration::modified()
     {
-      auto time = std::filesystem::last_write_time( data().filename ) ;
+      static std::error_code error ;
+      auto time = std::filesystem::last_write_time( data().filename, error ) ;
 
       if( data().modified != time )
       {
         data().modified = time ;
+        std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) ) ;
         return true ;
       }
 

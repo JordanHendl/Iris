@@ -46,7 +46,7 @@ struct IrisData
   /** Method to act as a pathway for the graph to signal iris to shutdown.
    * @param exit Whether or not iris should exit.
    */
-  void setExit( unsigned exit ) ;
+  void setExit( bool exit ) ;
 
   /** Method to set the graph configuration path.
    * @param path The path to the graph configuration on the filesystem.
@@ -61,7 +61,7 @@ struct IrisData
   /** Method to set whether or not the logs should be enabled or not.
    * @param output Whether or not logs should be enabled.
    */
-  void setLogEnable( const char* boolean ) ;
+  void setLogEnable( bool boolean ) ;
 
   /** Method to set the output directory of iris logs.
    * @param output The output directory of iris logs.
@@ -83,7 +83,7 @@ IrisData::IrisData()
   this->running = false ;
 }
 
-void IrisData::setExit( unsigned exit )
+void IrisData::setExit( bool exit )
 {
   if( exit )
   {
@@ -92,6 +92,11 @@ void IrisData::setExit( unsigned exit )
     iris::log::Log::flush()      ;
     this->cv.notify_all()        ;
   }
+}
+
+void IrisData::setLogEnable( bool val )
+{
+  iris::log::Log::setEnabled( val ) ;
 }
 
 void IrisData::setDebugMode( const char* mode )
@@ -135,12 +140,13 @@ void IrisData::parseSetup()
   auto module_path  = token[ "module_path"       ] ;
   auto log_output   = token[ "log_output_path"   ] ;
   auto log_mode     = token[ "log_mode"          ] ;
-  auto log_enable   = token[ "log_mode"          ] ;
+  auto log_enable   = token[ "log_enable"        ] ;
   
   if( graph_config ) this->setModuleConfigPath( graph_config.string() ) ;
   if( module_path  ) this->setModulePath      ( module_path.string()  ) ;
   if( log_output   ) this->setDebugOutput     ( log_output.string()   ) ;
   if( log_mode     ) this->setDebugMode       ( log_mode.string()     ) ;
+  if( log_enable   ) this->setLogEnable       ( log_enable.boolean()  ) ;
 }
 
 Iris::Iris()
