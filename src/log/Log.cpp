@@ -26,6 +26,7 @@
 #include <chrono>
 #include <iomanip>
 #include <cstring>
+#include <condition_variable>
 
 namespace iris
 {
@@ -57,6 +58,18 @@ namespace iris
       first.setStr( string.c_str() ) ;
     }
 
+    void operator<<( String& first, unsigned long long second )
+    {
+      std::stringstream stream ;
+      std::string       string ;
+
+      stream << first.str()  ;
+      stream << second       ;
+      
+      string = stream.str() ;
+      first.setStr( string.c_str() ) ;
+    }
+    
     void operator<<( String& first, unsigned second )
     {
       std::stringstream stream ;
@@ -108,7 +121,7 @@ namespace iris
     struct LogData
     {
       const unsigned INITIAL_LOG_SIZE = 8000 ;
-      
+      tm*            local_time  ;
       std::string    output_path ;
       char*          log         ;
       unsigned       log_size    ;
@@ -150,6 +163,7 @@ namespace iris
       this->use_stdout  = true                               ;
       this->current_pos = 0                                  ;
       this->mode        = Log::Mode::Quiet                   ;
+      this->local_time  = nullptr                            ;
     }
 
     const char* LogData::stringFromLogLevel( Log::Level level )
@@ -165,18 +179,15 @@ namespace iris
     
     std::string LogData::timestamp()
     {
-      // For some reason, this crashes when enabled? TODO: Make this not crash.
-//      auto now = std::chrono::system_clock::now() ;
-//      time_t            time       ;
-//      tm                local_time ;
       std::stringstream stream     ;
       std::string       str        ;
-//      
-//      time       = std::chrono::system_clock::to_time_t( now ) ;
-//      local_time = localtime( &time )                          ;
-//      
-//      stream << local_time.tm_hour << "h " << local_time.tm_min << "m " << local_time.tm_sec << "s |" ;
-//      str = std::string( stream.str().c_str() ) ;
+      
+      if( log_data.local_time != nullptr )
+      {
+        stream << log_data.local_time->tm_hour << "h " << log_data.local_time->tm_min << "m " << log_data.local_time->tm_sec << "s |" ;
+      }
+
+      str = std::string( stream.str().c_str() ) ;
       
       return str ;
     }
@@ -242,7 +253,7 @@ namespace iris
 
       std::stringstream file_name  ;
       time_t            time       ;
-      tm                local_time ;
+      
       
       char ch ;
 
@@ -256,23 +267,23 @@ namespace iris
         log_data.output_path.pop_back() ;
       }
       
-      time       = std::chrono::system_clock::to_time_t( now ) ;
-      local_time = *localtime( &time )                         ;
+      time                = std::chrono::system_clock::to_time_t( now ) ;
+      log_data.local_time = localtime( &time )                          ;
       
-      file_name << "/iris_debug_log_"   ;
-      file_name << local_time.tm_mon    ;
-      file_name << "D_"                 ;
-      file_name << local_time.tm_mday   ;
-      file_name << "M_"                 ;
-      file_name << local_time.tm_year   ;
-      file_name << "Y_"                 ;
-      file_name << local_time.tm_hour   ;
-      file_name << "H"                  ;
-      file_name << local_time.tm_min    ;
-      file_name << "M"                  ;
-      file_name << local_time.tm_sec    ;
-      file_name << "S"                  ;
-      file_name << ".txt"               ;
+      file_name << "/iris_debug_log_"            ;
+      file_name << log_data.local_time->tm_mon   ;
+      file_name << "D_"                          ;
+      file_name << log_data.local_time->tm_mday  ;
+      file_name << "M_"                          ;
+      file_name << log_data.local_time->tm_year  ;
+      file_name << "Y_"                          ;
+      file_name << log_data.local_time->tm_hour  ;
+      file_name << "H"                           ;
+      file_name << log_data.local_time->tm_min   ;
+      file_name << "M"                           ;
+      file_name << log_data.local_time->tm_sec   ;
+      file_name << "S"                           ;
+      file_name << ".txt"                        ;
       
       log_data.output_path += file_name.str() ;
     }
@@ -296,13 +307,12 @@ namespace iris
     {
       const std::string timestamp = log_data.timestamp()                 ;
       const std::string level_str = log_data.stringFromLogLevel( level ) ;
-
-      std::stringstream base_str ;
-      std::stringstream msg      ;
-      int               cx       ;
+      static std::mutex log_mutex ;
+      std::stringstream base_str  ;
+      std::stringstream msg       ;
+      int               cx        ;
       
-      
-      
+      log_mutex.lock() ;
       if( log_data.mode == Log::Mode::Verbose )
       {
         base_str << timestamp ;
@@ -331,6 +341,7 @@ namespace iris
           log_data.current_pos += cx ;
         }
       }
+      log_mutex.unlock() ;
     }
   }
 }

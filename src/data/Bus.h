@@ -184,14 +184,14 @@ namespace iris
        * @param args The key of the signal to send the data over.
        */
       template<class Value, typename ... Keys>
-      void emitIndexed( const Value& value, unsigned idx, Keys... args ) ;
+      inline void emitIndexed( const Value& value, unsigned idx, Keys... args ) ;
       
       /** Method to manually publish data through the bus to subscriptions.
        * @param value The data to publish.
        * @param args The key of the signal to send the data over.
        */
       template<class Value, typename ... Keys>
-      void emit( const Value& value, Keys... args ) ;
+      inline void emit( const Value& value, Keys... args ) ;
       
       /** Method to enroll a subscription in the bus. 
        *  AKA Set a setter function pointer to receive data copy.
@@ -199,7 +199,7 @@ namespace iris
        * @param args The arguments that make up the name of signal to send the data over.
        */
       template<typename ... Keys, class Value>
-      void enroll( void (*setter)( Value ), bool required, Keys... args ) ;
+      inline void enroll( void (*setter)( Value ), bool required, Keys... args ) ;
 
       /** Method to enroll a subscription in the bus. 
        *  AKA Set a setter function pointer to receive data via const-reference.
@@ -207,7 +207,7 @@ namespace iris
        * @param args The arguments that make up the name of signal to send the data over.
        */
       template<typename ... Keys, class Value>
-      void enroll( void (*setter)( const Value& ), bool required, Keys... args ) ;
+      inline void enroll( void (*setter)( const Value& ), bool required, Keys... args ) ;
 
       /** Method to enroll an indexed subscription in the bus. 
        *  AKA Set a setter function pointer to receive data via value.
@@ -215,7 +215,7 @@ namespace iris
        * @param args The arguments that make up the name of signal to send the data over.
        */      
       template<typename ... Keys, class Value>
-      void enroll( void (*setter)( unsigned, Value ), bool required, Keys... args ) ;
+      inline void enroll( void (*setter)( unsigned, Value ), bool required, Keys... args ) ;
       
       /** Method to enroll an indexed subscription in the bus. 
        *  AKA Set a setter function pointer to receive data via const-reference.
@@ -223,7 +223,7 @@ namespace iris
        * @param args The arguments that make up the name of signal to send the data over.
        */      
       template<typename ... Keys, class Value>
-      void enroll( void (*setter)( unsigned, Value const & ), bool required, Keys... args ) ;
+      inline void enroll( void (*setter)( unsigned, Value const & ), bool required, Keys... args ) ;
       
       /** Method to enroll a method subscription in the bus.
        * @param obj The object to use for calling the subscription.
@@ -231,7 +231,7 @@ namespace iris
        * @param args The arguments that make up the name of the signal to send data over.
        */
       template<typename ... Keys, class Object, class Value>
-      void enroll( Object* obj, void (Object::*setter)( Value ), bool required, Keys... args ) ;
+      inline void enroll( Object* obj, void (Object::*setter)( Value ), bool required, Keys... args ) ;
       
       /** Method to enroll a method subscription in the bus.
        * @param obj The object to use for calling the subscription.
@@ -239,7 +239,7 @@ namespace iris
        * @param args The arguments that make up the name of the signal to send data over.
        */
       template<typename ... Keys, class Object, class Value>
-      void enroll( Object* obj, void (Object::*setter)( Value const & ), bool required, Keys... args ) ;
+      inline void enroll( Object* obj, void (Object::*setter)( Value const & ), bool required, Keys... args ) ;
       
       /** Method to enroll an indexed method subscription in the bus.
        * @param obj The object to use for calling the subscription.
@@ -247,7 +247,7 @@ namespace iris
        * @param args The arguments that make up the name of the signal to send data over.
        */
       template<typename ... Keys, class Object, class Value>
-      void enroll( Object* obj, void (Object::*setter)( unsigned, Value ), bool required, Keys... args ) ;
+      inline void enroll( Object* obj, void (Object::*setter)( unsigned, Value ), bool required, Keys... args ) ;
       
       /** Method to enroll an indexed method subscription in the bus.
        * @param obj The object to use for calling the subscription.
@@ -255,35 +255,35 @@ namespace iris
        * @param args The arguments that make up the name of the signal to send data over.
        */
       template<typename ... Keys, class Object, class Value>
-      void enroll( Object* obj, void (Object::*setter)( unsigned, Value const & ), bool required, Keys... args ) ;
+      inline void enroll( Object* obj, void (Object::*setter)( unsigned, Value const & ), bool required, Keys... args ) ;
       
       /** Method to set a publisher in the bus.
        * @param getter The function pointer to use for publishing data via copy.
        * @param args The arguments that make up the name of the signal to send data over.
        */
       template<typename ... Keys, class Value>
-      void publish( Value (*getter)(), Keys... args ) ;
+      inline void publish( Value (*getter)(), Keys... args ) ;
 
       /** Method to set a publisher in the bus.
        * @param getter The function pointer to use for publishing data via const-reference.
        * @param args The arguments that make up the name of the signal to send data over.
        */
       template<typename ... Keys, class Value>
-      void publish( const Value& (*getter)(), Keys... args ) ;
+      inline void publish( const Value& (*getter)(), Keys... args ) ;
       
       /** Method to set an indexed publisher in the bus.
        * @param getter The function pointer to use for publishing data via copy.
        * @param args The arguments that make up the name of the signal to send data over.
        */
       template<typename ... Keys, class Value>
-      void publish( Value (*getter)( unsigned ), Keys... args ) ;
+      inline void publish( Value (*getter)( unsigned ), Keys... args ) ;
       
       /** Method to set an indexed publisher in the bus.
        * @param getter The function pointer to use for publishing data via const-reference.
        * @param args The arguments that make up the name of the signal to send data over.
        */
       template<typename ... Keys, class Value>
-      void publish( const Value& (*getter)( unsigned ), Keys... args ) ;
+      inline void publish( const Value& (*getter)( unsigned ), Keys... args ) ;
       
       /** Method to set a publisher in the bus.
        * @param obj The object to use for calling the publishing function.
@@ -291,7 +291,7 @@ namespace iris
        * @param args The arguments that make up the name of the signal to send data over.
        */
       template<typename ... Keys, class Object, class Value>
-      void publish( Object* obj, Value (Object::*getter)(), Keys... args ) ;
+      inline void publish( Object* obj, Value (Object::*getter)(), Keys... args ) ;
       
       /** Method to set a publisher in the bus.
        * @param obj The object to use for calling the publishing function.
@@ -299,7 +299,7 @@ namespace iris
        * @param args The arguments that make up the name of the signal to send data over.
        */
       template<typename ... Keys, class Object, class Value>
-      void publish( Object* obj, const Value& (Object::*getter)(), Keys... args ) ;
+      inline void publish( Object* obj, const Value& (Object::*getter)(), Keys... args ) ;
       
       /** Method to set an indexed publisher in the bus.
        * @param obj The object to use for calling the publishing function.
@@ -307,7 +307,7 @@ namespace iris
        * @param args The arguments that make up the name of the signal to send data over.
        */
       template<typename ... Keys, class Object, class Value>
-      void publish( Object* obj, Value (Object::*getter)( unsigned ), Keys... args ) ;
+      inline void publish( Object* obj, Value (Object::*getter)( unsigned ), Keys... args ) ;
       
       /** Method to set an indexed publisher in the bus.
        * @param obj The object to use for calling the publishing function.
@@ -315,7 +315,7 @@ namespace iris
        * @param args The arguments that make up the name of the signal to send data over.
        */
       template<typename ... Keys, class Object, class Value>
-      void publish( Object* obj, const Value& (Object::*getter)( unsigned ), Keys... args ) ;
+      inline void publish( Object* obj, const Value& (Object::*getter)( unsigned ), Keys... args ) ;
       
       /** Method to recieve the channel this Bus is on.
        * @return unsigned The channel this bus is sending data on.

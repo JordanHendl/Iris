@@ -1,0 +1,67 @@
+  {
+  # The graph for iris to generate.
+  "graph_1" :
+  {
+    # The modules as a part of the graph.
+    "Modules" : 
+    {
+      # Image Downloading Module.
+      "ImageDownloader" :
+      {
+        "type"            : "Http Image Downloader",
+        "outputs"         : [ "http_image", "http_width", "http_height", "http_channels" ],
+        "url"             : "https://pbs.twimg.com/media/EtNooSeXYAEdYzJ?format=png&name=900x900"
+      },
+      "ImageDownloader2" :
+      {
+	"type"    : "Http Image Downloader",
+        "outputs" : [ "http_image2", "http_width2", "http_height2", "http_channels2" ],
+        "url"     : "https://pbs.twimg.com/media/EuMy_FAWgAc2kAV?format=jpg&name=large"
+      },
+
+      # Vulkan module
+      "Vulkan" :
+      {
+        "type"              : "Vulkan",
+        "validation_layers" : [ "VK_KHR_surface", "VK_LAYER_KHRONOS_validation", "VK_LAYER_LUNARG_standard_validation" ]
+      },      
+      # Vulkan image converter.
+      "VulkanImageConverter" :
+      {
+        "type"                : "Vulkan Image Converter",
+        "inputs"              : [ "http_image", "http_width", "http_height", "http_channels" ],
+        "outputs"             : "converted_image_1",
+        "device"              : 0
+      },
+      "VulkanImageConverter2" :
+      {
+        "type"                : "Vulkan Image Converter",
+        "inputs"              : [ "http_image2", "http_width2", "http_height2", "http_channels2" ],
+        "outputs"             : "converted_image_2",
+        "device"              : 0
+      },
+      "ImageChooser" :
+      {
+	"type"    : "Image Chooser",
+        "inputs"  : [ "converted_image_1", "converted_image_2" ],
+	"outputs" : "chosen_image",
+	"choice"  : 0
+      }
+      #Vulkan Window
+      "VulkanWindow" :
+      {
+        "type"                : "Vulkan Window",
+        "borderless"          : false,
+        "resizable"           : false,
+        "outputs"             : "surface",
+        "device"              : 0,
+        "inputs"              : "chosen_image",
+        "width"               : 1024,
+        "height"              : 720,
+        "title"               : "oh shit dog whattup",
+	"quit_iris"           : true
+      }
+    }
+  }
+}
+

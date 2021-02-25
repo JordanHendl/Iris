@@ -140,7 +140,7 @@ namespace iris
         module->kick() ;
       }
       
-      while( !this->queue.back()->ready() ) std::this_thread::sleep_for( std::chrono::microseconds( 0 ) ) ;
+      while( !this->queue.back()->ready() ) std::this_thread::sleep_for( std::chrono::microseconds( 10 ) ) ;
       this->timer.stop() ;
 
       iris::log::Log::output( "Graph '", this->graph_name.c_str(), "' execution time: ", this->timer.output() ) ;
@@ -305,19 +305,18 @@ namespace iris
   
   void GraphData::reload()
   {
-    iris::log::Log::output( "Graph ", this->graph_name.c_str(), " reloading..." ) ;
-    this->stop ()          ;
+//    iris::log::Log::output( "Graph ", this->graph_name.c_str(), " reloading..." ) ;
+    this->stop()           ;
     this->config.reset()   ;
     this->config.initialize( this->graph_config_path.c_str() ) ;
-
     this->movePrexisting() ;
     this->clear()          ;
 
     this->load () ;
     this->solve() ;
     this->kick () ;
-    iris::log::Log::output( "Graph ", this->graph_name.c_str(), " reloaded!" ) ;
     this->pre_graph.clear() ;
+//    iris::log::Log::output( "Graph ", this->graph_name.c_str(), " reloaded!" ) ;
   }
 
   void GraphData::load()

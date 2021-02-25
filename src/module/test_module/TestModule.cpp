@@ -80,6 +80,7 @@ namespace iris
 
   void TestModule::initialize()
   {
+    std::cout << "Initializing Test Module..." << std::endl ;
     if( !floatEquals( data().thing1, 0.25 ) ){  std::cout << "!! Float value failed to set.  !!" << " : " << data().thing1 << std::endl ; exit( 1 ) ; }
     if( data().thing2 != "thing2"           ){  std::cout << "!! String value failed to set. !!" << " : " << data().thing2 << std::endl ; exit( 1 ) ; }
     if( data().thing3 != 2503               ){  std::cout << "!! Integer value failed to set.!!" << " : " << data().thing3 << std::endl ; exit( 1 ) ; }
@@ -89,9 +90,9 @@ namespace iris
   {
     data().bus.setChannel( id ) ;
     
-    data().bus.enroll( this->module_data, &TestModuleData::setThing1, true, this->name(), "::thing1" ) ;
-    data().bus.enroll( this->module_data, &TestModuleData::setThing2, true, this->name(), "::thing2" ) ;
-    data().bus.enroll( this->module_data, &TestModuleData::setThing3, true, this->name(), "::thing3" ) ;
+    data().bus.enroll( this->module_data, &TestModuleData::setThing1, iris::OPTIONAL, this->name(), "::thing1" ) ;
+    data().bus.enroll( this->module_data, &TestModuleData::setThing2, iris::OPTIONAL, this->name(), "::thing2" ) ;
+    data().bus.enroll( this->module_data, &TestModuleData::setThing3, iris::OPTIONAL, this->name(), "::thing3" ) ;
   }
 
   void TestModule::shutdown()

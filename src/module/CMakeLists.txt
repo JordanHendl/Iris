@@ -52,7 +52,7 @@ ADD_LIBRARY               ( iris_module SHARED   ${IRIS_MODULE_SOURCES} ${IRIS_M
 TARGET_INCLUDE_DIRECTORIES( iris_module PRIVATE  ${IRIS_MODULE_INCLUDE_DIRS}                   )
 TARGET_LINK_LIBRARIES     ( iris_module PUBLIC   ${IRIS_MODULE_LIBRARIES}                      )
 
-FILE( COPY test_json.json DESTINATION ${BUILD_DIR}/bin )
+FILE( COPY test_config.json DESTINATION ${BUILD_DIR}/bin )
 
 # If running tests, make and run them.
 BUILD_TEST( TARGET iris_module )

@@ -126,8 +126,18 @@ namespace iris
     
     str << data().name                        ;
     str << " -> "                             ;
-    str << std::setprecision( 5 ) << ( time ) ;
-    str <<  "μs"                              ;
+
+    if( time > 1000.0 )
+    {
+      str << std::setprecision( 5 ) << ( time / 1000.0f) ;
+      str <<  "ms"                                       ;
+    }
+    else
+    {
+      str << std::setprecision( 5 ) << ( time ) ;
+      str <<  "μs"                              ;
+    }
+
     data().output = str.str().c_str() ;
     return data().output.c_str() ;
   }

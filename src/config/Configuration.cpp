@@ -85,9 +85,11 @@ namespace iris
       std::ifstream stream ;
       
       data().filename = path ;
-
-      stream.open( path ) ;
+      
+      std::filesystem::copy_file( path, data().filename + ".tmp", std::filesystem::copy_options::skip_existing )  ;
+      stream.open( data().filename + ".tmp", std::ifstream::in ) ;
       data().parser.clear() ;
+      
       if( stream )
       {
         data().init = true ;
@@ -112,18 +114,21 @@ namespace iris
         data().init = false ;
       }
       stream.close() ;
+      std::filesystem::remove( data().filename + ".tmp" ) ;
     }
     
     bool Configuration::modified()
     {
-      static std::error_code error ;
-      auto time = std::filesystem::last_write_time( data().filename, error ) ;
-
-      if( data().modified != time )
+      if( std::filesystem::exists( data().filename ) )
       {
-        data().modified = time ;
-        std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) ) ;
-        return true ;
+        auto time = std::filesystem::last_write_time( data().filename ) ;
+  
+        if( data().modified != time )
+        {
+          data().modified = time ;
+          std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) ) ;
+          return true ;
+        }
       }
 
       return false ;

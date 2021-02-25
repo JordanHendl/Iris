@@ -30,7 +30,6 @@ static std::string     config_path ;
 bool testModManager()
 {
   mod_manager.initialize( module_path.c_str(), config_path.c_str() ) ;
-  mod_manager.start() ;
   return true ;
 } 
 
