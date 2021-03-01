@@ -246,10 +246,13 @@ namespace iris
       Log::Level level ;
       String     str   ;
       
-      str   = iris::log::concatenate( first, args... ) ;
-      level = Log::Level::None                         ;
-
-      outputBase( str.str(), level ) ;
+      if( Log::enabled )
+      {
+        str   = iris::log::concatenate( first, args... ) ;
+        level = Log::Level::None                         ;
+  
+        outputBase( str.str(), level ) ;
+      }
     }
 
     template<typename T>
@@ -258,10 +261,13 @@ namespace iris
       Log::Level level ;
       String     str   ;
       
-      str << first ;
-      level = Log::Level::None ;
-
-      outputBase( str.str(), level ) ;
+      if( Log::enabled )
+      {
+        str << first ;
+        level = Log::Level::None ;
+  
+        outputBase( str.str(), level ) ;
+      }
     }
 
     template<typename T, typename... ARGS>

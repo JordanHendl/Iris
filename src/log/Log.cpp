@@ -27,6 +27,7 @@
 #include <iomanip>
 #include <cstring>
 #include <condition_variable>
+#include <time.h>
 
 namespace iris
 {
@@ -179,16 +180,22 @@ namespace iris
     
     std::string LogData::timestamp()
     {
-      std::stringstream stream     ;
-      std::string       str        ;
+      static std::mutex lock   ;
+      std::stringstream stream ;
+      std::string       str    ;
       
-      if( log_data.local_time != nullptr )
+      lock.lock() ;
+      if( log_data.local_time == nullptr )
       {
-        stream << log_data.local_time->tm_hour << "h " << log_data.local_time->tm_min << "m " << log_data.local_time->tm_sec << "s |" ;
+        auto time = std::chrono::system_clock::to_time_t( std::chrono::system_clock::now() ) ;
+        log_data.local_time = localtime( &time )                                             ;
       }
-
-      str = std::string( stream.str().c_str() ) ;
       
+      stream << log_data.local_time->tm_hour << "h " << log_data.local_time->tm_min << "m " << log_data.local_time->tm_sec << "s |" ;
+      log_data.local_time = nullptr ;
+      lock.unlock() ;
+      
+      str = std::string( stream.str().c_str() ) ;
       return str ;
     }
 
@@ -285,6 +292,7 @@ namespace iris
       file_name << "S"                           ;
       file_name << ".txt"                        ;
       
+      log_data.local_time = nullptr ;
       log_data.output_path += file_name.str() ;
     }
     
