@@ -44,10 +44,24 @@ static const char* json_data =
 "          \"width\"  : 1240,\n"
 "          \"height\" : 1024\n"
 "        }\n"
+"        \"things\" :\n"
+"        [\n"
+"          {\n"
+"             \"x\" : 0.2,\n"
+"             \"y\" : 0.1,\n"
+"             \"z\" : 0.5,\n"
+"          },\n"
+"          {\n"
+"             \"x\" : 0.9,\n"
+"             \"y\" : 0.8,\n"
+"             \"z\" : 0.7,\n"
+"          }\n"
+"        ]\n"
 "      }\n"
 "    }\n"
 "  }\n"
 "}\n\0\0" ;
+
 
 static athena::Manager            manager    ;
 static iris::config::json::Parser parser     ;
@@ -175,6 +189,7 @@ bool testObject()
   
   if( name != "Modules" )
   {
+    std::cout << "Token lookup didn't find correct token. Expected: Modules. Got: " << name << std::endl ;
     return false ; // CASE: Token lookup didn't find correct token.
   }
   
@@ -182,15 +197,38 @@ bool testObject()
   {
     name = tmp.key() ;
     
-    if( name != "API" && name != "window" )
+    if( name != "API" && name != "window" && name != "things" )
     {
+      std::cout << "Token lookup found something other than the correct value." << name << std::endl ;
       return false ; // CASE: If found something other than the correct modules.
     }
     
     iter += 1 ;
   }
   
-  if( iter != 2 ) return false ; // CASE: It didnt iterate through both.
+  if( iter != 3 )
+  {
+    std::cout << "Token lookup didnt iterate through all parameters of the object." << std::endl ;
+    return false ; // CASE: It didnt iterate through both.
+  }
+    
+  return true ;
+}
+
+athena::Result testArrayObject()
+{
+  const auto token = base_token[ "Modules" ][ "things" ] ;
+  std::string name ;
+  
+  name = token.key() ;
+  
+  if( name != "things"                           ) { std::cout << "Wrong name. Name expected: things. Name found: "                   << name                              << std::endl ; return false ; }
+  if( token.size() != 2                          ) { std::cout << "Wrong size. Size expected: 2.      Size found: "                   << token.size()                      << std::endl ; return false ; }
+  if( !token.token( 0 )[ "x" ]                   ) { std::cout << "Invalid token found when a valid one was expected. "               << token.size()                      << std::endl ; return false ; }
+  if(  token.token( 0 )[ "x" ].decimal() != 0.2f ) { std::cout << "Array object token has bad value. Expected value: 0.2. Recieved: " << token.token( 0 )[ "x" ].decimal() << std::endl ; return false ; }
+  if(  token.token( 1 )[ "x" ].decimal() != 0.9f ) { std::cout << "Array object token has bad value. Expected value: 0.9. Recieved: " << token.token( 1 )[ "x" ].decimal() << std::endl ; return false ; }
+  if(  token.token( 0 )[ "y" ].decimal() != 0.1f ) { std::cout << "Array object token has bad value. Expected value: 0.1. Recieved: " << token.token( 0 )[ "y" ].decimal() << std::endl ; return false ; }
+  if(  token.token( 1 )[ "y" ].decimal() != 0.8f ) { std::cout << "Array object token has bad value. Expected value: 0.8. Recieved: " << token.token( 1 )[ "x" ].decimal() << std::endl ; return false ; }
   return true ;
 }
 
@@ -207,6 +245,7 @@ int main()
   manager.add( "Integer Value Test", &testIntegerValue  ) ;
   manager.add( "Bad Lookup Test"   , &testBadLookup     ) ;
   manager.add( "Graph Lookup Test" , &testGraphLookup   ) ;
+  manager.add( "Object Array Test" , &testArrayObject   ) ;
   
 
   return manager.test( athena::Output::Verbose ) ;

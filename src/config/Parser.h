@@ -94,7 +94,13 @@ namespace iris
            * @return The key of this token's key:value pair.
            */ 
           const char* key() const ;
-
+          
+          /** Method to recieve the value of this token as a token.
+           * @param index The index of the object, if it is part of an array, to recieve.
+           * @return The token, if available, at that specified index.
+           */
+          Token token( unsigned index = 0 ) const ;
+          
           /** Method to recieve the value of this token as a C-style string.
            * @param index The index of the object, if it is part of an array, to recieve.
            * @return The C-String representation of the value of the token at the specified index.

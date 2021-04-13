@@ -15,8 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef IRIS_MODULE
-#define IRIS_MODULE
+#pragma once
 
 // Defines for different OS Shared Library Exports.
 #ifdef _WIN32
@@ -48,12 +47,8 @@ namespace iris
       /** Method to subscribe this module's configuration to the bus.
        * @param id The id to use for this graph.
        */
-      virtual void subscribe( unsigned id ) ;
+      virtual void subscribe( unsigned id ) = 0 ;
 
-      /** Method to shut down this object's operation.
-       */
-      virtual void shutdown() = 0 ;
-      
       /** Method to execute a single instance of this module's operation.
        */
       virtual void execute() = 0 ;
@@ -133,4 +128,3 @@ namespace iris
       const ModuleData& data() const ;
   };
 }
-#endif

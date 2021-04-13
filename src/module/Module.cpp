@@ -91,11 +91,6 @@ namespace iris
   {
     delete this->module_data ;
   }
-  
-  void Module::subscribe( unsigned id )
-  {
-    data().bus.setChannel( id ) ;
-  }
           
   void Module::start()
   {

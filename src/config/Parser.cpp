@@ -35,23 +35,30 @@ namespace iris
 
       struct JSONNode
       {
-        typedef std::vector<std::string>        NodeList ;
+        typedef std::vector<JSONNode>           NodeList ;
         typedef std::map<std::string, JSONNode> NodeMap  ;
         friend class ParserData ;
         
       private:
-        NodeMap  children ;
-        NodeList values   ;
+        friend class ParserData ;
+        std::string  m_value  ;
+        NodeMap      children ;
+        NodeList     values   ;
       public:
 
         JSONNode() = default ;
         
-        const std::string& value( unsigned index ) const 
+        const JSONNode& value( unsigned index ) const 
         {
-          static std::string dummy = "" ;
+          static JSONNode dummy ;
           if( index < this->values.size() ) return this->values[ index ] ;
           
           return dummy ;
+        }
+        
+        const std::string& value() const 
+        { 
+          return this->m_value ;
         }
 
         NodeMap::const_iterator find( std::string str ) const 
@@ -71,7 +78,10 @@ namespace iris
         
         JSONNode& operator[]( std::string str )
         {
-          this->children.insert( { str, JSONNode() } ) ;
+          if( this->children.find( str ) == this->children.end() )
+          {
+            this->children.insert( { str, JSONNode() } ) ;
+          }
 
           return this->children[ str ] ;
         }
@@ -144,7 +154,10 @@ namespace iris
          */
         const std::string& key() const
         {
-          return this->it->first ;
+          const static std::string dummy ;
+          if( this->node ) return this->it->first ;
+          
+          return dummy ;
         }
 
         /** Method to return the size of this object's value.
@@ -288,9 +301,8 @@ namespace iris
       {
         const char next = getNextValidCharacter ( stream ) ; 
         
-        
-        if     ( isdigit( next ) || next  == '.' ) { stream.putback( next ) ; handleNumValue ( parent, stream ) ; }
-        else if( next == 't' || next == 'f'      ) { stream.putback( next ) ; handleBoolValue( parent, stream ) ; }
+        if     ( isdigit( next ) || next  == '.' ) { stream.putback( next ) ; handleNumValue ( parent , stream ) ; }
+        else if( next == 't' || next == 'f'      ) { stream.putback( next ) ; handleBoolValue( parent , stream ) ; }
         else
         {
           switch( next )
@@ -309,24 +321,27 @@ namespace iris
             default : /* Could be # or bool  */ stream.putback( next ) ; Log::output( Log::Level::Warning, "Invalid JSON Found: ", next, ".\n" ) ; break ;
           }
         }
+        
+        
       }
 
       void ParserData::handleArray( JSONMap &parent, JSONFile& stream )
       {
-        char     next ; ///< 
-        unsigned it   ; ///< 
-        
+        char     next  ; ///< 
+        unsigned it    ; ///< 
         it = 0 ;
         while( ( next = getNextValidCharacter( stream ) ) != ']' && next != stream.eof() )
         {
+          JSONMap  token ;
+
           if     ( isdigit( next ) || next  == '.' ) { stream.putback( next ) ; handleNumValue ( parent, stream ) ; }
           else if( next == 't' || next == 'f'      ) { stream.putback( next ) ; handleBoolValue( parent, stream ) ; }
           else
           switch( next )
           {
             // EXPECTED: We found key, can be string, object, or array.
-             case '"': /* Start of an string. */ it++ ; handleStringValue( parent, stream ) ; break ;
-            case '{': /* Start of an object. */ it++ ; handleObject     ( parent, stream ) ; break ;
+            case '"': /* Start of an string. */ it++ ; handleStringValue( parent, stream ) ;                                    break ;
+            case '{': /* Start of an object. */ it++ ; handleObject     ( token , stream ) ; parent.values.push_back( token ) ; break ;
             case ',': /* Continuing a list.  */ ; break ;
   
             // INVALID JSON 
@@ -407,7 +422,8 @@ namespace iris
       {
         std::stringstream str  ;
         char              next ;
-
+        JSONMap           val  ;
+        
         while( isdigit( next = getNextValidCharacter( stream ) ) || next == '.' )
         {
           str << next ;
@@ -417,7 +433,8 @@ namespace iris
 
         if( str.str() != "" )
         {
-          parent.values.push_back( str.str() ) ;
+          val.m_value = str.str() ;
+          parent.values.push_back( val ) ;
         }
       }
 
@@ -425,7 +442,7 @@ namespace iris
       {
         const char next = getNextValidCharacter( stream ) ;
         std::string       buffer ;
-
+        JSONMap val ;
         if( next == 't')
         {
           buffer.resize( 4 ) ;
@@ -445,15 +462,18 @@ namespace iris
 
         if( buffer.size() != 0 )
         {
-          parent.values.push_back( buffer ) ;
+          val.m_value = buffer ;
+          parent.values.push_back( val ) ;
         }
       }
 
       void ParserData::handleStringValue( JSONMap &parent, JSONFile& stream )
       {
         const std::string str  = getString( stream ) ;
+        JSONMap val ;
         
-        parent.values.push_back( str ) ;
+        val.m_value = str ;
+        parent.values.push_back( val ) ;
       }
 
       void ParserData::processFile( JSONFile& stream )
@@ -606,6 +626,16 @@ namespace iris
       {
         *this->token_data = *token.token_data ;
       }
+      
+      bool Token::leaf() const
+      {
+        if( data().node != nullptr && data().it != data().node->end() )
+        {
+          return this->data().it->second.size() != 0 ;
+        }
+        
+        return false ;
+      }
 
       bool Token::operator!=( const Token& token )
       {
@@ -644,12 +674,24 @@ namespace iris
       {
         return data().key().c_str() ;
       }
+      
+      Token Token::token( unsigned index ) const
+      {
+        Token token ;
+        if( this->leaf() )
+        {
+          token.data().node = &data().it->second.value( index ) ;
+          token.data().it   = token.data().node->begin() ;
+        }
+        
+        return token ;
+      }
 
       const char* Token::string( unsigned index ) const
       {
-        if( data().node != nullptr )
+        if( data().node != nullptr && data().it != data().node->end() && this->leaf() )
         {
-          return data().it->second.value( index ).c_str() ;
+          return data().it->second.value( index ).value().c_str() ;
         }
         else
         {
@@ -664,9 +706,10 @@ namespace iris
 
       float Token::decimal( unsigned index ) const
       {
-        if( data().node != nullptr )
+        if( data().node != nullptr && data().it != data().node->end() && this->leaf() )
         {
-          return static_cast<float>( std::atof(data().it->second.value( index ).c_str() ) ) ;
+          auto token = data().it->second.value( index ) ;
+          return static_cast<float>( std::atof( token.value().c_str() ) ) ;
         }
         else
         {
@@ -678,8 +721,9 @@ namespace iris
       {
         if( data().node != nullptr )
         {
-          if      ( data().it->second.value( index ) == "false" ) return false ;
-          else if ( data().it->second.value( index ) == "true"  ) return true  ;
+          auto token = data().it->second.value( index ) ;
+          if      ( token.value() == "false" ) return false ;
+          else if ( token.value() == "true"  ) return true  ;
         }
         
         return false ;
@@ -687,9 +731,10 @@ namespace iris
 
       unsigned Token::number( unsigned index ) const
       {
-        if( data().node != nullptr && data().it != data().node->end() )
+        if( data().node != nullptr && data().it != data().node->end() && this->leaf() )
         {
-          return static_cast<unsigned>( std::atoi( data().it->second.value( index ).c_str() ) ) ;
+          auto token = data().it->second.value( index ) ;
+          return static_cast<unsigned>( std::atoi( token.value().c_str() ) ) ;
         }
         else
         {

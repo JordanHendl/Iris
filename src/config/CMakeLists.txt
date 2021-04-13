@@ -57,9 +57,7 @@ TARGET_LINK_LIBRARIES     ( iris_configuration PUBLIC  ${IRIS_CONFIG_LIBRARIES} 
 ADD_DEPENDENCIES          ( iris_configuration         ${IRIS_CONFIG_DEPS}                           )
 
 # If running tests, make and run them.
-IF( RUN_TESTS )
-  BUILD_TEST( TARGET iris_configuration )
-ENDIF()
+BUILD_TEST( TARGET iris_configuration )
 
 INSTALL( FILES ${IRIS_CONFIG_HEADERS} DESTINATION ${HEADER_INSTALL_DIR}/config )
 INSTALL( TARGETS iris_configuration EXPORT Iris 

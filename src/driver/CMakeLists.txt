@@ -24,9 +24,9 @@ TARGET_LINK_LIBRARIES     ( iris_exe PUBLIC  ${IRIS_DRIVER_LIBRARIES}           
 TARGET_INCLUDE_DIRECTORIES( iris_exe PRIVATE ${IRIS_DRIVER_INCLUDE_DIRS}                   )
 
 IF( UNIX AND NOT APPLE )
-  EXECUTE_PROCESS( COMMAND unlink iris )
+  EXECUTE_PROCESS( COMMAND unlink iris                                                                     )
   EXECUTE_PROCESS( COMMAND ln -s ${INSTALL_LOCATION}/${CMAKE_PROJECT_NAME}/${EXPORT_BIN_DIR}/iris_exe iris )
-  INSTALL( FILES ${CMAKE_BINARY_DIR}/iris DESTINATION /usr/bin/ COMPONENT NyxFile )
+  INSTALL        ( FILES ${CMAKE_BINARY_DIR}/iris DESTINATION /usr/local/bin/ COMPONENT Iris               )
 ENDIF() 
 
 INSTALL( TARGETS iris_exe EXPORT Iris 

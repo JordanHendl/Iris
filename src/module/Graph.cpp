@@ -153,8 +153,6 @@ namespace iris
     for( auto node : this->queue )
     {
       type = node->type() ;
-      
-      node->shutdown() ;
       this->loader->descriptor( type.c_str() ).destroy( node ) ;
     }
 
