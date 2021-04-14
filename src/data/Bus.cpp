@@ -375,6 +375,12 @@ namespace iris
       auto map = pub.second ;
       auto val = map.second->second->execute( idx ) ;
       
+      for( auto iter = pub.second.first->subscribers.lower_bound( this->UNIVERSAL_TYPE ); iter != pub.second.first->subscribers.upper_bound( this->UNIVERSAL_TYPE ); ++iter )
+      {
+        iter->second->subscriber().execute( val, idx ) ;
+        iter->second->signal() ;
+      }
+      
       for( auto iter = pub.second.first->subscribers.lower_bound( pub.second.second->first ); iter != pub.second.first->subscribers.upper_bound( pub.second.second->first ); ++iter )
       {
         iter->second->subscriber().execute( val, idx ) ;

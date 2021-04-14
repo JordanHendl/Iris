@@ -32,7 +32,6 @@ static const unsigned       TEST_ARR[] = { 5, 4, 3, 2, 1 } ;
 static iris::Bus            bus                            ;
 static athena::Manager      manager                        ;
 static float                v                              ;
-static float                f                              ;
 static unsigned             index[] = { 0, 0, 0, 0, 0 }    ;
 
 bool equals( float v1, float v2 )
@@ -53,6 +52,7 @@ struct TestObject
 
   void setter( float val )
   {
+    std::cout << "Recieved: " << val << " Expected: " << TEST_VALUE << std::endl ;
     input = val ;
   }
   
@@ -63,7 +63,7 @@ struct TestObject
   
   float getter()
   {
-    return output ;
+    return TEST_VALUE ;
   }
   
   bool checkMethodSetter()
@@ -95,6 +95,7 @@ struct TestObject
     return false ;
   }
 };
+
 void setter( float val )
 {
   v = val ;
@@ -102,8 +103,9 @@ void setter( float val )
 
 float getter()
 {
-  return f ;
+  return TEST_VALUE_2 ;
 }
+
 void indexedSetter( unsigned idx, unsigned val )
 {
   index[ idx ] = val ;
@@ -130,6 +132,29 @@ bool testIndexedSetter()
   }
   return true ;
 }
+static bool set_blank_setter = false ;
+void blankSetter()
+{
+  set_blank_setter = true ;
+}
+
+void blankGetter()
+{
+  // nothing
+}
+
+bool testVoidSetter()
+{
+  iris::Bus bus ;
+  
+  bus.enroll( &blankSetter, iris::REQUIRED, "blank" ) ;
+  bus.publish( &blankGetter, "blank" ) ;
+  bus.emit() ;
+  
+  if( set_blank_setter == true ) return true ;
+  return false ;
+}
+
 static iris::Bus speed_bus ;
 
 template<unsigned i>
@@ -169,20 +194,20 @@ bool testFunctionSetter()
 int main() 
 { 
   TestObject obj ;
-  f = TEST_VALUE_2 ;
   
-  for( unsigned i = 0; i < 100; i++ )
+  for( unsigned i = 0; i < 1000; i++ )
   {
     speed_bus.enroll ( &setSpeed<0>, true,"speed" ) ;
     speed_bus.publish( &getSpeed<0>,"speed" ) ;
   }
   
   manager.initialize( "Iris Data Bus Tests" ) ;
-  manager.add( "Function Test"      , &testFunctionSetter                  ) ;
-  manager.add( "Method Test"        , &obj, &TestObject::checkMethodSetter ) ;
-  manager.add( "Manual Test"        , &obj, &TestObject::checkManualSetter ) ;
-  manager.add( "Indexed Test"       , &testIndexedSetter                   ) ;
-  manager.add( "100 Emit Speed Test", &testEmitSpeed                       ) ;
+  manager.add( "Function Test"       , &testFunctionSetter                  ) ;
+  manager.add( "Void Signal Test"    , &testVoidSetter                      ) ;
+  manager.add( "Method Test"         , &obj, &TestObject::checkMethodSetter ) ;
+  manager.add( "Manual Test"         , &obj, &TestObject::checkManualSetter ) ;
+  manager.add( "Indexed Test"        , &testIndexedSetter                   ) ;
+  manager.add( "1000 Emit Speed Test", &testEmitSpeed                       ) ;
   
   return manager.test( athena::Output::Verbose ) ;
 }
