@@ -15,13 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATA_BUS_H
-#define DATA_BUS_H
+#pragma once
 
 namespace iris
 {
-  static constexpr bool REQUIRED = true  ;
-  static constexpr bool OPTIONAL = false ;
+  using Requirement = unsigned ;
+  static constexpr Requirement REQUIRED = 0x01010101 ;
+  static constexpr Requirement OPTIONAL = 0x02020202 ;
   
   /** Container for compile-time type info.
    */
@@ -198,8 +198,16 @@ namespace iris
        * @param setter The function pointer of the setter to recieve data.
        * @param args The arguments that make up the name of signal to send the data over.
        */
+      template<typename ... Keys>
+      inline void enroll( void (*setter)(), Requirement req, Keys... args ) ;
+      
+      /** Method to enroll a subscription in the bus. 
+       *  AKA Set a setter function pointer to receive data copy.
+       * @param setter The function pointer of the setter to recieve data.
+       * @param args The arguments that make up the name of signal to send the data over.
+       */
       template<typename ... Keys, class Value>
-      inline void enroll( void (*setter)( Value ), bool required, Keys... args ) ;
+      inline void enroll( void (*setter)( Value ), Requirement req, Keys... args ) ;
 
       /** Method to enroll a subscription in the bus. 
        *  AKA Set a setter function pointer to receive data via const-reference.
@@ -207,7 +215,7 @@ namespace iris
        * @param args The arguments that make up the name of signal to send the data over.
        */
       template<typename ... Keys, class Value>
-      inline void enroll( void (*setter)( const Value& ), bool required, Keys... args ) ;
+      inline void enroll( void (*setter)( const Value& ), Requirement req, Keys... args ) ;
 
       /** Method to enroll an indexed subscription in the bus. 
        *  AKA Set a setter function pointer to receive data via value.
@@ -215,7 +223,7 @@ namespace iris
        * @param args The arguments that make up the name of signal to send the data over.
        */      
       template<typename ... Keys, class Value>
-      inline void enroll( void (*setter)( unsigned, Value ), bool required, Keys... args ) ;
+      inline void enroll( void (*setter)( unsigned, Value ), Requirement req, Keys... args ) ;
       
       /** Method to enroll an indexed subscription in the bus. 
        *  AKA Set a setter function pointer to receive data via const-reference.
@@ -223,7 +231,15 @@ namespace iris
        * @param args The arguments that make up the name of signal to send the data over.
        */      
       template<typename ... Keys, class Value>
-      inline void enroll( void (*setter)( unsigned, Value const & ), bool required, Keys... args ) ;
+      inline void enroll( void (*setter)( unsigned, Value const & ), Requirement req, Keys... args ) ;
+      
+      /** Method to enroll a method subscription in the bus.
+       * @param obj The object to use for calling the subscription.
+       * @param setter The function pointer to the setter to recieve data via copy.
+       * @param args The arguments that make up the name of the signal to send data over.
+       */
+      template<typename ... Keys, class Object>
+      inline void enroll( Object* obj, void (Object::*setter)(), Requirement req, Keys... args ) ;
       
       /** Method to enroll a method subscription in the bus.
        * @param obj The object to use for calling the subscription.
@@ -231,7 +247,7 @@ namespace iris
        * @param args The arguments that make up the name of the signal to send data over.
        */
       template<typename ... Keys, class Object, class Value>
-      inline void enroll( Object* obj, void (Object::*setter)( Value ), bool required, Keys... args ) ;
+      inline void enroll( Object* obj, void (Object::*setter)( Value ), Requirement req, Keys... args ) ;
       
       /** Method to enroll a method subscription in the bus.
        * @param obj The object to use for calling the subscription.
@@ -239,7 +255,7 @@ namespace iris
        * @param args The arguments that make up the name of the signal to send data over.
        */
       template<typename ... Keys, class Object, class Value>
-      inline void enroll( Object* obj, void (Object::*setter)( Value const & ), bool required, Keys... args ) ;
+      inline void enroll( Object* obj, void (Object::*setter)( Value const & ), Requirement req, Keys... args ) ;
       
       /** Method to enroll an indexed method subscription in the bus.
        * @param obj The object to use for calling the subscription.
@@ -247,7 +263,7 @@ namespace iris
        * @param args The arguments that make up the name of the signal to send data over.
        */
       template<typename ... Keys, class Object, class Value>
-      inline void enroll( Object* obj, void (Object::*setter)( unsigned, Value ), bool required, Keys... args ) ;
+      inline void enroll( Object* obj, void (Object::*setter)( unsigned, Value ), Requirement req, Keys... args ) ;
       
       /** Method to enroll an indexed method subscription in the bus.
        * @param obj The object to use for calling the subscription.
@@ -255,7 +271,14 @@ namespace iris
        * @param args The arguments that make up the name of the signal to send data over.
        */
       template<typename ... Keys, class Object, class Value>
-      inline void enroll( Object* obj, void (Object::*setter)( unsigned, Value const & ), bool required, Keys... args ) ;
+      inline void enroll( Object* obj, void (Object::*setter)( unsigned, Value const & ), Requirement req, Keys... args ) ;
+      
+      /** Method to set a publisher in the bus.
+       * @param getter The function pointer to use for publishing data via copy.
+       * @param args The arguments that make up the name of the signal to send data over.
+       */
+      template<typename ... Keys>
+      inline void publish( void (*getter)(), Keys... args ) ;
       
       /** Method to set a publisher in the bus.
        * @param getter The function pointer to use for publishing data via copy.
@@ -284,6 +307,14 @@ namespace iris
        */
       template<typename ... Keys, class Value>
       inline void publish( const Value& (*getter)( unsigned ), Keys... args ) ;
+      
+      /** Method to set a publisher in the bus.
+       * @param obj The object to use for calling the publishing function.
+       * @param getter The function pointer to use for publishing data via copy.
+       * @param args The arguments that make up the name of the signal to send data over.
+       */
+      template<typename ... Keys, class Object>
+      inline void publish( Object* obj, void (Object::*getter)(), Keys... args ) ;
       
       /** Method to set a publisher in the bus.
        * @param obj The object to use for calling the publishing function.
@@ -330,9 +361,11 @@ namespace iris
       
     private:
       
+      constexpr static unsigned UNIVERSAL_TYPE = 0x0000000 ;
+      
       /** Template class to encapsulate a publisher that emits via object.
        */
-      template<class Object, class Type, bool Referenced, bool indexed>
+      template<class Object, class Type, bool Referenced, bool Indexed, bool HasValue = true>
       class MethodPublisher : public Publisher
       {
         public:
@@ -348,7 +381,7 @@ namespace iris
       
       /** Template class to encapsulate a publisher that emits via function.
       */
-      template<class Type, bool Referenced, bool Indexed>
+      template<class Type, bool Referenced, bool Indexed, bool HasValue = true>
       class FunctionPublisher : public Publisher
       {
         public:
@@ -363,7 +396,7 @@ namespace iris
       
       /** Template class to encapsulate a subscriber that recieves data via object.
        */
-      template<class Object, class Type, bool Referenced, bool indexed>
+      template<class Object, class Type, bool Referenced, bool Indexed, bool HasValue = true>
       class MethodSubscriber : public Subscriber
       {
         public:
@@ -382,7 +415,7 @@ namespace iris
 
       /** Template class to encapsulate a subscriber that recieves data via function.
        */      
-      template<class Type, bool Referenced, bool indexed>
+      template<class Type, bool Referenced, bool Indexed, bool HasValue = true>
       class FunctionSubscriber : public Subscriber
       {
         public:
@@ -417,13 +450,26 @@ namespace iris
        */
       void enrollBase( const Key& key, Publisher* publisher, unsigned type_id ) ;
       
+      /** Method to enroll a publisher in this bus.
+       * @param key The key of signal to use to publish over.
+       * @param publisher The publisher object to use for handling data.
+       * @param type_name The name of the type being transferred.
+       */
+      void enrollBase( const Key& key, Publisher* publisher ) ;
+      
       /** Method to enroll a subscriber in this bus.
        * @param key The key of signal to use to subscribe to.
        * @param subscriber The subscriber object to use for handling data.
        * @param type_id The hash representing the type of data being transferred.
        * @param type_name The name of the type being transferred.
        */
-      void enrollBase( const Key& key, Subscriber* subscriber, bool required, unsigned type_id ) ;
+      void enrollBase( const Key& key, Subscriber* subscriber, Requirement req, unsigned type_id ) ;
+      
+      /** Method to enroll a subscriber in this bus.
+       * @param key The key of signal to use to subscribe to.
+       * @param subscriber The subscriber object to use for handling data.
+       */
+      void enrollBase( const Key& key, Subscriber* subscriber, Requirement req ) ;
       
       /** Method to manually emit data over the data bus.
        * @param key The key of signal to use to publish over.
@@ -457,9 +503,9 @@ namespace iris
     const char  end_str[] = "]" ;    
     #endif 
     
-    type_info.ctti_name   = base_str + find( base_str, beg_str )                   ;
-    type_info.ctti_length = find( base_str, end_str ) - find( base_str, beg_str )  ;
-    type_info.ctti_hash   = hash( type_info.ctti_name, 0, type_info.ctti_length )  ;
+    type_info.ctti_name   =     base_str + find( base_str, beg_str )                  ;
+    type_info.ctti_length =     find( base_str, end_str ) - find( base_str, beg_str ) ;
+    type_info.ctti_hash   = 1 + hash( type_info.ctti_name, 0, type_info.ctti_length ) ;
     
     return type_info ;
   }
@@ -500,156 +546,219 @@ namespace iris
     return current ;
   }
   
-  template<class Type, bool Referenced, bool Indexed>
-  Bus::FunctionSubscriber<Type, Referenced, Indexed>::FunctionSubscriber( FunctionSubscriber<Type, Referenced, Indexed>::Callback callback )
+  template<class Type, bool Referenced, bool Indexed, bool HasValue>
+  Bus::FunctionSubscriber<Type, Referenced, Indexed, HasValue>::FunctionSubscriber( FunctionSubscriber<Type, Referenced, Indexed, HasValue>::Callback callback )
   {
     this->callback = callback ;
   }
   
-  template<class Type, bool Referenced, bool Indexed>
-  void Bus::FunctionSubscriber<Type, Referenced, Indexed>::execute( const void* pointer, unsigned idx )
+  template<class Type, bool Referenced, bool Indexed, bool HasValue>
+  void Bus::FunctionSubscriber<Type, Referenced, Indexed, HasValue>::execute( const void* pointer, unsigned idx )
   {
     
     typedef void ( *Callback                  )( Type                  ) ;
     typedef void ( *IndexedCallback           )( unsigned, Type        ) ;
     typedef void ( *ReferencedCallback        )( const Type&           ) ;
     typedef void ( *IndexedReferencedCallback )( unsigned, const Type& ) ;
+    typedef void ( *EmptyCallback             )(                       ) ;
     
-    if( Referenced )
+    if constexpr( !HasValue )
     {
-      if( Indexed )
-      {
-        auto cb = reinterpret_cast<IndexedReferencedCallback>( this->callback ) ;
-        ( cb )( idx, *static_cast<const Type*>( pointer ) ) ;
-      }
-      else
-      {
-        auto cb = reinterpret_cast<ReferencedCallback>( this->callback ) ;
-        ( cb )( *static_cast<const Type*>( pointer ) ) ;
-      }
+      pointer = pointer ;
+      idx     = idx     ;
+
+      auto cb = reinterpret_cast<EmptyCallback>( this->callback ) ;
+      ( ( cb )() ) ;
     }
     else
     {
-      if( Indexed )
+      if( Referenced )
       {
-        auto cb = reinterpret_cast<IndexedCallback>( this->callback ) ;
-        ( cb )( idx, *static_cast<const Type*>( pointer ) ) ;
+        if( Indexed )
+        {
+          auto cb = reinterpret_cast<IndexedReferencedCallback>( this->callback ) ;
+          ( cb )( idx, *static_cast<const Type*>( pointer ) ) ;
+        }
+        else
+        {
+          auto cb = reinterpret_cast<ReferencedCallback>( this->callback ) ;
+          ( cb )( *static_cast<const Type*>( pointer ) ) ;
+        }
       }
       else
       {
-        auto cb = reinterpret_cast<Callback>( this->callback ) ;
-        ( cb )( *static_cast<const Type*>( pointer ) ) ;
+        if( Indexed )
+        {
+          auto cb = reinterpret_cast<IndexedCallback>( this->callback ) ;
+          ( cb )( idx, *static_cast<const Type*>( pointer ) ) ;
+        }
+        else
+        {
+          auto cb = reinterpret_cast<Callback>( this->callback ) ;
+          ( cb )( *static_cast<const Type*>( pointer ) ) ;
+        }
       }
     }
   }
   
-  template<class Object, class Type, bool Referenced, bool Indexed>
-  Bus::MethodSubscriber<Object, Type, Referenced, Indexed>::MethodSubscriber( Object* obj, Bus::MethodSubscriber<Object, Type, Referenced, Indexed>::Callback callback )
+  template<class Object, class Type, bool Referenced, bool Indexed, bool HasValue>
+  Bus::MethodSubscriber<Object, Type, Referenced, Indexed, HasValue>::MethodSubscriber( Object* obj, Bus::MethodSubscriber<Object, Type, Referenced, Indexed, HasValue>::Callback callback )
   {
     this->object   = obj      ;
     this->callback = callback ;
   }
   
-  template<class Object, class Type, bool Referenced, bool Indexed>
-  void Bus::MethodSubscriber<Object, Type, Referenced, Indexed>::execute( const void* pointer, unsigned idx )
+  template<class Object, class Type, bool Referenced, bool Indexed, bool HasValue>
+  void Bus::MethodSubscriber<Object, Type, Referenced, Indexed, HasValue>::execute( const void* pointer, unsigned idx )
   {
     typedef void ( Object::*Callback                  )( Type                  ) ;
     typedef void ( Object::*IndexedCallback           )( unsigned, Type        ) ;
     typedef void ( Object::*ReferencedCallback        )( const Type&           ) ;
     typedef void ( Object::*IndexedReferencedCallback )( unsigned, const Type& ) ;
+    typedef void ( Object::*EmptyCallback             )(                       ) ;
     
     idx = idx ; // Suppress warning.
-    if constexpr( Referenced )
+    
+    if constexpr( !HasValue )
     {
-      if constexpr( Indexed )
-      {
-        auto cb = reinterpret_cast<IndexedReferencedCallback>( this->callback ) ;
-        ( ( this->object )->*( cb ) )( idx, *static_cast<const Type*>( pointer ) ) ;
-      }
-      else
-      {
-        auto cb = reinterpret_cast<ReferencedCallback>( this->callback ) ;
-        ( ( this->object )->*( cb ) )( *static_cast<const Type*>( pointer ) ) ;
-      }
+      pointer = pointer ;
+      auto cb = reinterpret_cast<EmptyCallback>( this->callback ) ;
+      ( ( this->object )->*( cb ) )() ; 
     }
     else
     {
-      if constexpr( Indexed )
+      if constexpr( Referenced )
       {
-        auto cb = reinterpret_cast<IndexedCallback>( this->callback ) ;
-        ( ( this->object )->*( cb ) )( idx, *static_cast<const Type*>( pointer ) ) ;
+        if constexpr( Indexed )
+        {
+          auto cb = reinterpret_cast<IndexedReferencedCallback>( this->callback ) ;
+          ( ( this->object )->*( cb ) )( idx, *static_cast<const Type*>( pointer ) ) ;
+        }
+        else
+        {
+          auto cb = reinterpret_cast<ReferencedCallback>( this->callback ) ;
+          ( ( this->object )->*( cb ) )( *static_cast<const Type*>( pointer ) ) ;
+        }
       }
       else
       {
-        auto cb = reinterpret_cast<Callback>( this->callback ) ;
-        ( ( this->object )->*( cb ) )( *static_cast<const Type*>( pointer ) ) ;
+        if constexpr( Indexed )
+        {
+          auto cb = reinterpret_cast<IndexedCallback>( this->callback ) ;
+          ( ( this->object )->*( cb ) )( idx, *static_cast<const Type*>( pointer ) ) ;
+        }
+        else
+        {
+          auto cb = reinterpret_cast<Callback>( this->callback ) ;
+          ( ( this->object )->*( cb ) )( *static_cast<const Type*>( pointer ) ) ;
+        }
       }
     }
   }
   
-  template<class Type, bool Referenced, bool indexed>
-  Bus::FunctionPublisher<Type, Referenced, indexed>::FunctionPublisher( FunctionPublisher::Callback callback )
+  template<class Type, bool Referenced, bool Indexed, bool HasValue>
+  Bus::FunctionPublisher<Type, Referenced, Indexed, HasValue>::FunctionPublisher( FunctionPublisher::Callback callback )
   {
     this->callback = callback ; 
   }
   
-  template<class Type, bool Referenced, bool Indexed>
-  const void* Bus::FunctionPublisher<Type, Referenced, Indexed>::publish( unsigned idx )
+  template<class Type, bool Referenced, bool Indexed, bool HasValue>
+  const void* Bus::FunctionPublisher<Type, Referenced, Indexed, HasValue>::publish( unsigned idx )
   {
-    
     typedef Type        (*Callback                  )(          ) ;
     typedef Type        (*IndexedCallback           )( unsigned ) ;
     typedef const Type& (*ReferencedCallback        )(          ) ;
     typedef const Type& (*IndexedReferencedCallback )( unsigned ) ;
+    typedef void        (*VoidCallback              )(          ) ;
+    typedef void        (*VoidIndexedCallback       )( unsigned ) ;
     
-    if( Referenced )
+    static bool dummy = true ;
+    
+    if constexpr( !HasValue )
     {
-      if( Indexed )
+      if constexpr( Indexed )
       {
-        auto cb = reinterpret_cast<IndexedReferencedCallback>( this->callback ) ;
-        return static_cast<const void*>( &( cb )( idx ) ) ;
+        auto cb = reinterpret_cast<VoidIndexedCallback>( this->callback ) ;
+        ( ( cb )( idx ) ) ;
+        return static_cast<const void*>( &dummy ) ;
       }
       else
       {
-        auto cb = reinterpret_cast<ReferencedCallback>( this->callback ) ;
-        return static_cast<const void*>( &( cb )() ) ;
+        auto cb = reinterpret_cast<VoidCallback>( this->callback ) ;
+        ( ( cb )() ) ;
+        return static_cast<const void*>( &dummy ) ;
       }
     }
     else
     {
-      if( Indexed )
+      if( Referenced )
       {
-        auto cb = reinterpret_cast<IndexedCallback>( this->callback ) ;
-        this->local = ( cb )( idx ) ;
-        
-        return static_cast<const void*>( &this->local ) ;
+        if( Indexed )
+        {
+          auto cb = reinterpret_cast<IndexedReferencedCallback>( this->callback ) ;
+          return static_cast<const void*>( &( cb )( idx ) ) ;
+        }
+        else
+        {
+          auto cb = reinterpret_cast<ReferencedCallback>( this->callback ) ;
+          return static_cast<const void*>( &( cb )() ) ;
+        }
       }
       else
       {
-        auto cb = reinterpret_cast<Callback>( this->callback ) ;
-        this->local = ( cb )() ;
-        
-        return static_cast<const void*>( &this->local ) ;
+        if( Indexed )
+        {
+          auto cb = reinterpret_cast<IndexedCallback>( this->callback ) ;
+          this->local = ( cb )( idx ) ;
+          
+          return static_cast<const void*>( &this->local ) ;
+        }
+        else
+        {
+          auto cb = reinterpret_cast<Callback>( this->callback ) ;
+          this->local = ( cb )() ;
+          
+          return static_cast<const void*>( &this->local ) ;
+        }
       }
     }
   }
   
-  template<class Object, class Type, bool Referenced, bool Indexed>
-  Bus::MethodPublisher<Object, Type, Referenced, Indexed>::MethodPublisher( Object* obj, Bus::MethodPublisher<Object, Type, Referenced, Indexed>::Callback callback )
+  template<class Object, class Type, bool Referenced, bool Indexed, bool HasValue>
+  Bus::MethodPublisher<Object, Type, Referenced, Indexed, HasValue>::MethodPublisher( Object* obj, Bus::MethodPublisher<Object, Type, Referenced, Indexed, HasValue>::Callback callback )
   {
     this->object   = obj      ;
     this->callback = callback ; 
   }
   
-  template<class Object, class Type, bool Referenced, bool Indexed>
-  const void* Bus::MethodPublisher<Object, Type, Referenced, Indexed>::publish( unsigned idx )
+  template<class Object, class Type, bool Referenced, bool Indexed, bool HasValue>
+  const void* Bus::MethodPublisher<Object, Type, Referenced, Indexed, HasValue>::publish( unsigned idx )
   {
     /** Note: Is this better to do than to just make different abstract classes for each specification? Surely the compiler figures this stuff out right? */
     typedef Type        (Object::*Callback                  )(          ) ;
     typedef Type        (Object::*IndexedCallback           )( unsigned ) ;
     typedef const Type& (Object::*ReferencedCallback        )(          ) ;
     typedef const Type& (Object::*IndexedReferencedCallback )( unsigned ) ;
+    typedef void        (Object::*VoidCallback              )(          ) ;
+    typedef void        (Object::*VoidIndexedCallback       )( unsigned ) ;
     
+    static bool dummy = true ;
+    
+    if constexpr( !HasValue )
+    {
+      if constexpr( Indexed )
+      {
+        auto cb = reinterpret_cast<VoidIndexedCallback>( this->callback ) ;
+        ( ( ( this->object )->*( cb ) )( idx ) ) ;
+        return static_cast<const void*>( &dummy ) ;
+      }
+      else
+      {
+        auto cb = reinterpret_cast<VoidCallback>( this->callback ) ;
+       ( ( ( this->object )->*( cb ) )() ) ;
+        return static_cast<const void*>( &dummy ) ;
+      }
+    }
     if( Referenced )
     {
       if( Indexed )
@@ -702,8 +811,21 @@ namespace iris
     this->emitBase( key, static_cast<const void*>( &value ), ctti.ctti_hash, 0 ) ;
   }
   
+  template<typename ... Keys>
+  void Bus::enroll( void (*setter)(), Requirement req, Keys... args )
+  {
+    typedef Bus::FunctionSubscriber<bool, false, false, false> Callback ;
+    Callback *callback ;
+    Key       key      ;
+    
+    callback = new Callback( reinterpret_cast<typename Callback::Callback>( setter ) ) ;
+    key      = ::iris::concatenate( "", args... )                                     ;
+    
+    this->enrollBase( key, dynamic_cast<Bus::Subscriber*>( callback ), req, UNIVERSAL_TYPE ) ;
+  }
+  
   template<typename ... Keys, class Value>
-  void Bus::enroll( void (*setter)( Value ), bool required, Keys... args )
+  void Bus::enroll( void (*setter)( Value ), Requirement req, Keys... args )
   {
     typedef Bus::FunctionSubscriber<Value, false, false> Callback ;
     const TypeInfo ctti = typeinfo<Value>() ;
@@ -713,11 +835,11 @@ namespace iris
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( setter ) ) ;
     key      = ::iris::concatenate( "", args... )                                     ;
     
-    this->enrollBase( key, dynamic_cast<Bus::Subscriber*>( callback ), required, ctti.ctti_hash ) ;
+    this->enrollBase( key, dynamic_cast<Bus::Subscriber*>( callback ), req, ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Value>
-  void Bus::enroll( void (*setter)( const Value& ), bool required, Keys... args )
+  void Bus::enroll( void (*setter)( const Value& ), Requirement req, Keys... args )
   {
     typedef Bus::FunctionSubscriber<Value, true, false> Callback ;
     const TypeInfo ctti = typeinfo<Value>() ;
@@ -727,11 +849,11 @@ namespace iris
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( setter ) ) ;
     key      = ::iris::concatenate( "", args... )                                     ;
     
-    this->enrollBase( key, callback, required, ctti.ctti_hash ) ;
+    this->enrollBase( key, callback, req, ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Value>
-  void Bus::enroll( void (*setter)( unsigned, Value ), bool required, Keys... args )
+  void Bus::enroll( void (*setter)( unsigned, Value ), Requirement req, Keys... args )
   {
     typedef Bus::FunctionSubscriber<Value, false, true> Callback ;
     const TypeInfo ctti = typeinfo<Value>() ;
@@ -741,11 +863,11 @@ namespace iris
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( setter ) ) ;
     key      = ::iris::concatenate( "", args... )                                     ;
     
-    this->enrollBase( key, callback, required, ctti.ctti_hash ) ;
+    this->enrollBase( key, callback, req, ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Value>
-  void Bus::enroll( void (*setter)( unsigned, Value const & ), bool required, Keys... args )
+  void Bus::enroll( void (*setter)( unsigned, Value const & ), Requirement req, Keys... args )
   {
     typedef Bus::FunctionSubscriber<Value, true, true> Callback ;
     const TypeInfo ctti = typeinfo<Value>() ;
@@ -755,11 +877,24 @@ namespace iris
     callback = new Callback( reinterpret_cast<typename Callback::Callback>( setter ) ) ;
     key      = ::iris::concatenate( "", args... )                                      ;
     
-    this->enrollBase( key, callback, required, ctti.ctti_hash) ;
+    this->enrollBase( key, callback, req, ctti.ctti_hash) ;
+  }
+  
+  template<typename ... Keys, class Object>
+  void Bus::enroll( Object* obj, void (Object::*setter)(), Requirement req, Keys... args )
+  {
+    typedef Bus::MethodSubscriber<Object, bool, false, false, false> Callback ;  
+    Callback *callback ;
+    Key       key      ;
+    
+    callback = new Callback( obj, reinterpret_cast<typename Callback::Callback>( setter ) ) ;
+    key      = ::iris::concatenate( "", args... )                                          ;
+    
+    this->enrollBase( key, callback, req, UNIVERSAL_TYPE ) ;
   }
   
   template<typename ... Keys, class Object, class Value>
-  void Bus::enroll( Object* obj, void (Object::*setter)( Value ), bool required, Keys... args )
+  void Bus::enroll( Object* obj, void (Object::*setter)( Value ), Requirement req, Keys... args )
   {
     typedef Bus::MethodSubscriber<Object, Value, false, false> Callback ;  
     const TypeInfo ctti = typeinfo<Value>() ;
@@ -769,11 +904,11 @@ namespace iris
     callback = new Callback( obj, reinterpret_cast<typename Callback::Callback>( setter ) ) ;
     key      = ::iris::concatenate( "", args... )                                          ;
     
-    this->enrollBase( key, callback, required, ctti.ctti_hash ) ;
+    this->enrollBase( key, callback, req, ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Object, class Value>
-  void Bus::enroll( Object* obj, void (Object::*setter)( Value const & ), bool required, Keys... args )
+  void Bus::enroll( Object* obj, void (Object::*setter)( Value const & ), Requirement req, Keys... args )
   {
     typedef Bus::MethodSubscriber<Object, Value, true, false> Callback ;
     const TypeInfo ctti = typeinfo<Value>() ;
@@ -783,11 +918,11 @@ namespace iris
     callback = new Callback( obj, reinterpret_cast<typename Callback::Callback>( setter ) ) ;
     key      = ::iris::concatenate( "", args... )                                          ;
     
-    this->enrollBase( key, callback, required, ctti.ctti_hash ) ;
+    this->enrollBase( key, callback, req, ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Object, class Value>
-  void Bus::enroll( Object* obj, void (Object::*setter)( unsigned, Value ), bool required, Keys... args )
+  void Bus::enroll( Object* obj, void (Object::*setter)( unsigned, Value ), Requirement req, Keys... args )
   {
     typedef Bus::MethodSubscriber<Object, Value, false, true> Callback ;
     const TypeInfo ctti = typeinfo<Value>() ;
@@ -797,11 +932,11 @@ namespace iris
     callback = new Callback( obj, reinterpret_cast<typename Callback::Callback>( setter ) ) ;
     key      = ::iris::concatenate( "", args... )                                          ;
     
-    this->enrollBase( key, callback, required, ctti.ctti_hash ) ;
+    this->enrollBase( key, callback, req, ctti.ctti_hash ) ;
   }
   
   template<typename ... Keys, class Object, class Value>
-  void Bus::enroll( Object* obj, void (Object::*setter)( unsigned, Value const & ), bool required, Keys... args )
+  void Bus::enroll( Object* obj, void (Object::*setter)( unsigned, Value const & ), Requirement req, Keys... args )
   {
     typedef Bus::MethodSubscriber<Object, Value, true, true> Callback ;
     const TypeInfo ctti = typeinfo<Value>() ;
@@ -811,7 +946,20 @@ namespace iris
     callback = new Callback( obj, reinterpret_cast<typename Callback::Callback>( setter ) ) ;
     key      = ::iris::concatenate( "", args... )                                          ;
     
-    this->enrollBase( key, callback, required, ctti.ctti_hash ) ;
+    this->enrollBase( key, callback, req, ctti.ctti_hash ) ;
+  }
+  
+  template<typename ... Keys>
+  void Bus::publish( void (*getter)(), Keys... args )
+  {
+    typedef Bus::FunctionPublisher<bool, false, false, false> Callback ;
+    Callback *callback ;
+    Key       key      ;
+    
+    callback = new Callback( reinterpret_cast<typename Callback::Callback>( getter ) ) ;
+    key      = ::iris::concatenate( "", args... )                                     ;
+    
+    this->enrollBase( key, callback, this->UNIVERSAL_TYPE ) ;
   }
   
   template<typename ... Keys, class Value>
@@ -870,6 +1018,19 @@ namespace iris
     this->enrollBase( key, callback, ctti.ctti_hash ) ;
   }
   
+  template<typename ... Keys, class Object>
+  void Bus::publish( Object* obj, void (Object::*getter)(), Keys... args )
+  {
+    typedef Bus::MethodPublisher<Object, bool, false, false, false> Callback ;
+    Callback *callback ;
+    Key       key      ;
+    
+    callback = new Callback( obj, reinterpret_cast<typename Callback::Callback>( getter ) ) ;
+    key      = ::iris::concatenate( "", args... )                                           ;
+    
+    this->enrollBase( key, callback, this->UNIVERSAL_TYPE ) ;
+  }
+  
   template<typename ... Keys, class Object, class Value>
   void Bus::publish( Object* obj, Value (Object::*getter)(), Keys... args )
   {
@@ -926,6 +1087,4 @@ namespace iris
     this->enrollBase( key, callback, ctti.ctti_hash ) ;
   }
 }
-
-#endif
 

@@ -70,6 +70,12 @@ namespace iris
      * @param first
      * @param second
      */
+    void operator<<( String& first, bool second ) ;
+    
+    /**
+     * @param first
+     * @param second
+     */
     void operator<<( String& first, const String& second ) ;
 
     /**

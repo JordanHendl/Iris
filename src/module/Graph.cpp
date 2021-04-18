@@ -150,7 +150,7 @@ namespace iris
         module->kick() ;
       }
       
-      while( !this->queue.back()->ready() ) std::this_thread::sleep_for( std::chrono::microseconds( 10 ) ) ;
+
       this->timer.stop() ;
       
       if( this->enable_timings ) iris::log::Log::output( "Graph '", this->graph_name.c_str(), "' execution time: ", this->timer.output() ) ;
@@ -185,6 +185,9 @@ namespace iris
 
   void GraphData::stop()
   {
+    this->running = false ;
+    std::this_thread::sleep_for( std::chrono::seconds( 2 ) ) ;
+    
     for( auto module : this->queue )
     {
       while( !module->stop() ) { module->kick() ; } ;
@@ -307,6 +310,8 @@ namespace iris
           this->bus.emit( param.string (), name.c_str(), "::", key.c_str() ) ;
           this->bus.emit( param.boolean(), name.c_str(), "::", key.c_str() ) ;
         }
+        
+        this->bus.emit( param, name.c_str(), "::", key.c_str() ) ;
       }
     }
   }
@@ -359,11 +364,14 @@ namespace iris
         
         if( this->graph.find( name ) == this->graph.end() && this->pre_graph.find( name ) == this->pre_graph.end() )
         {
-          Log::output( "Initializing module. \n\n",
+          Log::output( 
+          "-------------------------------------------------------------------------\n",
+          "Initializing module: \n\n",
           "  - Name    : ", name.c_str()            , "\n",
           "  - Module  : ", type.c_str()            , "\n",
           "  - Version : ", version                 , "\n",
-          "  - Graph   : ", this->graph_name.c_str(), "\n" ) ;
+          "  - Graph   : ", this->graph_name.c_str(), "\n",
+          "---------------------------------------------------------------------------------------------" ) ;
           
           auto module = loader->descriptor( type.c_str() ).create ( version ) ;
           

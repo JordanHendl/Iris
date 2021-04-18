@@ -184,7 +184,7 @@ void Iris::initialize( const char* setup_json_path )
   const std::string iris_config_path = setup_json_path ;
   
   // Set the exit condition in the event bus.
-  data().bus.enroll( this->iris_data, &IrisData::setExit, "Iris::Exit::Flag" ) ;
+  data().bus.enroll( this->iris_data, &IrisData::setExit, iris::OPTIONAL, "Iris::Exit::Flag" ) ;
   
   data().config.initialize( iris_config_path.c_str() ) ;
   data().parseSetup() ;

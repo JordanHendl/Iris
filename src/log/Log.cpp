@@ -107,6 +107,20 @@ namespace iris
       first.setStr( string.c_str() ) ;
     }
     
+    void operator<<( String& first, bool second )
+    {
+      std::stringstream stream ;
+      std::string       string ;
+      
+      stream << first.str() ;
+      
+      if( second ) stream << "true"  ;
+      else         stream << "false" ;
+      
+      string = stream.str() ;
+      first.setStr( string.c_str() ) ;
+    }
+    
     void operator<<( String& first, const String& second )
     {
       std::stringstream stream ;
@@ -326,7 +340,7 @@ namespace iris
         base_str << timestamp ;
       }
       
-      base_str << "--Iris Debug :" ;
+      base_str << "--Iris :" ;
 
       msg << base_str.str() << level_str << std::string( out ) ;
       msg << "\n" ;

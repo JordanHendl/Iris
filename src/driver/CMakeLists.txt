@@ -23,13 +23,13 @@ ADD_EXECUTABLE            ( iris_exe         ${IRIS_DRIVER_SOURCES} ${IRIS_DRIVE
 TARGET_LINK_LIBRARIES     ( iris_exe PUBLIC  ${IRIS_DRIVER_LIBRARIES}                      )
 TARGET_INCLUDE_DIRECTORIES( iris_exe PRIVATE ${IRIS_DRIVER_INCLUDE_DIRS}                   )
 
-IF( UNIX AND NOT APPLE )
+IF( UNIX )
   EXECUTE_PROCESS( COMMAND unlink iris                                                                     )
   EXECUTE_PROCESS( COMMAND ln -s ${INSTALL_LOCATION}/${CMAKE_PROJECT_NAME}/${EXPORT_BIN_DIR}/iris_exe iris )
-  INSTALL        ( FILES ${CMAKE_BINARY_DIR}/iris DESTINATION /usr/local/bin/ COMPONENT Iris               )
+  INSTALL        ( FILES ${CMAKE_BINARY_DIR}/iris DESTINATION /usr/local/bin/ COMPONENT release            )
 ENDIF() 
 
-INSTALL( TARGETS iris_exe EXPORT Iris 
+INSTALL( TARGETS iris_exe EXPORT Iris COMPONENT release
                  LIBRARY  DESTINATION ${EXPORT_BIN_DIR} 
                  ARCHIVE  DESTINATION ${EXPORT_BIN_DIR}
                  RUNTIME  DESTINATION ${EXPORT_BIN_DIR}

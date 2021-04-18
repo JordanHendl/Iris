@@ -279,7 +279,8 @@ namespace iris
       void ParserData::handleComma( JSONMap &parent, JSONFile& stream )
       {
         const char next = getNextValidCharacter ( stream ) ;  ///< TODO
-
+        
+//        std::cout << "stream: " << stream.str().data() + stream.te() << std::endl ;
         switch( next )
         {
           // EXPECTED: We found key, want delimiter

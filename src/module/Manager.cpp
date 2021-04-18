@@ -25,6 +25,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <mutex>
 
 namespace iris
 {
@@ -35,13 +36,6 @@ namespace iris
     typedef std::map<std::string, Graph*> NodeGraphs ;
     
     iris::config::Configuration config ;
-<<<<<<< Updated upstream
-
-    std::string config_path ;
-    std::string mod_path    ;
-    Loader      loader      ;
-    NodeGraphs  graphs      ;
-=======
     bool        graph_timings ;
     std::string config_path   ;
     std::string mod_path      ;
@@ -52,7 +46,6 @@ namespace iris
     /** Constructor.
      */
     ManagerData() ;
->>>>>>> Stashed changes
     
     /** Method to find all graphs in the configuration.
      */
@@ -87,7 +80,7 @@ namespace iris
   {
     if( this->graphs.find( name ) == this->graphs.end() )
     {
-      iris::log::Log::output( "Adding module graph ", name ) ;
+      iris::log::Log::output( "Adding graph ", name ) ;
       Graph* graph ;
       
       graph = new Graph() ;
@@ -162,6 +155,7 @@ namespace iris
   {
     for( auto graph : data().graphs )
     {
+      graph.second->stop () ;
       graph.second->reset() ;
     }
   }

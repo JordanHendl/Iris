@@ -59,8 +59,8 @@ ADD_DEPENDENCIES          ( iris_configuration         ${IRIS_CONFIG_DEPS}      
 # If running tests, make and run them.
 BUILD_TEST( TARGET iris_configuration )
 
-INSTALL( FILES ${IRIS_CONFIG_HEADERS} DESTINATION ${HEADER_INSTALL_DIR}/config )
-INSTALL( TARGETS iris_configuration EXPORT Iris 
+INSTALL( FILES ${IRIS_CONFIG_HEADERS} DESTINATION ${HEADER_INSTALL_DIR}/config COMPONENT devel )
+INSTALL( TARGETS iris_configuration EXPORT Iris COMPONENT release
                  LIBRARY  DESTINATION ${EXPORT_LIB_DIR}
                  ARCHIVE  DESTINATION ${EXPORT_LIB_DIR}
                  RUNTIME  DESTINATION ${EXPORT_LIB_DIR}
