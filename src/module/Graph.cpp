@@ -53,7 +53,12 @@ namespace iris
     std::string     graph_config_path ;
     unsigned        id                ;
     bool            running           ;
+    bool            enable_timings    ;
     
+    /** Constructor.
+     */
+    GraphData() ;
+
     /** Method to shutdown all modules & clear the priority queue & graph.
      */
     void clear() ;
@@ -106,6 +111,11 @@ namespace iris
     void traverse() ;
   };
   
+  GraphData::GraphData()
+  {
+    this->enable_timings = false ;
+  }
+
   void GraphData::movePrexisting()
   {
     const auto token = this->config.begin()[ this->graph_name.c_str() ] ;
@@ -133,7 +143,7 @@ namespace iris
   {
     while( this->running )
     {
-      this->timer.start() ;
+      if( this->enable_timings ) this->timer.start() ;
       if( this->config.modified() ) this->reload() ;
       for( auto module : this->queue )
       {
@@ -142,8 +152,8 @@ namespace iris
       
       while( !this->queue.back()->ready() ) std::this_thread::sleep_for( std::chrono::microseconds( 10 ) ) ;
       this->timer.stop() ;
-
-      iris::log::Log::output( "Graph '", this->graph_name.c_str(), "' execution time: ", this->timer.output() ) ;
+      
+      if( this->enable_timings ) iris::log::Log::output( "Graph '", this->graph_name.c_str(), "' execution time: ", this->timer.output() ) ;
     }
   }
 
@@ -436,6 +446,11 @@ namespace iris
   void Graph::setName( const char* name )
   {
     data().graph_name = name ;
+  }
+  
+  void Graph::setEnableTimings( bool val )
+  {
+    data().enable_timings = val ;
   }
 
   void Graph::kick()

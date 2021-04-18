@@ -1,17 +1,22 @@
 {
-  #Path to the config for karma to use.
-  "graph_config_path" : "/wksp/testing/iris_config.json",
+  #Path to the config for iris to use.
+  "graph_config_path" : "/wksp/test/iris_test/graph_config",
 
-  #The path to the modules for karma to load.
-  "module_path"      : "/wksp/testing/modules",
+  #Whether or not to output graph timings to log.
+  "graph_timing_enable" : false,
+
+  #The path to the modules for iris to load.
+  "module_path"      : "/wksp/test/iris_test/modules",
 
   #Whether or not logging should be enabled.
-  "log_enable"        : false,
+  "log_enable"        : true,
 
   #The mode for the logging to use when outputting logs.
-  "log_mode"          : "VERBOSE",
+  "log_mode"          : "Verbose",
 
   #The path to log output.
-  "log_output_path"   : "/var/tmp"
-}
+  "log_output_path"   : "/var/tmp",
 
+  #Whether or not logging should output to standard out or not.
+  "log_use_stdout"    : true
+}

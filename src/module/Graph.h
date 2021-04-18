@@ -39,6 +39,7 @@ namespace iris
       bool has( const char* name ) const ;
       void pulse() ;
       const Module* module( const char* name ) ;
+      void setEnableTimings( bool value ) ;
       void setName( const char* name ) ;
       void kick() ;
       void stop() ;

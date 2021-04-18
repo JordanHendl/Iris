@@ -38,7 +38,8 @@ struct IrisData
   bool                        running            ; ///< Whether or not iris is running.
   std::condition_variable     cv                 ; ///< The condition variable to use for waiting to end.
   std::mutex                  mutex              ; ///< The mutex to wait on for an exit condition.
-
+  bool                        use_log_stddout    ; ///< Whether or not to use stddout for logging.
+  
   /** Default constructor.
    */
   IrisData() ;
@@ -80,7 +81,8 @@ struct IrisData
 
 IrisData::IrisData()
 {
-  this->running = false ;
+  this->use_log_stddout = true  ;
+  this->running         = false ;
 }
 
 void IrisData::setExit( bool exit )
@@ -119,7 +121,7 @@ void IrisData::setDebugMode( const char* mode )
 }
 void IrisData::setDebugOutput( const char* output )
 {
-  iris::log::Log::initialize( output ) ;
+  iris::log::Log::initialize( output, this->use_log_stddout ) ;
 }
 
 void IrisData::setModulePath( const char* path )
@@ -136,17 +138,21 @@ void IrisData::parseSetup()
 {
   auto token = this->config.begin() ;
   
-  auto graph_config = token[ "graph_config_path" ] ;
-  auto module_path  = token[ "module_path"       ] ;
-  auto log_output   = token[ "log_output_path"   ] ;
-  auto log_mode     = token[ "log_mode"          ] ;
-  auto log_enable   = token[ "log_enable"        ] ;
+  auto graph_config = token[ "graph_config_path"   ] ;
+  auto module_path  = token[ "module_path"         ] ;
+  auto log_output   = token[ "log_output_path"     ] ;
+  auto log_mode     = token[ "log_mode"            ] ;
+  auto log_enable   = token[ "log_enable"          ] ;
+  auto log_stddout  = token[ "log_use_stdout"      ] ;
+  auto graph_timings= token[ "graph_timing_enable" ] ;
   
-  if( graph_config ) this->setModuleConfigPath( graph_config.string() ) ;
-  if( module_path  ) this->setModulePath      ( module_path.string()  ) ;
-  if( log_output   ) this->setDebugOutput     ( log_output.string()   ) ;
-  if( log_mode     ) this->setDebugMode       ( log_mode.string()     ) ;
-  if( log_enable   ) this->setLogEnable       ( log_enable.boolean()  ) ;
+  if( graph_config  ) this->setModuleConfigPath              ( graph_config.string()   ) ;
+  if( module_path   ) this->setModulePath                    ( module_path.string()    ) ;
+  if( log_stddout   ) this->use_log_stddout =  log_stddout.boolean() ;
+  if( log_output    ) this->setDebugOutput                   ( log_output.string()     ) ;
+  if( log_mode      ) this->setDebugMode                     ( log_mode.string()       ) ;
+  if( log_enable    ) this->setLogEnable                     ( log_enable.boolean()    ) ;
+  if( graph_timings ) this->mod_manager.setEnableGraphTimings( graph_timings.boolean() ) ;
 }
 
 Iris::Iris()

@@ -35,11 +35,24 @@ namespace iris
     typedef std::map<std::string, Graph*> NodeGraphs ;
     
     iris::config::Configuration config ;
+<<<<<<< Updated upstream
 
     std::string config_path ;
     std::string mod_path    ;
     Loader      loader      ;
     NodeGraphs  graphs      ;
+=======
+    bool        graph_timings ;
+    std::string config_path   ;
+    std::string mod_path      ;
+    Loader      loader        ;
+    NodeGraphs  graphs        ;
+    std::mutex  lock          ;
+    
+    /** Constructor.
+     */
+    ManagerData() ;
+>>>>>>> Stashed changes
     
     /** Method to find all graphs in the configuration.
      */
@@ -51,6 +64,13 @@ namespace iris
     void addGraph( const char* name ) ;
   };
   
+  ManagerData::ManagerData()
+  {
+    this->graph_timings = false ;
+    this->config_path   = ""    ;
+    this->mod_path      = ""    ;
+  }
+
   void ManagerData::findGraphs()
   {
     this->config.initialize( this->config_path.c_str() ) ;
@@ -71,10 +91,11 @@ namespace iris
       Graph* graph ;
       
       graph = new Graph() ;
-
-      graph->setName     ( name                                                         ) ;
-      graph->initialize  ( this->loader, this->config_path.c_str(), this->graphs.size() ) ;
-      this->graphs.insert( { name, graph }                                              ) ;
+      
+      graph->setEnableTimings( this->graph_timings                                          ) ;
+      graph->setName         ( name                                                         ) ;
+      graph->initialize      ( this->loader, this->config_path.c_str(), this->graphs.size() ) ;
+      this->graphs.insert    ( { name, graph }                                              ) ;
     }
   }
 
@@ -87,7 +108,12 @@ namespace iris
   {
     delete this->man_data ;
   }
-
+  
+  void Manager::setEnableGraphTimings( bool val )
+  {
+    data().graph_timings = val ;
+  }
+  
   void Manager::initialize( const char* mod_path, const char* configuration_path )
   {
     data().config_path = configuration_path ;

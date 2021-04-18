@@ -1,45 +1,50 @@
-  {
-  # The graph for iris to generate.
+{
   "graph_1" :
   {
-    # The modules as a part of the graph.
     "Modules" : 
     {
-      # Image Downloading Module.
-      "ImageDownloader" :
+      "nyx_window" :
       {
-        "type"            : "Http Image Downloader",
-        "outputs"         : [ "http_image", "http_width", "http_height", "http_channels" ],
-        "url"             : "https://pbs.twimg.com/media/EtNooSeXYAEdYzJ?format=png&name=900x900"
+        "type"      : "NyxWindow",
+        "width"     : 1280,
+        "height"    : 720,
+        "title"     : "NyxWindow",
+        "quit_iris" : true,
+        "id"        : 0
       },
-      # Vulkan module
-      "Vulkan" :
+      "nyx_camera" :
       {
-        "type"              : "Vulkan",
-        "validation_layers" : [ "VK_KHR_surface", "VK_LAYER_KHRONOS_validation", "VK_LAYER_LUNARG_standard_validation" ]
+        "type"    : "NyxCamera",
+        "outputs" : [ "nyx_camera_input" ],
+        "lookat"  : "look_at_this"
       },
-      # Vulkan image converter.
-      "VulkanImageConverter" :
+      "nyx_draw_model" :
       {
-        "type"                : "Vulkan Image Converter",
-        "inputs"              : [ "http_image", "http_width", "http_height", "http_channels" ],
-        "outputs"             : "converted_image",
-        "device"              : 0
+        "type"         : "NyxDrawModel",
+        "pipeline"     : "path_to_nyx_file",
+        "parent"       : "draw1",
+        "projection"   : "nyx_begin_projection",
+        "camera"       : "nyx_camera_input",
+        "model_input"  : "input_models_here",
+        "model_remove" : "remove_models_here", 
+        "device"       : 0
       },
-      #Vulkan Window
-      "VulkanWindow" :
+      "nyx_begin" :
       {
-        "type"                : "Vulkan Window",
-        "borderless"          : true,
-        "resizable"           : false,
-        "outputs"             : "surface",
-        "device"              : 0,
-        "inputs"              : "converted_image",
-        "width"               : 1024,
-        "height"              : 720,
-        "title"               : "oh shit dog whattup"
+        "type"       : "NyxStartDraw",
+        "width"      : 1280,
+        "height"     : 720,
+        "outputs"    : [ "draw1" ],
+        "projection" : "nyx_begin_projection",
+        "subpasses"     : [ 
+                            {
+                              "depth_enable" : true,
+                              "attachments"  : [ 
+                                                 { "format" : "RGBA8", "stencil_clear" : true, "layout" : "Color", "clear_color" : [ 0.5, 0.2, 0.3, 0.5 ] }
+                                               ]
+                            }
+                          ]
       }
     }
   }
 }
-

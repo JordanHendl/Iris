@@ -33,6 +33,7 @@ namespace iris
       Manager() ;
       ~Manager() ;
       void initialize( const char* mod_path, const char* configuration_path ) ;
+      void setEnableGraphTimings( bool val ) ;
       const Graph& graph( const char* graph_name ) ;
       void start() ;
       void stop() ;
