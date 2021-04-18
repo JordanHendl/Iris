@@ -72,7 +72,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON )
 SET( ARCHITECTURE "64bit" CACHE STRING "The system architecture."                     )
 SET( CXX_STANDARD "17"    CACHE STRING "The C++ standard to use for building."        )
 SET( MAJOR        "0"     CACHE STRING "The major version of this build."             )
-SET( MINOR        "9"     CACHE STRING "The minor version of this build."             )
+SET( MINOR        "0"     CACHE STRING "The minor version of this build."             )
 SET( BRANCH       "0"     CACHE STRING "The branch version of this build."            )
 SET( REVISION     "0"     CACHE STRING "The revision of this build."                  )
 SET( GENERATOR    "DEB"   CACHE STRING "The Package Generator to use for this build." )
@@ -155,10 +155,15 @@ IF( MSVC )
     SET( BUILD_SHARED_LIBS TRUE                )
 ENDIF()
 
+
+SET( CPACK_COMPONENTS_ALL                 release devel                                                                   )
+SET( CPACK_COMPONENT_DEVEL_DISPLAY_NAME   "${CMAKE_PROJECT_NAME}-devel"                                                   )
+SET( CPACK_COMPONENT_RELEASE_DISPLAY_NAME "${CMAKE_PROJECT_NAME}-release"                                                 )
+SET( CPACK_COMPONENT_DEVEL_DESCRIPTION    "Development Headers & Runtime Libraries for the ${CMAKE_PROJECT_NAME} library" )
+SET( CPACK_COMPONENT_RELEASE_DESCRIPTION  "Runtime Libraries for the ${CMAKE_PROJECT_NAME} library"                       )
+SET( CPACK_COMPONENT_DEVEL_DEPENDS        release                                                                         )
+
 INCLUDE( KPackage ) 
-
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/src ) 
-
 ADD_SUBDIRECTORY( src )
-
-INSTALL( EXPORT Iris FILE IrisConfig.cmake DESTINATION ${CMAKE_PROJECT_NAME} COMPONENT dev )
+INSTALL( EXPORT Iris FILE IrisConfig.cmake DESTINATION ${CMAKE_PROJECT_NAME} COMPONENT devel )
