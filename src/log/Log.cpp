@@ -133,6 +133,18 @@ namespace iris
       first.setStr( string.c_str() ) ;
     }
     
+    void operator<<( String& first, const void* second )
+    {
+      std::stringstream stream ;
+      std::string       string ;
+      
+      stream << first.str()  ;
+      stream << second       ;
+      
+      string = stream.str() ;
+      first.setStr( string.c_str() ) ;
+    }
+    
     struct LogData
     {
       const unsigned INITIAL_LOG_SIZE = 8000 ;

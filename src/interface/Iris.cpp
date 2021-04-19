@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <condition_variable>
 #include <mutex>
+#include <stdlib.h>
 
 struct IrisData
 {
@@ -93,6 +94,7 @@ void IrisData::setExit( bool exit )
     this->running = false        ;
     iris::log::Log::flush()      ;
     this->cv.notify_all()        ;
+    ::exit( 0 ) ;
   }
 }
 
