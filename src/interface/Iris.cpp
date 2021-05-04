@@ -94,7 +94,7 @@ void IrisData::setExit( bool exit )
     this->running = false        ;
     iris::log::Log::flush()      ;
     this->cv.notify_all()        ;
-    ::exit( 0 ) ;
+//    ::exit( 0 ) ;
   }
 }
 

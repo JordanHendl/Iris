@@ -387,8 +387,11 @@ namespace iris
         
         for( auto iter = pub.second.first->subscribers.lower_bound( pair.second->first ); iter != pub.second.first->subscribers.upper_bound( pair.second->first ); ++iter )
         {
-          iter->second->subscriber().execute( val, idx ) ;
-          iter->second->signal() ;
+          if( pair.second->first != this->UNIVERSAL_TYPE )
+          {
+            iter->second->subscriber().execute( val, idx ) ;
+            iter->second->signal() ;
+          }
         }
       }
     }

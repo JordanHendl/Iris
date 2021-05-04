@@ -64,7 +64,7 @@ namespace iris
     iris::Bus         bus         ; ///< The bus to communicate data over.
     unsigned          id          ; ///< The id associated with this module.
     std::mutex        mutex       ; ///< The mutex to use for locking.
-    std::atomic<bool> is_signaled ; ///< Whether or not this module is signaled.
+    std::atomic<int>  is_signaled ; ///< Whether or not this module is signaled.
 
     std::condition_variable cv ;
 
@@ -79,7 +79,7 @@ namespace iris
     this->running     = false ;
     this->should_run  = false ;
     this->id          = 0     ;
-    this->is_signaled = false ;
+    this->is_signaled = 0     ;
   }
 
   Module::Module()
@@ -101,8 +101,8 @@ namespace iris
     while( data().should_run )
     {
       std::unique_lock<std::mutex> lock = std::unique_lock<std::mutex>( data().mutex ) ;
-      data().is_signaled = false ;
-      data().cv.wait( lock, [=] { return data().is_signaled.load() ; } ) ;
+      data().is_signaled-- ;
+      data().cv.wait( lock, [=] { return data().is_signaled >= 0 ; } ) ;
       if( !data().should_run ) { data().running = false ; return ; }
       this->execute() ;
     }
@@ -112,7 +112,7 @@ namespace iris
   {
     {
       std::lock_guard<std::mutex> lock( data().mutex ) ;
-      data().is_signaled = true ;
+      data().is_signaled++ ;
     }
 
     data().cv.notify_one() ;

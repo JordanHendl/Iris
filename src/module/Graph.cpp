@@ -150,7 +150,6 @@ namespace iris
         module->kick() ;
       }
       
-
       this->timer.stop() ;
       
       if( this->enable_timings ) iris::log::Log::output( "Graph '", this->graph_name.c_str(), "' execution time: ", this->timer.output() ) ;
