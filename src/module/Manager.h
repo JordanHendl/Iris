@@ -21,8 +21,7 @@
  * Created on July 10, 2020, 6:04 AM
  */
 
-#ifndef IRIS_MANAGER_H
-#define IRIS_MANAGER_H
+#pragma once
 
 namespace iris
 {
@@ -34,7 +33,6 @@ namespace iris
       ~Manager() ;
       void initialize( const char* mod_path, const char* configuration_path ) ;
       void setEnableGraphTimings( bool val ) ;
-      const Graph& graph( const char* graph_name ) ;
       void start() ;
       void stop() ;
       void shutdown() ;
@@ -44,6 +42,4 @@ namespace iris
       const ManagerData& data() const ;
   };
 }
-
-#endif /* MANAGER_H */
 

@@ -100,10 +100,19 @@ namespace iris
     data().running    = true ;
     while( data().should_run )
     {
+      if( !data().should_run )
+      { 
+        data().running = false ;
+        return ; 
+      }
       std::unique_lock<std::mutex> lock = std::unique_lock<std::mutex>( data().mutex ) ;
       data().is_signaled-- ;
       data().cv.wait( lock, [=] { return data().is_signaled >= 0 ; } ) ;
-      if( !data().should_run ) { data().running = false ; return ; }
+      if( !data().should_run )
+      { 
+        data().running = false ;
+        return ; 
+      }
       this->execute() ;
     }
   }

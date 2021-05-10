@@ -162,6 +162,7 @@ namespace iris
     LocalSubscribers required_sub_map ;
     LocalPublishers  pub_map          ;
     unsigned         identifier       ;
+    std::mutex       lock             ;
     
     BusData() ;
     BusData& operator=( const BusData& bus ) ;
@@ -372,6 +373,7 @@ namespace iris
   
   void Bus::emit( unsigned idx )
   {
+    data().lock.lock() ;
     for( auto pub : data().pub_map )
     {
       for( auto& pair : pub.second.second )
@@ -395,10 +397,12 @@ namespace iris
         }
       }
     }
+    data().lock.unlock() ;
   }
   
   void Bus::wait()
   {
+    data().lock.lock() ;
     for( auto &signal : data().required_sub_map )
     {
       for( auto &sig : signal.second.second )
@@ -406,12 +410,14 @@ namespace iris
         sig.second->second->wait() ;
       }
     }
+    data().lock.unlock() ;
   }
   
   void Bus::enrollBase( const Key& key, Publisher* publisher, unsigned type_id )
   {
     Signal::PublisherIterator pub_iter ;
     
+    data().lock.lock() ;
     map_lock.lock() ;
     
     auto iter = signal_map.find( key.str() )      ;
@@ -447,12 +453,14 @@ namespace iris
     data().pub_map[ key.str() ].second.insert( { type_id, pub_iter } ) ;
 
     map_lock.unlock() ;
+    data().lock.unlock() ;
   }
   
   void Bus::enrollBase( const Key& key, Subscriber* subscriber, Requirement required, unsigned type_id )
   {
     Signal::SubscriberIterator sub_iter ;
     
+    data().lock.lock() ;
     map_lock.lock() ;
     
     auto iter  = signal_map.find( key.str() )     ;
@@ -490,12 +498,14 @@ namespace iris
     }
 
     map_lock.unlock() ;
+    data().lock.unlock() ;
   }
   
   void Bus::emitBase( const Key& key, const void* value, unsigned type_id, unsigned idx )
   {
     auto iter = signal_map.find( key.str() ) ;
     
+    data().lock.lock() ;
     if( iter != signal_map.end() )
     {
       for( auto sub = iter->second->subscribers.lower_bound( type_id ); sub != iter->second->subscribers.upper_bound( type_id ); ++sub )
@@ -504,6 +514,7 @@ namespace iris
         sub->second->signal() ;
       }
     }
+    data().lock.unlock() ;
   }
   
   unsigned Bus::id()

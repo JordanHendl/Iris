@@ -90,11 +90,8 @@ void IrisData::setExit( bool exit )
 {
   if( exit )
   {
-    this->mod_manager.shutdown() ;
     this->running = false        ;
-    iris::log::Log::flush()      ;
     this->cv.notify_all()        ;
-//    ::exit( 0 ) ;
   }
 }
 
@@ -178,6 +175,9 @@ bool Iris::run()
   std::unique_lock<std::mutex> lock = std::unique_lock<std::mutex>( data().mutex ) ;
   data().cv.wait( lock, [=] { return !data().running ; } ) ;
   
+  data().mod_manager.shutdown() ;
+  iris::log::Log::flush()       ;
+    
   return data().running ;
 }
 
