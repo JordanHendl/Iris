@@ -95,6 +95,7 @@ namespace iris
         {
           this->values  .clear() ;
           this->children.clear() ;
+          this->m_value = "" ;
         }
 
         bool leaf() const 

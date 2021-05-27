@@ -41,6 +41,7 @@
   #include <pthread.h>
 #include <sys/resource.h>
 #include <condition_variable>
+#include <mutex>
 
   static inline void setThreadPriority()
   {
@@ -107,7 +108,7 @@ namespace iris
       }
       std::unique_lock<std::mutex> lock = std::unique_lock<std::mutex>( data().mutex ) ;
       data().is_signaled-- ;
-      data().cv.wait( lock, [=] { return data().is_signaled >= 0 ; } ) ;
+      data().cv.wait( lock, [=] { return data().is_signaled == 0 ; } ) ;
       if( !data().should_run )
       { 
         data().running = false ;
@@ -120,7 +121,7 @@ namespace iris
   void Module::kick()
   {
     {
-      std::lock_guard<std::mutex> lock( data().mutex ) ;
+      std::scoped_lock<std::mutex> lock( data().mutex ) ;
       data().is_signaled++ ;
     }
 
@@ -167,6 +168,11 @@ namespace iris
   const char* Module::type() const
   {
     return data().type.c_str() ;
+  }
+  
+  void Module::resetSynchronization()
+  {
+    data().is_signaled = 0 ;
   }
   
   unsigned Module::version() const

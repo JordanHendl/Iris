@@ -16,7 +16,7 @@
  */
 
 #include "Timer.h"
-#include <athena/Manager.h>
+#include <Athena/Manager.h>
 #include <chrono>
 #include <thread>
 #include <iostream>

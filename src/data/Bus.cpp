@@ -93,6 +93,7 @@ namespace iris
       public: 
         Subscriber() ;
         Subscriber( const Subscriber& sub ) ;
+        ~Subscriber() ;
         void initialize( Bus::Subscriber* sub ) ;
         void signal() ;
         void wait() ;
@@ -222,22 +223,23 @@ namespace iris
     this->is_signaled.exchange( cont.is_signaled.load() ) ;
   }
   
+  Signal::Subscriber::~Subscriber()
+  {
+    this->subscriber_ptr = nullptr ;
+  }
+
   void Signal::Subscriber::signal()
   {
-    {
-      std::lock_guard<std::mutex> lock( this->mutex ) ;
-      this->is_signaled = true ;
-    }
-
+    std::scoped_lock<std::mutex> lock( this->mutex ) ;
+    this->is_signaled = true ;
     this->cv.notify_one() ;
   }
   
   void Signal::Subscriber::wait()
   {
-    std::unique_lock<std::mutex> lock = std::unique_lock<std::mutex>( this->mutex ) ;
+    std::unique_lock<std::mutex> lock( this->mutex ) ;
     this->cv.wait( lock, [=] { return this->is_signaled.load() ; } ) ;
     this->reset() ;
-    lock.unlock() ;
   }
   
   void Signal::Subscriber::initialize( Bus::Subscriber* sub )
@@ -290,6 +292,9 @@ namespace iris
   void Signal::remove( Signal::SubscriberIterator& iter )
   {
     this->signal_mutex.lock() ;
+    iter->second->reset () ;
+    delete iter->second ;
+    iter->second = nullptr ;
     this->subscribers.erase( iter ) ;
     this->signal_mutex.unlock() ;
   }
@@ -335,6 +340,36 @@ namespace iris
         }
       }
     }
+    
+//    if( this->required_sub_map.size() != 0 )
+//    {
+//      for( auto& iter : this->required_sub_map )
+//      {  
+//        auto signal = signal_map.find( iter.first ) ;
+//        for( auto& iter2 : iter.second.second )
+//        {
+//          delete iter2.second->second ;
+//          signal->second->subscribers.erase( iter2.second ) ;
+//        }
+//      }
+//    }
+    
+    if( this->pub_map.size() != 0 )
+    {
+      for( auto& iter : this->pub_map )
+      {  
+        auto signal = signal_map.find( iter.first ) ;
+        for( auto& iter2 : iter.second.second )
+        {
+          delete iter2.second->second ;
+          signal->second->publishers.erase( iter2.second ) ;
+        }
+      }
+    }
+    
+    this->pub_map         .clear() ;
+    this->sub_map         .clear() ;
+    this->required_sub_map.clear() ;
     map_lock.unlock() ;
   }
   
@@ -405,14 +440,71 @@ namespace iris
     data().lock.lock() ;
     for( auto &signal : data().required_sub_map )
     {
+      signal.second.first->signal_mutex.lock() ;
       for( auto &sig : signal.second.second )
       {
         sig.second->second->wait() ;
       }
+      signal.second.first->signal_mutex.unlock() ;
     }
     data().lock.unlock() ;
   }
   
+  void Bus::clearSubscriptions()
+  {
+    map_lock.lock() ;
+    if( data().sub_map.size() != 0 )
+    {
+      for( auto& iter : data().sub_map )
+      {  
+        auto signal = signal_map.find( iter.first ) ;
+        for( auto& iter2 : iter.second.second )
+        {
+          delete iter2.second->second ;
+          signal->second->subscribers.erase( iter2.second ) ;
+        }
+      }
+    }
+
+    data().sub_map         .clear() ;
+    data().required_sub_map.clear() ;
+    map_lock.unlock() ;
+  }
+  
+  void Bus::reset()
+  {
+    map_lock.lock() ;
+    if( data().sub_map.size() != 0 )
+    {
+      for( auto& iter : data().sub_map )
+      {  
+        auto signal = signal_map.find( iter.first ) ;
+        for( auto& iter2 : iter.second.second )
+        {
+          delete iter2.second->second ;
+          signal->second->subscribers.erase( iter2.second ) ;
+        }
+      }
+    }
+    
+    if( data().pub_map.size() != 0 )
+    {
+      for( auto& iter : data().pub_map )
+      {  
+        auto signal = signal_map.find( iter.first ) ;
+        for( auto& iter2 : iter.second.second )
+        {
+          delete iter2.second->second ;
+          signal->second->publishers.erase( iter2.second ) ;
+        }
+      }
+    }
+
+    data().pub_map         .clear() ;
+    data().sub_map         .clear() ;
+    data().required_sub_map.clear() ;
+    map_lock.unlock() ;
+  }
   void Bus::enrollBase( const Key& key, Publisher* publisher, unsigned type_id )
   {
     Signal::PublisherIterator pub_iter ;
@@ -424,6 +516,20 @@ namespace iris
     auto iter2 = data().pub_map.find( key.str() ) ;
 
     
+    if( iter2 != data().pub_map.end() )
+    {
+      auto type_iter = iter2->second.second.find( type_id ) ;
+      if( type_iter != iter2->second.second.end() )
+      {
+        iter->second->remove( type_iter->second ) ;
+        data().pub_map.erase( key.str() ) ;
+      }
+    }
+    else
+    {
+      data().pub_map[ key.str() ] ;
+    }
+
     if( iter == signal_map.end() )
     {
       iter = signal_map.insert( { std::string( key.str() ), new Signal() } ) ;
@@ -435,19 +541,6 @@ namespace iris
       pub_iter = iter->second->insert( type_id, publisher ) ;
     }
     
-    if( iter2 != data().pub_map.end() )
-    {
-      auto type_iter = iter2->second.second.find( type_id ) ;
-      if( type_iter != iter2->second.second.end() )
-      {
-        iter->second->remove( type_iter->second ) ;
-        iter2->second.second.erase( type_iter ) ;
-      }
-    }
-    else
-    {
-      data().pub_map[ key.str() ] ;
-    }
     
     data().pub_map[ key.str() ].first = iter->second                   ;
     data().pub_map[ key.str() ].second.insert( { type_id, pub_iter } ) ;
@@ -466,6 +559,20 @@ namespace iris
     auto iter  = signal_map.find( key.str() )     ;
     auto iter2 = data().sub_map.find( key.str() ) ;
     
+    if( iter2 != data().sub_map.end() )
+    {
+      auto type_iter = iter2->second.second.find( type_id ) ;
+
+      if( type_iter != iter2->second.second.end() )
+      {
+        iter->second->remove( type_iter->second ) ;
+        data().sub_map.erase( iter2 ) ;
+        if( data().required_sub_map.find( key.str() ) != data().required_sub_map.end() )
+        {
+          data().required_sub_map.erase( key.str() ) ;
+        }
+      }
+    }
 
     if( iter == signal_map.end() )
     {
@@ -476,16 +583,6 @@ namespace iris
     else
     {
       sub_iter = iter->second->insert( type_id, subscriber ) ;
-    }
-  
-    if( iter2 != data().sub_map.end() )
-    {
-      auto type_iter = iter2->second.second.find( type_id ) ;
-      if( type_iter != iter2->second.second.end() )
-      {
-        iter->second->remove( type_iter->second ) ;
-        iter2->second.second.erase( type_iter ) ;
-      }
     }
     
     data().sub_map[ key.str() ].first = iter->second                   ;

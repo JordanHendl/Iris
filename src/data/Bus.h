@@ -348,6 +348,14 @@ namespace iris
       template<typename ... Keys, class Object, class Value>
       inline void publish( Object* obj, const Value& (Object::*getter)( unsigned ), Keys... args ) ;
       
+      /** Method to reset this bus and remove all cached subscriptions.
+       */
+      void clearSubscriptions() ;
+
+      /** Method to reset this bus and remove all cached subscriptions/publishes.
+       */
+      void reset() ;
+
       /** Method to recieve the channel this Bus is on.
        * @return unsigned The channel this bus is sending data on.
        */

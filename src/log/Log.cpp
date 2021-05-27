@@ -148,7 +148,7 @@ namespace iris
     struct LogData
     {
       const unsigned INITIAL_LOG_SIZE = 8000 ;
-      tm*            local_time  ;
+      std::tm*       local_time  ;
       std::string    output_path ;
       char*          log         ;
       unsigned       log_size    ;
@@ -174,6 +174,10 @@ namespace iris
       /** Method to write log out to disk.
        */
       void write() ;
+      
+      /** Outputs the Iris header to the log.
+       */
+      void printHeader() ;
     };
     
     struct StringData
@@ -197,13 +201,27 @@ namespace iris
     {
       switch( level )
       {
-        case Log::Level::Warning : return "WARNING: " ;
-        case Log::Level::Fatal   : return "FATAL  : " ;
-        case Log::Level::None    : return ""          ;
-        default                  : return ""          ; 
+        case Log::Level::Warning : return "WARNING|: " ;
+        case Log::Level::Fatal   : return "FATAL  |: " ;
+        case Log::Level::None    : return "INFO   |: " ;
+        default                  : return "INFO   |: " ;
       };
     }
     
+    void LogData::printHeader()
+    {
+      Log::output( "  _____      _       ______             _               " ) ;
+      Log::output( " |_   _|    (_)     |  ____|           (_)              " ) ;
+      Log::output( "   | |  _ __ _ ___  | |__   _ __   __ _ _ _ __   ___    " ) ;
+      Log::output( "   | | | '__| / __| |  __| | '_ \\ / _` | | '_ \\ / _ \\" ) ;
+      Log::output( "  _| |_| |  | \\__ \\ | |____| | | | (_| | | | | |  __/ " ) ;
+      Log::output( " |_____|_|  |_|___/ |______|_| |_|\\__, |_|_| |_|\\___| " ) ;
+      Log::output( "                                   __/ |                " ) ;
+      Log::output( "                                  |___/                 " ) ;
+      Log::output( "--------------------------------------------------------" ) ;
+      Log::output( "--------------------------------------------------------" ) ;
+    }
+
     std::string LogData::timestamp()
     {
       static std::mutex lock   ;
@@ -217,7 +235,7 @@ namespace iris
         log_data.local_time = localtime( &time )                                             ;
       }
       
-      stream << log_data.local_time->tm_hour << "h " << log_data.local_time->tm_min << "m " << log_data.local_time->tm_sec << "s |" ;
+      stream << std::put_time( log_data.local_time, "%X" ) << "| " ;
       log_data.local_time = nullptr ;
       lock.unlock() ;
       
@@ -303,20 +321,16 @@ namespace iris
       time                = std::chrono::system_clock::to_time_t( now ) ;
       log_data.local_time = localtime( &time )                          ;
       
-      file_name << "/iris_debug_log_"            ;
-      file_name << log_data.local_time->tm_mon   ;
-      file_name << "D_"                          ;
-      file_name << log_data.local_time->tm_mday  ;
-      file_name << "M_"                          ;
-      file_name << log_data.local_time->tm_year  ;
-      file_name << "Y_"                          ;
-      file_name << log_data.local_time->tm_hour  ;
-      file_name << "H"                           ;
-      file_name << log_data.local_time->tm_min   ;
-      file_name << "M"                           ;
-      file_name << log_data.local_time->tm_sec   ;
-      file_name << "S"                           ;
-      file_name << ".txt"                        ;
+      /*@TODO: Probably shouldn't just write out a timestamp here.
+       * Better solution would be to have 0...X possible logs, and move the 
+       * latest down the line when a new log is generated, and so on.
+      */
+
+      file_name << "/iris_debug_log_"                                  ;
+      file_name << std::put_time( log_data.local_time, "%F" )          ;
+      file_name << "_"                                                 ;
+      file_name << std::put_time( log_data.local_time, "%Hh_%Mm_%Ss" ) ;
+      file_name << ".txt"                                              ;
       
       log_data.local_time = nullptr ;
       log_data.output_path += file_name.str() ;
@@ -339,6 +353,8 @@ namespace iris
 
     void Log::outputBase( const char* out, Level level )
     {
+      static bool first = true ;
+      
       const std::string timestamp = log_data.timestamp()                 ;
       const std::string level_str = log_data.stringFromLogLevel( level ) ;
       static std::mutex log_mutex ;
@@ -346,21 +362,26 @@ namespace iris
       std::stringstream msg       ;
       int               cx        ;
       
+      if( first == true )
+      {
+        first = false ;
+        log_data.printHeader() ;
+      }
       log_mutex.lock() ;
       if( log_data.mode == Log::Mode::Verbose )
       {
         base_str << timestamp ;
       }
       
-      base_str << "--Iris :" ;
 
+      base_str << "   " ;
       msg << base_str.str() << level_str << std::string( out ) ;
       msg << "\n" ;
       if( log_data.mode != Log::Mode::Quiet )
       {
         if( log_data.use_stdout ) 
         {
-          std::cout << level_str << msg.str().data() ;
+          std::cout << msg.str().data() ;
         }
         
         cx = snprintf( log_data.log + log_data.current_pos, log_data.log_size, msg.str().data() ) ;

@@ -17,7 +17,7 @@
 
 #include "Manager.h"
 #include "Graph.h"
-#include <athena/Manager.h>
+#include <Athena/Manager.h>
 #include <iostream>
 #include <ostream>
 #include <fstream>
@@ -58,7 +58,5 @@ int main( int argc, char* argv[] )
   
   std::cout << "\n-- Performing Iris Module Library Test. " << std::endl ;
   
-  manager.add( "Module Manager & Graph Test", &testModManager ) ;
-
   return manager.test( athena::Output::Verbose ) ; 
 }

@@ -166,8 +166,11 @@ Iris::~Iris()
 
 void Iris::shutdown()
 {
+  using Log = iris::log::Log ;
   data().mod_manager.shutdown() ;
-  iris::log::Log::flush()       ;
+  
+  Log::output( "Iris Shutdown Complete!" ) ;
+  Log::flush()                             ;
 }
 
 bool Iris::run()
@@ -175,8 +178,7 @@ bool Iris::run()
   std::unique_lock<std::mutex> lock = std::unique_lock<std::mutex>( data().mutex ) ;
   data().cv.wait( lock, [=] { return !data().running ; } ) ;
   
-  data().mod_manager.shutdown() ;
-  iris::log::Log::flush()       ;
+  this->shutdown() ;
     
   return data().running ;
 }

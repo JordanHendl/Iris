@@ -197,7 +197,6 @@ namespace iris
     while( this->lock() && this->should_run )
     {
       if( this->enable_timings    ) this->timer.start() ;
-      if( this->config.modified() ) this->reload() ;
       for( auto module : this->queue )
       {
         module->kick() ;
@@ -207,6 +206,7 @@ namespace iris
       
       if( this->enable_timings ) iris::log::Log::output( "Graph '", this->graph_name.c_str(), "' execution time: ", this->timer.output() ) ;
       this->unlock() ;
+      if( this->config.modified() ) this->reload() ;
       while( this->paused ) {} ;
     }
   }
@@ -227,15 +227,24 @@ namespace iris
 
   void GraphData::kick()
   {
+    iris::log::Log::output( "Kicking off graph ", this->graph_name.c_str() ) ;
+
     for( auto module : this->queue )
     {
       if( this->pre_graph.find( module->name() ) == this->pre_graph.end() )
       {
+        iris::log::Log::output( "Graph ", this->graph_name.c_str(), " initializing module ", module->name(), "." ) ;
         module->initialize() ;
       }
-
+    }
+    
+    for( auto module : this->queue )
+    {
+      iris::log::Log::output( "Graph ", this->graph_name.c_str(), " kicking off module ", module->name(), "." ) ;
       std::thread( &Module::start, module ).detach() ;
     }
+    
+    this->should_run = true ;
   }
 
   void GraphData::stop()
@@ -248,6 +257,7 @@ namespace iris
     {
       iris::log::Log::output( "Graph ", this->graph_name.c_str(), " stopping module ", module->name(), "." ) ;
       while( !module->stop() ) { module->kick() ; } ;
+      module->resetSynchronization() ;
     }
     this->paused = false ;
     this->unlock() ;
@@ -337,7 +347,6 @@ namespace iris
       this->queue.push_back( module.second ) ;
     }
     
-    this->config.reset() ;
     this->graph.clear() ;
   }
 
@@ -377,7 +386,7 @@ namespace iris
   
   void GraphData::reload()
   {
-    iris::log::Log::output( "Graph ", this->graph_name.c_str(), " reloading..." ) ;
+    iris::log::Log::output( "Graph ", this->graph_name.c_str(), " configuration changed. Reloading..." ) ;
     this->stop()           ;
     this->config.reset()   ;
     this->config.initialize( this->graph_config_path.c_str() ) ;
@@ -503,6 +512,7 @@ namespace iris
       module.second->kick() ;
     }
   }
+  
   void Graph::add( const char* name, Module* module )
   {
     if( data().graph.find( name ) == data().graph.end() )
@@ -525,9 +535,7 @@ namespace iris
   {
     GraphData::PriorityQueue queue ;
 
-    iris::log::Log::output( "Kicking off graph ", data().graph_name.c_str() ) ;
     data().should_run = true ;
-    
     data().kick    () ;
     data().traverse() ;
   }
