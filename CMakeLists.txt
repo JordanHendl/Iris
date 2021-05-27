@@ -34,7 +34,7 @@ OPTION( BUILD_TESTS   "Whether or not tests should be built. "         ON  )
 OPTION( RUN_TESTS     "Whether or not tests should be run."            ON  )
 OPTION( BUILD_RELEASE "Whether or not the to build for release.     "  OFF )
 
-PROJECT( iris CXX )
+PROJECT( Iris CXX )
 INCLUDE( Message   )
 INCLUDE( BuildTest )
 
@@ -78,10 +78,10 @@ SET( REVISION     "0"     CACHE STRING "The revision of this build."            
 SET( GENERATOR    "DEB"   CACHE STRING "The Package Generator to use for this build." )
 
 IF( WIN32 )
-  SET( CMAKE_PREFIX_PATH "C:/Program Files" CACHE STRING "The default path to look for dependancies." )
-  SET( INSTALL_LOCATION "C:/Program Files" CACHE STRING "The default NSIS install location of this library" )
+  SET( INSTALL_LOCATION  "C:\\Program Files"         CACHE STRING "The default NSIS install location of this library" )
+  SET( CMAKE_PREFIX_PATH "C:\\Program Files\\Athena" CACHE STRING "The default path to look for dependancies."        )
 ELSEIF( UNIX AND NOT APPLE )
-  SET( CMAKE_PREFIX_PATH "/usr/local/lib/athena;" CACHE STRING "The default path to look for dependancies." )
+  SET( CMAKE_PREFIX_PATH "/usr/local/lib/Athena;" CACHE STRING "The default path to look for dependancies." )
   SET( INSTALL_LOCATION  "/usr/local/lib"         CACHE STRING "The RPM install location of this library."  ) 
 ENDIF()
 
@@ -130,11 +130,19 @@ MESSAGE( INFO  "├─GNU:               ${GNU}"               )
 MESSAGE( INFO  "└─MSVC:              ${MSVC}"              )
 MESSAGE( INFO " " ) 
 
-SET( BIN_DIR     "bin"                                       )
-SET( INCLUDE_DIR "include"                                   )
-SET( LIB_DIR     "lib64"                                     )
-SET( DOC_DIR     "doc"                                       )
-SET( CONFIG_DIR  "${CMAKE_PROJECT_NAME}"                     )
+
+IF( UNIX )
+  SET( BIN_DIR     bin     )
+  SET( INCLUDE_DIR include )
+  SET( LIB_DIR     lib64   )
+  SET( DOC_DIR     doc     )
+ELSE()
+  SET( BIN_DIR     "." )
+  SET( INCLUDE_DIR "." )
+  SET( LIB_DIR     "." )
+  SET( DOC_DIR     "." )
+ENDIF()
+
 SET( BUILD_DIR    ${CMAKE_BINARY_DIR}                        )
 SET( HEADER_INSTALL_DIR ${INCLUDE_DIR}/${CMAKE_PROJECT_NAME} )
 

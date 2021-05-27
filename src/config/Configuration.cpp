@@ -137,6 +137,10 @@ namespace iris
     void Configuration::reset()
     {
       data().parser.clear() ;
+      data().end      = config::json::Token() ;
+      data().begin    = config::json::Token() ;
+      data().init     = false                 ;
+      data().filename = ""                    ;
     }
 
     ConfigurationData& Configuration::data()

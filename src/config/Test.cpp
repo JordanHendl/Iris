@@ -18,7 +18,7 @@
 #include "Configuration.h"
 #include "Parser.h"
 #include <iostream>
-#include <athena/Manager.h>
+#include <Athena/Manager.h>
 #include <string>
 
 /** Test JSON file.

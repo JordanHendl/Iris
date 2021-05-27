@@ -1,5 +1,5 @@
 #include "Log.h"
-#include <athena/Manager.h>
+#include <Athena/Manager.h>
 #include <iostream>
 
 using namespace iris::log ;

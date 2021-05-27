@@ -101,7 +101,7 @@ void loadDependancies()
     {
       if( !std::filesystem::is_directory( path ) )
       {
-        std::cout << "Loading: " << path.path().string() << std::endl ;
+        std::cout << "Loading Specified Dependancy: " << path.path().string() << std::endl ;
         
         loadSharedObject( path.path().string().c_str() ) ;
       }

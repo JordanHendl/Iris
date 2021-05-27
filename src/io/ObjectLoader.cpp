@@ -121,7 +121,7 @@ namespace iris
 
       if( data().handle == nullptr )
       {
-        std::cout << "Error loading shared object " << lib_path << ". Error: " << ::getError() << std::endl  ;
+        Log::output( Log::Level::Warning, "Error loading shared library at path ", lib_path, " with OS error: ", ::getError() ) ;
       }
     }
     

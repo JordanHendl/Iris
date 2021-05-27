@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <condition_variable>
 #include <mutex>
+#include <stdlib.h>
 
 struct IrisData
 {
@@ -89,9 +90,7 @@ void IrisData::setExit( bool exit )
 {
   if( exit )
   {
-    this->mod_manager.shutdown() ;
     this->running = false        ;
-    iris::log::Log::flush()      ;
     this->cv.notify_all()        ;
   }
 }
@@ -167,8 +166,11 @@ Iris::~Iris()
 
 void Iris::shutdown()
 {
+  using Log = iris::log::Log ;
   data().mod_manager.shutdown() ;
-  iris::log::Log::flush()       ;
+  
+  Log::output( "Iris Shutdown Complete!" ) ;
+  Log::flush()                             ;
 }
 
 bool Iris::run()
@@ -176,6 +178,8 @@ bool Iris::run()
   std::unique_lock<std::mutex> lock = std::unique_lock<std::mutex>( data().mutex ) ;
   data().cv.wait( lock, [=] { return !data().running ; } ) ;
   
+  this->shutdown() ;
+    
   return data().running ;
 }
 

@@ -41,6 +41,7 @@
   #include <pthread.h>
 #include <sys/resource.h>
 #include <condition_variable>
+#include <mutex>
 
   static inline void setThreadPriority()
   {
@@ -64,7 +65,7 @@ namespace iris
     iris::Bus         bus         ; ///< The bus to communicate data over.
     unsigned          id          ; ///< The id associated with this module.
     std::mutex        mutex       ; ///< The mutex to use for locking.
-    std::atomic<bool> is_signaled ; ///< Whether or not this module is signaled.
+    std::atomic<int>  is_signaled ; ///< Whether or not this module is signaled.
 
     std::condition_variable cv ;
 
@@ -79,7 +80,7 @@ namespace iris
     this->running     = false ;
     this->should_run  = false ;
     this->id          = 0     ;
-    this->is_signaled = false ;
+    this->is_signaled = 0     ;
   }
 
   Module::Module()
@@ -100,10 +101,19 @@ namespace iris
     data().running    = true ;
     while( data().should_run )
     {
+      if( !data().should_run )
+      { 
+        data().running = false ;
+        return ; 
+      }
       std::unique_lock<std::mutex> lock = std::unique_lock<std::mutex>( data().mutex ) ;
-      data().is_signaled = false ;
-      data().cv.wait( lock, [=] { return data().is_signaled.load() ; } ) ;
-      if( !data().should_run ) { data().running = false ; return ; }
+      data().is_signaled-- ;
+      data().cv.wait( lock, [=] { return data().is_signaled == 0 ; } ) ;
+      if( !data().should_run )
+      { 
+        data().running = false ;
+        return ; 
+      }
       this->execute() ;
     }
   }
@@ -111,8 +121,8 @@ namespace iris
   void Module::kick()
   {
     {
-      std::lock_guard<std::mutex> lock( data().mutex ) ;
-      data().is_signaled = true ;
+      std::scoped_lock<std::mutex> lock( data().mutex ) ;
+      data().is_signaled++ ;
     }
 
     data().cv.notify_one() ;
@@ -158,6 +168,11 @@ namespace iris
   const char* Module::type() const
   {
     return data().type.c_str() ;
+  }
+  
+  void Module::resetSynchronization()
+  {
+    data().is_signaled = 0 ;
   }
   
   unsigned Module::version() const

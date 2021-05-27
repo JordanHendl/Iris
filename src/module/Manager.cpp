@@ -26,6 +26,7 @@
 #include <vector>
 #include <string>
 #include <mutex>
+#include <thread>
 
 namespace iris
 {
@@ -36,12 +37,14 @@ namespace iris
     typedef std::map<std::string, Graph*> NodeGraphs ;
     
     iris::config::Configuration config ;
-    bool        graph_timings ;
-    std::string config_path   ;
-    std::string mod_path      ;
-    Loader      loader        ;
-    NodeGraphs  graphs        ;
-    std::mutex  lock          ;
+    
+    std::map<std::string, std::thread> graph_threads ;
+    bool                               graph_timings ;
+    std::string                        config_path   ;
+    std::string                        mod_path      ;
+    Loader                             loader        ;
+    NodeGraphs                         graphs        ;
+    std::mutex                         lock          ;
     
     /** Constructor.
      */
@@ -127,28 +130,20 @@ namespace iris
 
     for( auto &graph : data().graphs ) 
     {
-      graph.second->kick() ;
+      std::thread thread( &iris::Graph::kick, graph.second ) ;
+      data().graph_threads[ graph.first ] = std::move( thread ) ;
 
       index++ ;
     }
   }
   
-  const Graph& Manager::graph( const char* graph_name )
-  {
-    static const Graph dummy ;
-    auto iter = data().graphs.find( graph_name ) ;
-    
-    if( iter != data().graphs.end() ) return *iter->second ;
-    
-    return dummy ;
-  }
-  
   void Manager::stop()
   {
-    for( auto graph : data().graphs )
+    for( auto& graph : data().graphs )
     {
       graph.second->stop() ;
     }
+
   }
   
   void Manager::shutdown()
@@ -157,6 +152,11 @@ namespace iris
     {
       graph.second->stop () ;
       graph.second->reset() ;
+    }
+    
+    for( auto& thread : data().graph_threads )
+    {
+      thread.second.join() ;
     }
   }
 

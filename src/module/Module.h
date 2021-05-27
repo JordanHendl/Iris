@@ -105,6 +105,10 @@ namespace iris
        * @return 
        */
       const char* type() const ;
+      
+      /**
+       */
+      void resetSynchronization() ;
 
       /** Method to retrieve the name of this module.
        * @return The name of this module.
