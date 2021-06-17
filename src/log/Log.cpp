@@ -71,6 +71,30 @@ namespace iris
       first.setStr( string.c_str() ) ;
     }
     
+    void operator<<( String& first, int second )
+    {
+      std::stringstream stream ;
+      std::string       string ;
+
+      stream << first.str()  ;
+      stream << second       ;
+      
+      string = stream.str() ;
+      first.setStr( string.c_str() ) ;
+    }
+    
+    void operator<<( String& first, long unsigned second )
+    {
+      std::stringstream stream ;
+      std::string       string ;
+
+      stream << first.str()  ;
+      stream << second       ;
+      
+      string = stream.str() ;
+      first.setStr( string.c_str() ) ;
+    }
+    
     void operator<<( String& first, unsigned second )
     {
       std::stringstream stream ;
