@@ -46,7 +46,19 @@ namespace iris
      * @param first
      * @param second
      */
+    void operator<<( String& first, int second ) ;
+    
+    /**
+     * @param first
+     * @param second
+     */
     void operator<<( String& first, unsigned second ) ;
+    
+    /**
+     * @param first
+     * @param second
+     */
+    void operator<<( String& first, long unsigned second ) ;
     
     /**
      * @param first

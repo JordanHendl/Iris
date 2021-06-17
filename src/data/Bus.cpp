@@ -103,7 +103,7 @@ namespace iris
         std::condition_variable  cv             ;
         std::mutex               mutex          ;
         Bus::Subscriber*         subscriber_ptr ;
-        std::atomic<bool>        is_signaled    ;
+        std::atomic<int>         is_signaled    ;
     };
     
     class Publisher
@@ -231,14 +231,15 @@ namespace iris
   void Signal::Subscriber::signal()
   {
     std::scoped_lock<std::mutex> lock( this->mutex ) ;
-    this->is_signaled = true ;
+    this->is_signaled++ ;
     this->cv.notify_one() ;
   }
   
   void Signal::Subscriber::wait()
   {
     std::unique_lock<std::mutex> lock( this->mutex ) ;
-    this->cv.wait( lock, [=] { return this->is_signaled.load() ; } ) ;
+    this->cv.wait( lock, [=] { return this->is_signaled >= 0 ; } ) ;
+    this->is_signaled-- ;
     this->reset() ;
   }
   

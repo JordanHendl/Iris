@@ -84,7 +84,7 @@ struct TestObject
   bool checkManualSetter()
   {
     iris::Bus bus ;
-    bus.enroll ( this, &TestObject::manual_setter, true, "manual_set" ) ; // Manual Setter.
+    bus.enroll ( this, &TestObject::manual_setter, iris::REQUIRED, "manual_set" ) ; // Manual Setter.
     bus.emit( TEST_VALUE_3, "manual_set" ) ; // Manually send data.
 
     if( equals( this->manual_input, TEST_VALUE_3 ) )
